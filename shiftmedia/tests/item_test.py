@@ -9,7 +9,7 @@ from config.local import LocalConfig
 class ItemTests(TestCase):
     """ Media item entity tests """
 
-    def setUp(self, app=None):
+    def setUp(self):
         super().setUp()
 
     def get_config(self):
