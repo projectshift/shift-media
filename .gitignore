@@ -14,23 +14,9 @@ www.esproj
 
 # Virtualenv ignores
 /env
-/bin
-/lib
-/share
-/include
-/man
 
 # Project ignores
-.sass-cache
-.tmp
-/.coverage
-/config/*
-!/config/config.dist.py
-!/config/apps.dist.py
-/var/data/*
-!/var/data/.gitkeep
-/var/logs/*
-!/var/logs/.gitkeep
+/config/local.py
 
 
 
