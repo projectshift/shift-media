@@ -32,19 +32,21 @@ class ItemTests(TestCase):
         for bucket in s3.buckets.all():
             print(bucket.name)
 
-    @attr('boto')
-    def test_can_upload_to_s3(self):
-        """ Can upload stuff to s3 """
-        filename = 'test.jpg'
-        path = os.path.realpath(os.path.dirname(__file__))
-        path = os.path.join(path, 'test_assets', filename)
+        print(list(s3.buckets.all()))
 
-        s3 = boto3.resource('s3', **self.get_config())
-        bucket = s3.Bucket(LocalConfig.AWS_S3_BUCKET)
-
-        with open(path, 'rb') as data:
-            result = bucket.put_object(Key='my_example_file.jpg', Body=data)
-            print('RESULT', result)
+    # @attr('boto')
+    # def test_can_upload_to_s3(self):
+    #     """ Can upload stuff to s3 """
+    #     filename = 'test.jpg'
+    #     path = os.path.realpath(os.path.dirname(__file__))
+    #     path = os.path.join(path, 'test_assets', filename)
+    #
+    #     s3 = boto3.resource('s3', **self.get_config())
+    #     bucket = s3.Bucket(LocalConfig.AWS_S3_BUCKET)
+    #
+    #     with open(path, 'rb') as data:
+    #         result = bucket.put_object(Key='my_example_file.jpg', Body=data)
+    #         print('RESULT', result)
 
 
 

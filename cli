@@ -5,12 +5,8 @@ from boiler.cli import cli as kernel
 cli = kernel.cli
 
 # add orm cli
-# from boiler.cli import db
-# cli.add_command(db.cli, name='db')
-
-# add user cli
-# cli.add_command(user.cli, name='user')
-# from boiler.cli import user
+from shiftmedia.cli import cli as media
+cli.add_command(media.cli, name='media')
 
 # and run
 cli()

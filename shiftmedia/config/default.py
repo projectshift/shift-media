@@ -9,4 +9,5 @@ class DefaultConfig():
     AWS_IAM_KEY_ID = None
     AWS_IAM_ACCESS_SECRET = None
     AWS_S3_BUCKET = None
-
+    BASE_STORAGE_URL = None
+    LOCAL_TEMP = None
