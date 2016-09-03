@@ -3,6 +3,7 @@ from nose.plugins.attrib import attr
 
 import uuid, os, boto3
 from shiftmedia import Item
+from config.local import LocalConfig
 
 
 class ItemTests(TestCase):
@@ -10,6 +11,13 @@ class ItemTests(TestCase):
 
     def setUp(self, app=None):
         super().setUp()
+
+    def get_config(self):
+        """ Returns aws config for testing """
+        return dict(
+            aws_access_key_id=LocalConfig.AWS_IAM_KEY_ID,
+            aws_secret_access_key=LocalConfig.AWS_IAM_ACCESS_SECRET
+        )
 
     def test_can_instantiate(self):
         """ Can instantiate media item entity """
@@ -20,7 +28,7 @@ class ItemTests(TestCase):
     @attr('boto')
     def test_can_boto(self):
         """ Can list S3 buckets with boto """
-        s3 = boto3.resource('s3')
+        s3 = boto3.resource('s3', **self.get_config())
         for bucket in s3.buckets.all():
             print(bucket.name)
 
@@ -31,8 +39,8 @@ class ItemTests(TestCase):
         path = os.path.realpath(os.path.dirname(__file__))
         path = os.path.join(path, 'test_assets', filename)
 
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket('example-shiftmedia-bucket')
+        s3 = boto3.resource('s3', **self.get_config())
+        bucket = s3.Bucket(LocalConfig.AWS_S3_BUCKET)
 
         with open(path, 'rb') as data:
             result = bucket.put_object(Key='my_example_file.jpg', Body=data)

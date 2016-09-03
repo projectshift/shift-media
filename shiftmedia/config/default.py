@@ -6,4 +6,7 @@ class DefaultConfig():
     Extend this class with your own local config class and override required
     settings, for example security credentials.
     """
-    pass
+    AWS_IAM_KEY_ID = None
+    AWS_IAM_ACCESS_SECRET = None
+    AWS_S3_BUCKET = None
+
