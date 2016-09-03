@@ -1,0 +1,1 @@
+from shiftmedia.config.default import DefaultConfig
