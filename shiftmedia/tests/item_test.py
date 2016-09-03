@@ -1,11 +1,11 @@
-from unittest import mock
+from unittest import mock, TestCase
 from nose.plugins.attrib import attr
-from boiler.testing.testcase import BaseTestCase
 
 import uuid, os, boto3
 from shiftmedia import Item
 
-class ItemTests(BaseTestCase):
+
+class ItemTests(TestCase):
     """ Media item entity tests """
 
     def setUp(self, app=None):
