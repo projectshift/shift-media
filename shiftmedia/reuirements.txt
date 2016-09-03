@@ -13,3 +13,12 @@ Should scale
 Should work over HTTPS
 Should Handle video encoding (how to specify desired formats? configured templates?)
 For the purpose of accepting missing file redirects and thus resizes,  it has to be a server of some sort.
+
+
+
+How to know file extension from id <- it should be contained within file name
+How to define crops?
+How to define arbitrary crops?
+
+How to tunnel video to server? How to tunnel all files to server?
+Download vs open

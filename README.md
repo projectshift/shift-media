@@ -37,7 +37,26 @@ Now go to the user or group you created and attach an inline policy:
 This will allow to list all buckets the user has access to as well as full access to `your-bucket-name-here` bucket.
 
 
-### Create a bucket
+### Create a public bucket
+
+Go to AWS S3 console and create a new bucket that we'll use to store our media files. The bucket will need to be made public since we are to serve static files from S3 directly, so go bucket properties, select permissions section and apply following policy:
+
+```
+{
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::your-bucket-name-here/*",
+	        "Principal": {
+      		  "AWS": [
+		          "*"
+        		]
+		      }
+        }
+    ]
+}
+```
 
 
 
