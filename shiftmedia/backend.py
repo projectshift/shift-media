@@ -1,5 +1,6 @@
-from abc import ABCMeta, abstractmethod
 import os
+from abc import ABCMeta, abstractmethod
+from shiftmedia import exceptions as x
 
 
 class Backend(metaclass=ABCMeta):
@@ -10,11 +11,10 @@ class Backend(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def put(self, local_path, id, delete_original=True):
+    def put(self, local_path, id):
         """
         Put file
-        Save local file in storage under given id. Will remove local original
-        on success.
+        Save local file in storage under given id.
         """
         pass
 
@@ -61,13 +61,14 @@ class BackendLocal(Backend):
             os.makedirs(self._path)
         return self._path
 
-    def put(self, local_path, id, delete_original=True):
+    def put(self, local_path, id):
         """
         Put file
-        Save local file in storage under given id. Will remove local original
-        on success.
+        Save local file in storage under given id.
         """
-        pass
+        if not os.path.exists(local_path):
+            msg = 'Unable to find local file [{}]'
+            raise x.LocalFileNotFound(msg.format(local_path))
 
     def retrieve(self, id, local_path):
         pass
@@ -81,4 +82,27 @@ class BackendLocal(Backend):
 
 
 class BackendS3(Backend):
+
+    # @attr('boto')
+    # def test_can_boto(self):
+    #     """ Can list S3 buckets with boto """
+    #     s3 = boto3.resource('s3', **self.get_config())
+    #     for bucket in s3.buckets.all():
+    #         print(bucket.name)
+    #
+    #     print(list(s3.buckets.all()))
+    #
+    # @attr('boto')
+    # def test_can_upload_to_s3(self):
+    #     """ Can upload stuff to s3 """
+    #     filename = 'test.jpg'
+    #     path = os.path.realpath(os.path.dirname(__file__))
+    #     path = os.path.join(path, 'test_assets', filename)
+    #
+    #     s3 = boto3.resource('s3', **self.get_config())
+    #     bucket = s3.Bucket(LocalConfig.AWS_S3_BUCKET)
+    #
+    #     with open(path, 'rb') as data:
+    #         result = bucket.put_object(Key='my_example_file.jpg', Body=data)
+    #         print('RESULT', result)
     pass

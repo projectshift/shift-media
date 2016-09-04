@@ -1,3 +1,7 @@
+import os
+from pathlib import Path
+from shiftmedia import Id, exceptions as x
+
 class Storage:
 
     def __init__(self, config, backend):
@@ -5,16 +9,28 @@ class Storage:
         self.backend = backend
 
     def validate_file(self):
+        """
+        Validate file
+        Checks whether the file is indeed what it pretends to be.
+        """
         pass
 
-    def put(self, local_path):
+    def put(self, src):
         """
         Put local file to storage
-        
+        Generates a uuid for the file, creates directory
+        in storage and uploads file as original. Returns url
+        of the stored file on success.
         """
-        pass
+        local_path = Path(src)
+        extension = ''.join(local_path.suffixes)
+        id = Id()
+        dst = os.path.join(id.get_storage_path(), 'original' + extension)
+        self.backend.put(src, dst)
 
-    def delete(self):
+
+
+    def delete(self, url):
         pass
 
     def resize(self):

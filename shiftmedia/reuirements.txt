@@ -16,9 +16,16 @@ For the purpose of accepting missing file redirects and thus resizes,  it has to
 
 
 
-How to know file extension from id <- it should be contained within file name
+How to know file extension from id?
+    It should be contained within file name
+But why do we need to know that?
+Will it save a request when retrieving the original?
+
+
 How to define crops?
 How to define arbitrary crops?
 
 How to tunnel video to server? How to tunnel all files to server?
+
 Download vs open
+Will mean setting content-type policy
