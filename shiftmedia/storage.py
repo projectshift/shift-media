@@ -7,7 +7,11 @@ class Storage:
     def validate_file(self):
         pass
 
-    def put(self):
+    def put(self, local_path):
+        """
+        Put local file to storage
+        
+        """
         pass
 
     def delete(self):

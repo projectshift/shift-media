@@ -8,7 +8,7 @@ from shiftmedia import BackendLocal
 
 @attr('backend', 'local')
 class BackendLocalTests(TestCase):
-    """ Media item entity tests """
+    """ Local storage backend tests """
 
     def setUp(self, app=None):
         super().setUp()

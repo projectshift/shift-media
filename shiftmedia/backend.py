@@ -10,10 +10,11 @@ class Backend(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def put(self, local_path, id):
+    def put(self, local_path, id, delete_original=True):
         """
         Put file
-        Save local file in storage under given id
+        Save local file in storage under given id. Will remove local original
+        on success.
         """
         pass
 
@@ -60,7 +61,12 @@ class BackendLocal(Backend):
             os.makedirs(self._path)
         return self._path
 
-    def put(self, local_path, id):
+    def put(self, local_path, id, delete_original=True):
+        """
+        Put file
+        Save local file in storage under given id. Will remove local original
+        on success.
+        """
         pass
 
     def retrieve(self, id, local_path):
