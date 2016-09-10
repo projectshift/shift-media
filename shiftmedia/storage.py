@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
-from shiftmedia import Id, exceptions as x
+import uuid
+from shiftmedia import exceptions as x
+
 
 class Storage:
 
@@ -24,9 +26,9 @@ class Storage:
         """
         local_path = Path(src)
         extension = ''.join(local_path.suffixes)
-        id = Id()
-        dst = os.path.join(id.get_storage_path(), 'original' + extension)
-        self.backend.put(src, dst)
+        id = str(uuid.uuid1()).split('-')
+        dst = os.path.join(*id, 'original' + extension)
+        print(dst)
 
 
 

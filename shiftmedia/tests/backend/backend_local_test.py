@@ -4,10 +4,11 @@ from nose.plugins.attrib import attr
 import os, shutil
 from config.local import LocalConfig
 from shiftmedia import BackendLocal
+from shiftmedia.testing.localstorage_testhelpers import LocalStorageTestHelpers
 
 
 @attr('backend', 'local')
-class BackendLocalTests(TestCase):
+class BackendLocalTests(TestCase, LocalStorageTestHelpers):
     """ Local storage backend tests """
 
     def setUp(self, app=None):
@@ -17,19 +18,6 @@ class BackendLocalTests(TestCase):
         """ Clean up after yourself """
         self.clean()
         super().tearDown()
-
-    @property
-    def path(self):
-        """ Get path to local storage """
-        root = os.path.realpath(os.path.dirname(__file__) + '/../../')
-        path = os.path.join(root, 'var', 'testing', 'localstorage')
-        return path
-
-    def clean(self):
-        """ Deletes local storage directory """
-        if os.path.exists(self.path):
-            shutil.rmtree(self.path, ignore_errors=True)
-
 
 
     # ------------------------------------------------------------------------
@@ -46,7 +34,7 @@ class BackendLocalTests(TestCase):
         self.assertFalse(os.path.exists(self.path))
         backend = BackendLocal(self.path)
         path = backend.path
-        self.assertTrue(os.path.exists(self.path))
+        self.assertTrue(os.path.exists(path))
 
 
 
