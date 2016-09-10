@@ -1,6 +1,7 @@
-import os
+import os, shutil
 from abc import ABCMeta, abstractmethod
 from shiftmedia import exceptions as x
+from pathlib import Path
 
 
 class Backend(metaclass=ABCMeta):
@@ -69,6 +70,15 @@ class BackendLocal(Backend):
         if not os.path.exists(local_path):
             msg = 'Unable to find local file [{}]'
             raise x.LocalFileNotFound(msg.format(local_path))
+
+        extension = ''.join(Path(local_path).suffixes)
+        parts = id.split('-')
+        dir = os.path.join(self.path, *parts)
+        os.makedirs(dir)
+
+        dst = os.path.join(self.path, *parts, 'original' + extension)
+        shutil.copyfile(local_path, dst)
+        return True
 
     def retrieve(self, id, local_path):
         pass

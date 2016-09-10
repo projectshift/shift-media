@@ -17,20 +17,15 @@ class Storage:
         """
         pass
 
-    def put(self, src):
+    def put(self, src, delete_local=True):
         """
         Put local file to storage
-        Generates a uuid for the file, creates directory
-        in storage and uploads file as original. Returns url
-        of the stored file on success.
+        Generates a uuid for the file, tells backend ti put
+        local file to storage by that id and removes original.
         """
-        local_path = Path(src)
-        extension = ''.join(local_path.suffixes)
-        id = str(uuid.uuid1()).split('-')
-        dst = os.path.join(*id, 'original' + extension)
-        print(dst)
-
-
+        id = str(uuid.uuid1())
+        self.backend.put(src, id)
+        return id
 
     def delete(self, url):
         pass
@@ -48,4 +43,6 @@ class Storage:
 
     def get_original_url(self, id):
         """ Return storage url of the original file """
+        # get path to original
+        # combine with storage url from config
         pass

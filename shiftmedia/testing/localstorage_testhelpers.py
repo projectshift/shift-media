@@ -57,7 +57,7 @@ class LocalStorageTestHelpers():
         """
         root = os.path.realpath(os.path.dirname(__file__) + '/../../')
         src = os.path.join(root, 'shiftmedia', 'tests', 'test_assets')
-        dst = self.tmp_path
+        dst = self.upload_path
         if not os.path.exists(dst):
             os.makedirs(dst)
         for path, dirs, files in os.walk(src):
