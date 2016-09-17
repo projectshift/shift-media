@@ -27,21 +27,15 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
 
     def test_instantiate_storage(self):
         """ Instantiating storage """
-        backend = BackendLocal(self.path)
+        backend = mock.MagicMock()
         storage = Storage(self.config, backend)
         self.assertIsInstance(storage, Storage)
 
     def test_put_file(self):
         """ Put uploaded file to storage """
-
-
-        # create storage with mock backend
-        # prepare upload
-        # simulate put
-        # assert called put
-        # assert original deleted
-
-
-
-
-
+        backend = mock.MagicMock()
+        storage = Storage(self.config, backend)
+        self.prepare_uploads()
+        filepath = os.path.join(self.upload_path, 'test.png')
+        id = storage.put(filepath)
+        self.assertFalse(os.path.exists(filepath))
