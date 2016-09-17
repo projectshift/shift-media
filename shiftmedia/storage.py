@@ -25,16 +25,24 @@ class Storage:
         """
         id = str(uuid.uuid1())
         self.backend.put(src, id)
+        if delete_local:
+            os.remove(src)
+
         return id
 
-    def delete(self, url):
-        pass
-
-    def resize(self):
+    def delete(self, id):
         pass
 
     def clean_cache(self):
         """ Walk each directory in storage and delete resize caches """
+        pass
+
+    def resize(self):
+        """
+        Resize
+        Creates resize from the given parameters
+        """
+        # todo: create resize definition schema
         pass
 
     def get_resize_url(self, id):

@@ -78,7 +78,7 @@ class BackendLocal(Backend):
 
         dst = os.path.join(self.path, *parts, 'original' + extension)
         shutil.copyfile(local_path, dst)
-        return True
+        return id
 
     def retrieve(self, id, local_path):
         pass

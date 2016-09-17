@@ -31,15 +31,15 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         storage = Storage(self.config, backend)
         self.assertIsInstance(storage, Storage)
 
-    @attr('xxx')
     def test_put_file(self):
         """ Put uploaded file to storage """
-        self.prepare_uploads()
-        backend = BackendLocal(self.path)
-        storage = Storage(self.config, backend)
-        uploads = self.upload_path
-        src = os.path.join(uploads, 'test.tar.gz')
-        storage.put(src)
+
+
+        # create storage with mock backend
+        # prepare upload
+        # simulate put
+        # assert called put
+        # assert original deleted
 
 
 

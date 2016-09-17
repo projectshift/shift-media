@@ -1,7 +1,7 @@
 from unittest import mock, TestCase
 from nose.plugins.attrib import attr
 
-import os, shutil
+import os, shutil, uuid
 from config.local import LocalConfig
 from shiftmedia import BackendLocal
 from shiftmedia.testing.localstorage_testhelpers import LocalStorageTestHelpers
@@ -35,6 +35,25 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         backend = BackendLocal(self.path)
         path = backend.path
         self.assertTrue(os.path.exists(path))
+
+    def test_put_file(self):
+        """ Put uploaded file to storage """
+        self.prepare_uploads()
+        backend = BackendLocal(self.path)
+        uploads = self.upload_path
+        src = os.path.join(uploads, 'test.tar.gz')
+        id = str(uuid.uuid1())
+        backend.put(src, id)
+
+        # assert directories created
+        current = self.path
+        for dir in id.split('-'):
+            current = os.path.join(current, dir)
+            self.assertTrue(os.path.exists(current))
+
+        # assert file put
+        full_file_path = os.path.join(current, 'original.tar.gz')
+        self.assertTrue(os.path.exists(full_file_path))
 
 
 
