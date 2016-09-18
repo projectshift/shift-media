@@ -80,10 +80,17 @@ class BackendLocal(Backend):
         shutil.copyfile(local_path, dst)
         return id
 
-    def retrieve(self, id, local_path):
-        pass
-
     def delete(self, id):
+        """
+        Delete
+        Remove file from storage by id
+        """
+        id = str(id)
+        path = os.path.join(self.path, id.split('-')[0])
+        shutil.rmtree(path)
+        return True
+
+    def retrieve(self, id, local_path):
         pass
 
     def list(self, path=None):

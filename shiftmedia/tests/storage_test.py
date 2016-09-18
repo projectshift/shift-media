@@ -39,3 +39,11 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         filepath = os.path.join(self.upload_path, 'test.png')
         id = storage.put(filepath)
         self.assertFalse(os.path.exists(filepath))
+
+    def test_delete_file_by_id(self):
+        """ Deleting file from storage by id """
+        id = '123'
+        backend = mock.MagicMock()
+        storage = Storage(self.config, backend)
+        storage.delete(id)
+        backend.delete.assert_called_with(id)

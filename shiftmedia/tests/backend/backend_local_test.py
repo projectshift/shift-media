@@ -55,5 +55,21 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         full_file_path = os.path.join(current, 'original.tar.gz')
         self.assertTrue(os.path.exists(full_file_path))
 
+    def test_delete_file(self):
+        """ Deleting file from local storage """
+        # put file
+        self.prepare_uploads()
+        backend = BackendLocal(self.path)
+        uploads = self.upload_path
+        src = os.path.join(uploads, 'test.tar.gz')
+        id = str(uuid.uuid1())
+        backend.put(src, id)
+
+        # delete file
+        backend.delete(id)
+        path = os.path.join(self.path, *id.split('-'), 'original.tar.gz')
+        self.assertFalse(os.path.exists(path))
+
+
 
 

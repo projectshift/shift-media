@@ -31,7 +31,12 @@ class Storage:
         return id
 
     def delete(self, id):
-        pass
+        """
+        Delete
+        Removes file and all its artifacts from storage by id
+        """
+        return self.backend.delete(id)
+
 
     def clean_cache(self):
         """ Walk each directory in storage and delete resize caches """
