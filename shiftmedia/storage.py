@@ -9,6 +9,17 @@ class Storage:
     def __init__(self, config, backend):
         self.config = config
         self.backend = backend
+        self._tmp_path = config.LOCAL_TEMP
+
+    @property
+    def tmp(self):
+        """
+        Get temp path
+        Returns path to local temp and creates one if necessary
+        """
+        if not os.path.exists(self._tmp_path):
+            os.makedirs(self._tmp_path)
+        return self._tmp_path
 
     def validate_file(self):
         """

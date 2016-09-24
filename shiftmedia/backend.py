@@ -23,7 +23,7 @@ class Backend(metaclass=ABCMeta):
     def retrieve(self, id, local_path):
         """
         Retrieve
-        Download file from storage and put to local path
+        Download file from storage and put to local temp path
         """
         pass
 
@@ -91,7 +91,27 @@ class BackendLocal(Backend):
         return True
 
     def retrieve(self, id, local_path):
-        pass
+        """
+        Retrieve
+        Download file from storage and put to local temp path
+        """
+        id = str(id)
+        path = os.path.join(self.path, *id.split('-'))
+
+        files = [item for item in os.scandir(path) if item.is_file()]
+        for file in files:
+            if not file.name.startswith('original.'):
+                continue
+
+            src = file.path
+            dst_dir = os.path.join(local_path, id)
+            dst = os.path.join(dst_dir, file.name)
+            if not os.path.exists(dst_dir):
+                os.makedirs(dst_dir)
+
+            shutil.copyfile(src, dst)
+            return dst
+
 
     def list(self, path=None):
         pass

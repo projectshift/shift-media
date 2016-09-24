@@ -31,6 +31,13 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         storage = Storage(self.config, backend)
         self.assertIsInstance(storage, Storage)
 
+    def test_getting_tmp_creates_directory(self):
+        """ Can create local temp upon getting """
+        shutil.rmtree(self.tmp_path)
+        storage = Storage(self.config, mock.MagicMock())
+        storage.tmp
+        self.assertTrue(os.path.exists(self.tmp_path))
+
     def test_put_file(self):
         """ Put uploaded file to storage """
         backend = mock.MagicMock()

@@ -29,6 +29,8 @@ class LocalStorageTestHelpers():
         """
         root = os.path.realpath(os.path.dirname(__file__) + '/../../')
         path = os.path.join(root, 'var', 'testing', 'localstorage-uploaded')
+        if not os.path.exists(path):
+            os.makedirs(path)
         return path
 
     @property
@@ -40,6 +42,9 @@ class LocalStorageTestHelpers():
         """
         root = os.path.realpath(os.path.dirname(__file__) + '/../../')
         path = os.path.join(root, 'var', 'testing', 'localstorage-tmp')
+        if not os.path.exists(path):
+            os.makedirs(path)
+
         return path
 
     def clean(self):
@@ -58,8 +63,6 @@ class LocalStorageTestHelpers():
         root = os.path.realpath(os.path.dirname(__file__) + '/../../')
         src = os.path.join(root, 'shiftmedia', 'tests', 'test_assets')
         dst = self.upload_path
-        if not os.path.exists(dst):
-            os.makedirs(dst)
         for path, dirs, files in os.walk(src):
             for file in files:
                 file_src = os.path.join(src, file)

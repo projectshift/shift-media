@@ -70,6 +70,22 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         path = os.path.join(self.path, *id.split('-'), 'original.tar.gz')
         self.assertFalse(os.path.exists(path))
 
+    def test_retrieve_to_temp(self):
+        """ Retrieving from backend to local temp """
+        # put file
+        self.prepare_uploads()
+        backend = BackendLocal(self.path)
+        src = os.path.join(self.upload_path, 'test.tar.gz')
+        id = str(uuid.uuid1())
+        backend.put(src, id)
+
+        # retrieve file
+        backend.retrieve(id, self.tmp_path)
+        expected_dst = os.path.join(self.tmp_path, id, 'original.tar.gz')
+        self.assertTrue(os.path.exists(expected_dst))
+
+
+
 
 
 
