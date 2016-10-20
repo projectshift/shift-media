@@ -54,3 +54,17 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         storage = Storage(self.config, backend)
         storage.delete(id)
         backend.delete.assert_called_with(id)
+
+    @attr('xxx')
+    def test_get_image_data_with_pil(self):
+        """ Open a local image with PIL """
+        self.prepare_uploads()
+        path = os.path.join(self.upload_path, 'test.jpg')
+        from PIL import Image
+        img = Image.open(path)
+        img.thumbnail((1000, 1000))
+        img.show()
+
+        self.assertEquals('JPEG', img.format)
+        self.assertEquals('RGB', img.mode)
+
