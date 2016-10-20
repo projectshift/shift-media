@@ -2,6 +2,13 @@
 
 A library for handling user-generated media files. It uses AWS S3 as storage backend for files. It is assumed that you are not going to server your media from your application but instead let S3 handle the heavy lifting.
 
+## Installation
+
+Image manipulation functionality will require Pillow library and there might be some
+quirks with `zlib` and `libjpeg` on MacOS that will get in the way. See [this StackOverflow thread](http://stackoverflow.com/questions/34631806/fail-during-installation-of-pillow-python-module-in-linux)
+on how to install the libs.
+
+
 ## Setting up S3
 
 Setting up S3 involves creating an IAM user and granting it proper permissions as well as creating and configuring a bucket to store and serve your files.
@@ -57,6 +64,9 @@ Go to AWS S3 console and create a new bucket that we'll use to store our media f
     ]
 }
 ```
+
+
+
 
 
 
