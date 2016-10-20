@@ -16,7 +16,7 @@ www.esproj
 /env
 
 # Project ignores
-/config/local.py
+/config
 
 
 
