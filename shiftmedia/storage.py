@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import uuid
 from shiftmedia import exceptions as x
+from shiftmedia.resizer import Resizer
 
 
 class Storage:
@@ -53,20 +54,10 @@ class Storage:
         """ Walk each directory in storage and delete resize caches """
         pass
 
-    def resize(self, targetSize, crop=None, cropPosition=None):
-        """
-        Resize
-        Creates resize from the given parameters
-        Crop outbound: resize to fill
-        Crop inset: resize to fit (thumbnail)
-        """
-        # todo: create resize definition schema
-        # todo: do we enlarge if original smaller than dest
+    def resize(self, *args, **kwargs):
+        resizer = Resizer
+        resizer.resize(*args, **kwargs)
 
-        # targetWidth
-        # targetHeight
-        # originalWidth
-        # originalHeight
 
 
         pass

@@ -55,11 +55,14 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         storage.delete(id)
         backend.delete.assert_called_with(id)
 
-    @attr('xxx')
+    # ------------------------------------------------------
+    # Resizer tests
+    # ------------------------------------------------------
+
     def test_get_image_data_with_pil(self):
         """ Open a local image with PIL """
         self.prepare_uploads()
-        path = os.path.join(self.upload_path, 'test.jpg')
+        path = os.path.join(self.upload_path, 'original_horizontal.jpg')
         from PIL import Image
         img = Image.open(path)
         img.thumbnail((1000, 1000))
@@ -67,4 +70,13 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
 
         self.assertEquals('JPEG', img.format)
         self.assertEquals('RGB', img.mode)
+
+    @attr('xxx')
+    def test_can_Create_a_resize(self):
+        """ Creating a resize"""
+        self.prepare_uploads()
+        src = path = os.path.join(self.upload_path, 'original_horizontal.jpg')
+        storage = Storage(self.config, mock.MagicMock())
+        storage.resize(src, 'dst', '100x1000', 'outbound')
+
 
