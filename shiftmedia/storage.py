@@ -53,12 +53,22 @@ class Storage:
         """ Walk each directory in storage and delete resize caches """
         pass
 
-    def resize(self):
+    def resize(self, targetSize, crop=None, cropPosition=None):
         """
         Resize
         Creates resize from the given parameters
+        Crop outbound: resize to fill
+        Crop inset: resize to fit (thumbnail)
         """
         # todo: create resize definition schema
+        # todo: do we enlarge if original smaller than dest
+
+        # targetWidth
+        # targetHeight
+        # originalWidth
+        # originalHeight
+
+
         pass
 
     def get_resize_url(self, id):
