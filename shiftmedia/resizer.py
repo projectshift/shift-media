@@ -5,30 +5,55 @@ from math import floor
 class Resizer:
 
     @staticmethod
-    def getRatio(src, dst):
+    def getRatio(src, dst, mode='resize_sample'):
         """
         Get ratio
-        Calculates resize ratio based on source and destination size
+        Calculates resize ratio based on source and destination size.
+        For all the calculations assume 0 for width and 1 for height.
+
+        Operates in two modes:
+            resize_original - shrinks src to fit dst, then cuts excess
+            resize_sample - enlarges dst to fit src, then shrinks
+
+        The second algorithm might be more performant as we  resize
+        smaller sample, not the full original.
+
         """
         percents = (dst[0] / (src[0] / 100), dst[1] / (src[1] / 100))
         closest_side = 0 if percents[0] >= percents[1] else 1
-        other_side = int(not bool(closest_side))
+        other_side = 1 if closest_side == 0 else 0
         ratio = src[closest_side] / dst[closest_side]
 
+        # get new size and crop offset to center
         new_size = dict()
-        new_size[closest_side] = dst[closest_side]
-        new_size[other_side] = floor(src[other_side] / ratio)
+        new_size[closest_side] = 0
+        new_size[other_side] = 0
 
-        # todo: now figure top-left position
-        center_by = other_side
         crop_position = dict()
         crop_position[closest_side] = 0
-        crop_position[center_by] = round(
-            (new_size[center_by] - dst[center_by]) / 2
+        crop_position[other_side] = 0
+
+        # enlarge dst
+        if mode == 'resize_sample':
+            new_size[closest_side] = src[closest_side]
+            new_size[other_side] = floor(dst[other_side] * ratio)
+            crop_position[other_side] = round(
+                (src[other_side] - dst[other_side]) / 2
+            )
+
+        # shrink src
+        if mode == 'resize_original':
+            new_size[closest_side] = dst[closest_side] # shrink src
+            new_size[other_side] = floor(dst[other_side] * ratio)
+            crop_position[other_side] = round(
+                (src[other_side] - dst[other_side]) / 2
+            )
+
+        # and return
+        return dict(
+            size =(new_size[0], new_size[1]),
+            position=(crop_position[0], crop_position[1])
         )
-
-        return (new_size[0], new_size[1]), (crop_position[0], crop_position[1])
-
 
 
     @staticmethod
@@ -45,12 +70,9 @@ class Resizer:
         dst_width = dst_size[0]
         dst_height = dst_size[1]
 
+        image = Image.open(src)
+        src_size = image.size
 
-        # image = Image.open(src) # wi don't even need pil here we can use maths
-        # src_size = image.size
-
-        image_sizes = dict(h=(5000, 2000), v=(2000, 5000), s=(3000, 3000))
-        src_size = image_sizes['h']
         src_width = src_size[0]
         src_height = src_size[1]
 
