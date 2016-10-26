@@ -81,6 +81,20 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((100,100), result['size'])
         self.assertEquals((0,0), result['position'])
 
+    def test_upscaling_to_fit(self):
+        """ Can upscale smaller src to fit dst """
+        resizer = Resizer
+        mode = resizer.CROP_TO_FIT
+        result = resizer.get_ratio(
+            src=(100, 100),
+            dst=(300, 200),
+            mode=mode,
+            upscale=True
+        )
+
+        self.assertEquals((200, 200), result['size'])
+        self.assertEquals((0,0), result['position'])
+
     def test_calculate_to_fit_if_one_side_is_shorter(self):
         """ Calculating to-fit size if one src side is shorter """
         resizer = Resizer

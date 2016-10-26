@@ -35,7 +35,7 @@ class Resizer:
             return dict(size=(src[0], src[1]), position=(0, 0))
 
         if mode == Resizer.CROP_TO_FIT:
-            result = Resizer.get_ratio_to_fit(src, dst)
+            result = Resizer.get_ratio_to_fit(src, dst, upscale)
         else:
             result = Resizer.get_ratio_to_fill(src, dst, algo, upscale)
 
@@ -47,7 +47,7 @@ class Resizer:
 
 
     @staticmethod
-    def get_ratio_to_fit(src, dst):
+    def get_ratio_to_fit(src, dst, upscale=False):
         """
         Get ratio to fit
         Proportionally resizes original to fit target size without discarding
@@ -57,7 +57,7 @@ class Resizer:
         """
 
         # if one src side shorter than dst, make the other one fit
-        if src[0] <= dst[0] or src[1] <= dst[1]:
+        if src[0] <= dst[0] or src[1] <= dst[1] and not upscale:
             short_side = 0 if src[0] <= dst[0] else 1
             other_side = 1 if short_side == 0 else 1
 
