@@ -5,8 +5,8 @@ from math import floor
 class Resizer:
 
     # resize modes (crop factor)
-    CROP_TO_FILL = 'mode_crop_to_fill'
-    CROP_TO_FIT = 'mode_crop_to_fit'
+    RESIZE_TO_FILL = 'mode_resize_to_fill'
+    RESIZE_TO_FIT = 'mode_resize_to_fit'
 
     # rezise to fill algorithms
     RESIZE_SAMPLE = 'algo_resize_sample'
@@ -16,25 +16,18 @@ class Resizer:
     def get_ratio(src, dst, mode=None, algo=None, upscale=False):
         """
         Get ratio
-        Calculates resize ratio based on source and destination size.
-        For all the calculations assume 0 for width and 1 for height.
+        Calculates resize ratio and crop offset for two resize modes:
+            * Resize to fit original
+            * Resize to fill target
 
-        Operates in two modes:
-            resize_original - shrinks src to fit dst, then cuts excess
-            resize_sample - enlarges dst to fit src, then shrinks
-
-        The second algorithm might be more performant as we  resize
-        smaller sample, not the full original.
+        May additionally perform source image upscale in case it is smaller
+        than requested target size.
 
         """
-        if not mode: mode = Resizer.CROP_TO_FILL
+        if not mode: mode = Resizer.RESIZE_TO_FILL
         if not algo: algo = Resizer.RESIZE_SAMPLE
 
-        # if src smaller than original and no upscale - return src
-        if src[0] <= dst[0] and src[1] <= dst[1] and not upscale:
-            return dict(size=(src[0], src[1]), position=(0, 0))
-
-        if mode == Resizer.CROP_TO_FIT:
+        if mode == Resizer.RESIZE_TO_FIT:
             result = Resizer.get_ratio_to_fit(src, dst, upscale)
         else:
             result = Resizer.get_ratio_to_fill(src, dst, algo, upscale)
@@ -50,11 +43,43 @@ class Resizer:
     def get_ratio_to_fit(src, dst, upscale=False):
         """
         Get ratio to fit
-        Proportionally resizes original to fit target size without discarding
-        anything. Most of the time resulting size will be smaller than
-        requested target size, unless both original and target sizes have the
-        same proportions.
+        Resizes original to fit target size without discarding anything.
+        In this mode most of the time resulting size will be smaller
+        than requested.
         """
+        new_size = {0: 0, 1: 0}
+
+        # no upscale
+        if not upscale:
+
+            # both sides smaller - return src
+            if src[0] <= dst[0] and src[1] <= dst[1]:
+                return (src[0], src[1]), (0, 0)
+
+            # one side smaller - fit the other
+            if src[0] <= dst[0] or src[1] <= dst[1] and not upscale:
+                short_side = 0 if src[0] <= dst[0] else 1
+                other_side = 1 if short_side == 0 else 1
+                ratio = src[other_side] / dst[other_side]
+                new_size[other_side] = dst[other_side]
+                new_size[short_side] = floor(src[short_side] / ratio)
+                return (new_size[0], new_size[1]), (0, 0)
+
+            # -----------------------------
+            # refactoring stopped here
+            # -----------------------------
+
+
+            # normal - fit longer
+
+        # upscale
+            # one side smaller - fit the other
+            # both sides smaller - fit closest
+            # normal - fit longer
+
+
+        # todo both sides are shorter and upscale
+        # todo one side is shorter and upscale
 
         # if one src side shorter than dst, make the other one fit
         if src[0] <= dst[0] or src[1] <= dst[1] and not upscale:
@@ -80,8 +105,8 @@ class Resizer:
     def get_ratio_to_fill(self, src, dst, algo, upscale=False):
         """
         Get ratio to fit
-        Proportionally resizes original to fill destination and discards excess.
-        May optionally upscale original if it's smaller than target size.
+        Eesizes original to fill destination and discards excess.
+        In this mode most of the time original will be cropped.
 
         Operates in two modes:
             resize_original - shrinks src to fit dst, then cuts excess
@@ -90,6 +115,21 @@ class Resizer:
         The second algorithm might be more performant as we  resize
         smaller sample, not the full original.
         """
+
+        # upscale
+            # one side smaller - enlarge until it fits
+            # both sides smaller - enlarge until closest fits
+            # normal - enlarge closest
+
+        # no upscale
+            # one side smaller - crop the other
+            # both sides smaller - return src
+            # normal - enlarge closest
+
+        #todo both sides are shorter and upscale
+
+
+
 
         # if one src side is shorter than same dst side, crop the other
         if src[0] <= dst[0] or src[1] <= dst[1] and not upscale:

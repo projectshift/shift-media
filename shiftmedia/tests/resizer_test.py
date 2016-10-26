@@ -21,12 +21,11 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         # self.clean()
         super().tearDown()
 
-
     # ------------------------------------------------------------------------
     # Tests
     # ------------------------------------------------------------------------
 
-    def test_get_image_data_with_pil(self):
+    def get_image_data_with_pil(self):
         """ Open a local image with PIL """
         self.prepare_uploads()
         path = os.path.join(self.upload_path, 'original_horizontal.jpg')
@@ -74,17 +73,17 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
 
             print('\n')
 
-    def test_return_src_if_smaller_than_dst_without_upscale(self):
+    def return_src_if_smaller_than_dst_without_upscale(self):
         """ No upscale returns original if smaller than resize """
         resizer = Resizer
         result = Resizer.get_ratio((100, 100), (200,200), upscale=False)
         self.assertEquals((100,100), result['size'])
         self.assertEquals((0,0), result['position'])
 
-    def test_upscaling_to_fit(self):
+    def upscaling_to_fit(self):
         """ Can upscale smaller src to fit dst """
         resizer = Resizer
-        mode = resizer.CROP_TO_FIT
+        mode = resizer.RESIZE_TO_FIT
         result = resizer.get_ratio(
             src=(100, 100),
             dst=(300, 200),
@@ -95,21 +94,51 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((200, 200), result['size'])
         self.assertEquals((0,0), result['position'])
 
-    def test_calculate_to_fit_if_one_side_is_shorter(self):
-        """ Calculating to-fit size if one src side is shorter """
+    def calculate_to_fit_if_one_side_is_shorter(self):
+        """ Calculating to-fit size if one src side is shorter than dst"""
         resizer = Resizer
-        mode = resizer.CROP_TO_FIT
+        mode = resizer.RESIZE_TO_FIT
         result = resizer.get_ratio(src=(200, 400), dst=(300, 200), mode=mode)
         self.assertEquals((100, 200), result['size'])
         self.assertEquals((0,0), result['position'])
 
-    def test_calculate_to_fit_is_src_larger_than_dst(self):
+    def calculate_to_fit_if_src_larger_than_dst(self):
         """ Calculating to-fit size if src is larger than dst"""
         resizer = Resizer
-        mode = resizer.CROP_TO_FIT
+        mode = resizer.RESIZE_TO_FIT
         result = resizer.get_ratio(src=(400, 800), dst=(200, 200), mode=mode)
         self.assertEquals((100,200), result['size'])
         self.assertEquals((0,0), result['position'])
+
+    def calculate_to_fill_if_one_side_is_shorter(self):
+        """ Calculating to-fit size if one src side is shorter than dst"""
+        resizer = Resizer
+        mode = resizer.RESIZE_TO_FIT
+        result = resizer.get_ratio((),(),mode=mode)
+
+    # ------------------------------------------------------------------------
+    # Resize to fit math
+    # ------------------------------------------------------------------------
+
+    def test_fit_no_upscale_smaller_original(self):
+        """ Resize to fit, no upscale, src smaller - returns src """
+        resizer = Resizer
+        mode = resizer.RESIZE_TO_FIT
+        src = (100, 300)
+        dst = (200, 400)
+        upscale = False
+        result = resizer.get_ratio(src, dst,mode=mode, upscale=upscale)
+        self.assertEquals(src, result['size'])
+        self.assertEquals((0,0), result['position'])
+
+    def test_fit_no_upscale_one_side_smaller(self):
+        """ Resize to fit, no upscale, one side smaller - fit longer side """
+        pass
+
+
+    # ------------------------------------------------------------------------
+    # Resize to fit math
+    # ------------------------------------------------------------------------
 
 
 
