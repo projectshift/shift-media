@@ -38,7 +38,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals('JPEG', img.format)
         self.assertEquals('RGB', img.mode)
 
-    def test_calculate_resize_ratio(self):
+    def calculate_resize_ratio(self):
         """ Calculating resize ratio """
         dsts = dict(
             horizontal1=(500,200),
@@ -57,14 +57,12 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         print('\n')
         hr = '-' * 40
 
-
-
         for src in srcs.keys():
             head = 'SRC {} ({}x{})\n' + hr
             print(head.format(src.upper(), srcs[src][0], srcs[src][1], hr))
 
             for dst in dsts.keys():
-                ratio = Resizer.getRatio(srcs[src], dsts[dst])
+                ratio = Resizer.get_ratio(srcs[src], dsts[dst])
 
                 row = 'DST {} ({}x{}): '
                 row = row.format(dst.upper(), dsts[dst][0], dsts[dst][1])
@@ -76,10 +74,34 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
 
             print('\n')
 
-
     def test_return_src_if_smaller_than_dst_without_upscale(self):
         """ No upscale returns original if smaller than resize """
-        pass
+        resizer = Resizer
+        result = Resizer.get_ratio((100, 100), (200,200), upscale=False)
+        self.assertEquals((100,100), result['size'])
+        self.assertEquals((0,0), result['position'])
+
+    def test_calculate_to_fit_if_one_side_is_shorter(self):
+        """ Calculating to-fit size if one src side is shorter """
+        resizer = Resizer
+        mode = resizer.CROP_TO_FIT
+        result = resizer.get_ratio(src=(200, 400), dst=(300, 200), mode=mode)
+        self.assertEquals((100, 200), result['size'])
+        self.assertEquals((0,0), result['position'])
+
+    def test_calculate_to_fit_is_src_larger_than_dst(self):
+        """ Calculating to-fit size if src is larger than dst"""
+        resizer = Resizer
+        mode = resizer.CROP_TO_FIT
+        result = resizer.get_ratio(src=(400, 800), dst=(200, 200), mode=mode)
+        self.assertEquals((100,200), result['size'])
+        self.assertEquals((0,0), result['position'])
+
+
+
+
+
+
 
 
 
