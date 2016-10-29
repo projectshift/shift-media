@@ -57,25 +57,39 @@ class Resizer:
                 return (src[0], src[1]), (0, 0)
 
             # one side smaller - fit the other
-            if src[0] <= dst[0] or src[1] <= dst[1] and not upscale:
+            elif src[0] <= dst[0] or src[1] <= dst[1]:
                 short_side = 0 if src[0] <= dst[0] else 1
-                other_side = 1 if short_side == 0 else 1
+                other_side = 1 if short_side == 0 else 0
                 ratio = src[other_side] / dst[other_side]
                 new_size[other_side] = dst[other_side]
                 new_size[short_side] = floor(src[short_side] / ratio)
                 return (new_size[0], new_size[1]), (0, 0)
+
+            # normal - fit longer
+            else:
+                longer_side = 0 if src[0] >= src[1] else 1
+                other_side = 0 if longer_side == 1 else 1
+                ratio = src[longer_side] / dst[longer_side]
+                new_size[longer_side] = dst[longer_side]
+                new_size[other_side] = floor(src[other_side] / ratio)
+                return (new_size[0], new_size[1]), (0, 0)
+
+        # upscale
+        # if upscale:
+
+            # one side smaller - fit the other
+
+            # both sides smaller - fit closest
+            # normal - fit longer
 
             # -----------------------------
             # refactoring stopped here
             # -----------------------------
 
 
-            # normal - fit longer
 
-        # upscale
-            # one side smaller - fit the other
-            # both sides smaller - fit closest
-            # normal - fit longer
+
+
 
 
         # todo both sides are shorter and upscale
