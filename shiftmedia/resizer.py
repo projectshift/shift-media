@@ -85,8 +85,8 @@ class Resizer:
 
 
 
-
-    def get_ratio_to_fill(self, src, dst, algo, upscale=False):
+    @staticmethod
+    def get_ratio_to_fill(src, dst, algo, upscale=False):
         """
         Get ratio to fit
         Eesizes original to fill destination and discards excess.
@@ -99,26 +99,50 @@ class Resizer:
         The second algorithm might be more performant as we  resize
         smaller sample, not the full original.
         """
+        new_size = {0: 0, 1: 0}
+        offset = {0: 0, 1: 0}
+
+        # no upscale
+        if not upscale:
+
+            # both sides smaller - return src
+            if src[0] <= dst[0] and src[1] <= dst[1]:
+                return (src[0], src[1]), (0, 0)
+
+            # one side smaller - crop the other
+            elif src[0] <= dst[0] or src[1] <= dst[1]:
+                short_side = 0 if src[0] <= dst[0] else 1
+                other_side = 1 if short_side == 0 else 1
+                new_size[short_side] = src[short_side]
+                new_size[other_side] = dst[other_side]
+                offset[short_side] = 0
+                offset[other_side] = floor(
+                    (dst[other_side] - src[other_side]) / 2
+                )
+                return (new_size[0], new_size[1]), (offset[0], offset[1])
+
+
+            # src bigger - fit closest
+            else:
+                pass
+
 
         # upscale
             # one side smaller - enlarge until it fits
             # both sides smaller - enlarge until closest fits
             # normal - enlarge closest
 
-        # no upscale
-            # one side smaller - crop the other
-            # both sides smaller - return src
-            # normal - enlarge closest
+
 
         #todo both sides are shorter and upscale
+        return 'bull', 'shit'
 
 
 
 
         # if one src side is shorter than same dst side, crop the other
         if src[0] <= dst[0] or src[1] <= dst[1] and not upscale:
-            short_side = 0 if src[0] <= dst[0] else 1
-            other_side = 1 if short_side == 0 else 1
+
 
             new_size = dict()
             new_size[short_side] = src[short_side]

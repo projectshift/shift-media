@@ -121,7 +121,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
     # ------------------------------------------------------------------------
 
     def test_fit_no_upscale_smaller_original(self):
-        """ Fit, no upscale, src smaller - returns src """
+        """ Fit, no upscale, src smaller """
         resizer = Resizer
         mode = resizer.RESIZE_TO_FIT
         src = (100, 300)
@@ -132,7 +132,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((0,0), result['position'])
 
     def test_fit_no_upscale_one_side_smaller(self):
-        """ Fit, no upscale, one side smaller - fit side longer than target"""
+        """ Fit, no upscale, one side smaller"""
         resizer = Resizer
         mode = resizer.RESIZE_TO_FIT
         src = (100, 300)
@@ -143,7 +143,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((0, 0), result['position'])
 
     def test_fit_no_upscale_bigger_original(self):
-        """ Fit, no upscale, original bigger - fit longer original side"""
+        """ Fit, no upscale, original bigger"""
         resizer = Resizer
         mode = resizer.RESIZE_TO_FIT
         src = (2000, 4000)
@@ -154,7 +154,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((0, 0), result['position'])
 
     def test_fit_upscale_smaller_original(self):
-        """ Fit, upscale, original smaller - fit closest side """
+        """ Fit, upscale, original smaller """
         resizer = Resizer
         mode = resizer.RESIZE_TO_FIT
         src = (2000, 1000)
@@ -165,7 +165,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((0, 0), result['position'])
 
     def test_fit_upscale_one_side_smaller(self):
-        """ Fit, upscale, one side smaller - fit closest side """
+        """ Fit, upscale, one side smaller """
         resizer = Resizer
         mode = resizer.RESIZE_TO_FIT
         src = (5000, 2200)
@@ -176,7 +176,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((0, 0), result['position'])
 
     def test_fit_upscale_bigger_original(self):
-        """ Fit, upscale, original bigger - fit closest side """
+        """ Fit, upscale, original bigger """
         resizer = Resizer
         mode = resizer.RESIZE_TO_FIT
         src = (5000, 3000)
@@ -186,11 +186,48 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((1000, 600), result['size'])
         self.assertEquals((0, 0), result['position'])
 
-
     # ------------------------------------------------------------------------
-    # Resize to fit math
+    # Resize to fill math
     # ------------------------------------------------------------------------
 
+    def test_fill_no_upscale_smaller_original(self):
+        """ Fill, no upscale, src smaller """
+        resizer = Resizer
+        algo = resizer.RESIZE_SAMPLE
+        mode = resizer.RESIZE_TO_FILL
+        src = (1000, 3000)
+        dst = (2000, 4000)
+        upscale = False
+        result = resizer.get_ratio(src, dst, mode, algo, upscale)
+        self.assertEquals(src, result['size'])
+        self.assertEquals((0, 0), result['position'])
+
+    def test_fill_no_upscale_one_size_smaller(self):
+        """ Fill, no upscale, one side smaller """
+        resizer = Resizer
+        algo = resizer.RESIZE_SAMPLE
+        mode = resizer.RESIZE_TO_FILL
+        src = (2000, 3000)
+        dst = (3000, 2000)
+        upscale = False
+        result = resizer.get_ratio(src, dst, mode, algo, upscale)
+        self.assertEquals((2000, 2000), result['size'])
+        self.assertEquals((0, -500), result['position'])
+
+
+    @attr('xxx')
+    def test_fill_no_upscale_bigger_original(self):
+        """ Fill, no upscale, original bigger """
+        resizer = Resizer
+        algo = resizer.RESIZE_SAMPLE
+        mode = resizer.RESIZE_TO_FILL
+        src = (2000, 3000)
+        dst = (1000, 2000)
+        upscale = False
+        result = resizer.get_ratio(src, dst, mode, algo, upscale)
+        print(result)
+        # self.assertEquals((2000, 2000), result['size'])
+        # self.assertEquals((0, -500), result['position'])
 
 
 
