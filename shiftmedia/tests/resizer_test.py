@@ -238,6 +238,29 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((1500, 3000), result['size'])
         self.assertEquals((250, 0), result['position'])
 
+    def test_fill_upscale_original_smaller_risize_original(self):
+        """ Fill, upscale, original bigger - resize original algo """
+        resizer = Resizer
+        algo = resizer.RESIZE_ORIGINAL
+        mode = resizer.RESIZE_TO_FILL
+        src = (2000, 1000)
+        dst = (4000, 3000)
+        upscale = True
+        result = resizer.get_ratio(src, dst, mode, algo, upscale)
+        self.assertEquals((6000, 3000), result['size'])
+        self.assertEquals((1000, 0), result['position'])
+
+    def test_fill_upscale_original_smaller_risize_sample(self):
+        """ Fill, upscale, original bigger - resize sample algo """
+        resizer = Resizer
+        algo = resizer.RESIZE_SAMPLE
+        mode = resizer.RESIZE_TO_FILL
+        src = (2000, 1000)
+        dst = (4000, 3000)
+        upscale = True
+        result = resizer.get_ratio(src, dst, mode, algo, upscale)
+        self.assertEquals((1333, 1000), result['size'])
+        self.assertEquals((334, 0), result['position'])
 
 
 

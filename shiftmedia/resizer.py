@@ -38,7 +38,6 @@ class Resizer:
             position=result[1],
         )
 
-
     @staticmethod
     def get_ratio_to_fit(src, dst, upscale=False):
         """
@@ -65,7 +64,7 @@ class Resizer:
                 new_size[other_side] = floor(src[other_side] / ratio)
                 return (new_size[0], new_size[1]), (0, 0)
 
-        # one side smaller - fit the other
+        # one side smaller - fit the other side
         elif src[0] <= dst[0] or src[1] <= dst[1]:
             short_side = 0 if src[0] <= dst[0] else 1
             other_side = 1 if short_side == 0 else 0
@@ -121,7 +120,7 @@ class Resizer:
                 )
                 return (new_size[0], new_size[1]), (offset[0], offset[1])
 
-            # src bigger - fit closest
+            # src bigger - fit closest side
             else:
                 percents = (dst[0] / (src[0] / 100), dst[1] / (src[1] / 100))
                 percents = [p if p < 100 else p * -1 for p in percents]
@@ -142,10 +141,33 @@ class Resizer:
                     )
                 return (new_size[0], new_size[1]), (offset[0], offset[1])
 
-
         # upscale
+        if upscale:
+            # both sides smaller - enlarge until further fits
+            if src[0] <= dst[0] and src[1] <= dst[1]:
+                percents = (dst[0] / (src[0] / 100), dst[1] / (src[1] / 100))
+                percents = [p if p < 100 else p * -1 for p in percents]
+                closest_side = 0 if percents[0] >= percents[1] else 1
+                other_side = 1 if closest_side == 0 else 0
+                ratio = src[other_side] / dst[other_side]
+                if algo == Resizer.RESIZE_SAMPLE:
+                    new_size[other_side] = src[other_side]
+                    new_size[closest_side] = floor(dst[closest_side] * ratio)
+                    offset[closest_side] = round(
+                        (src[closest_side] - new_size[closest_side]) / 2
+                    )
+
+                if algo == Resizer.RESIZE_ORIGINAL:
+                    new_size[other_side] = dst[other_side]  # shrink src
+                    new_size[closest_side] = floor(src[closest_side] / ratio)
+                    offset[closest_side] = round(
+                        (new_size[closest_side] - dst[closest_side]) / 2
+                    )
+                return (new_size[0], new_size[1]), (offset[0], offset[1])
+
+
+
             # one side smaller - enlarge until it fits
-            # both sides smaller - enlarge until closest fits
             # normal - enlarge closest
 
 
