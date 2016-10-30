@@ -117,14 +117,30 @@ class Resizer:
                 new_size[other_side] = dst[other_side]
                 offset[short_side] = 0
                 offset[other_side] = floor(
-                    (dst[other_side] - src[other_side]) / 2
+                    (src[other_side] - dst[other_side]) / 2
                 )
                 return (new_size[0], new_size[1]), (offset[0], offset[1])
 
-
             # src bigger - fit closest
             else:
-                pass
+                percents = (dst[0] / (src[0] / 100), dst[1] / (src[1] / 100))
+                percents = [p if p < 100 else p * -1 for p in percents]
+                closest_side = 0 if percents[0] >= percents[1] else 1
+                other_side = 1 if closest_side == 0 else 0
+                ratio = src[closest_side] / dst[closest_side]
+                if algo == Resizer.RESIZE_SAMPLE:
+                    new_size[closest_side] = src[closest_side]
+                    new_size[other_side] = floor(dst[other_side] * ratio)
+                    offset[other_side] = round(
+                        (src[other_side] - new_size[other_side]) / 2
+                    )
+                if algo == Resizer.RESIZE_ORIGINAL:
+                    new_size[closest_side] = dst[closest_side]  # shrink src
+                    new_size[other_side] = floor(dst[other_side] * ratio)
+                    offset[other_side] = round(
+                        (src[other_side] - new_size[other_side]) / 2
+                    )
+                return (new_size[0], new_size[1]), (offset[0], offset[1])
 
 
         # upscale
