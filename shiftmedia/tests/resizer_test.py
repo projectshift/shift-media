@@ -274,7 +274,6 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((6000, 3000), result['size'])
         self.assertEquals((1000, 0), result['position'])
 
-    @attr('xxxx')
     def test_fill_upscale_one_side_smaller_risize_sample(self):
         """ Fill, upscale, one side smaller - resize sample algo """
         resizer = Resizer
@@ -284,7 +283,6 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         dst = (4000, 3000)
         upscale = True
         result = resizer.get_ratio(src, dst, mode, algo, upscale)
-        print(result)
         self.assertEquals((2666, 2000), result['size'])
         self.assertEquals((1167, 0), result['position'])
 
@@ -297,12 +295,11 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         dst = (4000, 3000)
         upscale = True
         result = resizer.get_ratio(src, dst, mode, algo, upscale)
-        self.assertEquals((5400, 3000), result['size'])
-        self.assertEquals((700, 0), result['position'])
+        self.assertEquals((6750, 3000), result['size'])
+        self.assertEquals((1375, 0), result['position'])
 
-    @attr('xxxx')
-    def test_fill_upscale_original_bigger_risize_sample(self):
-        """ Fill, upscale, original bigger - resize sample algo """
+    def test_fill_upscale_original_bigger_risize_original(self):
+        """ Fill, upscale, original bigger - resize original algo """
         resizer = Resizer
         algo = resizer.RESIZE_ORIGINAL
         mode = resizer.RESIZE_TO_FILL
@@ -310,12 +307,20 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         dst = (2000, 1000)
         upscale = True
         result = resizer.get_ratio(src, dst, mode, algo, upscale)
-        print(result)
+        self.assertEquals((2000, 1500), result['size'])
+        self.assertEquals((0, 250), result['position'])
 
-
-    def test_fill_upscale_original_bigger_risize_original(self):
-        """ Fill, upscale, original bigger - resize original algo """
-        pass
+    def test_fill_upscale_original_bigger_risize_sample(self):
+        """ Fill, upscale, original bigger - resize sample algo """
+        resizer = Resizer
+        algo = resizer.RESIZE_SAMPLE
+        mode = resizer.RESIZE_TO_FILL
+        src = (4000, 3000)
+        dst = (2000, 1000)
+        upscale = True
+        result = resizer.get_ratio(src, dst, mode, algo, upscale)
+        self.assertEquals((1333, 1000), result['size'])
+        self.assertEquals((334, 0), result['position'])
 
 
 

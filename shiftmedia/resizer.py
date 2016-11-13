@@ -82,8 +82,6 @@ class Resizer:
             new_size[other_side] = floor(src[other_side] / ratio)
             return (new_size[0], new_size[1]), (0, 0)
 
-
-
     @staticmethod
     def get_ratio_to_fill(src, dst, algo, upscale=False):
         """
@@ -176,6 +174,9 @@ class Resizer:
                     offset[other_side] = round(
                         (new_size[other_side] - dst[other_side]) / 2
                     )
+
+
+
                 if algo == Resizer.RESIZE_SAMPLE:
                     new_size[short_side] = src[short_side]
                     new_size[other_side] = floor(dst[other_side] * ratio)
@@ -184,17 +185,29 @@ class Resizer:
                     )
                 return (new_size[0], new_size[1]), (offset[0], offset[1])
 
-            # src bigger - shrink until closes side fits
+            # src bigger - shrink until closest side fits
             else:
                 percents = (dst[0] / (src[0] / 100), dst[1] / (src[1] / 100))
                 percents = [p if p < 100 else p * -1 for p in percents]
                 closest_side = 0 if percents[0] >= percents[1] else 1
                 other_side = 1 if closest_side == 0 else 0
-                ratio = src[other_side] / dst[other_side]
+                if algo == Resizer.RESIZE_ORIGINAL:
+                    ratio = src[closest_side] / dst[closest_side]
+                    new_size[closest_side] = dst[closest_side]
+                    new_size[other_side] = floor(src[other_side] / ratio)
+                    offset[other_side] = round(
+                        (new_size[other_side] - dst[other_side]) / 2
+                    )
+                if algo == Resizer.RESIZE_SAMPLE:
+                    ratio = src[other_side] / dst[other_side]
+                    new_size[other_side] = dst[other_side]
+                    new_size[closest_side] = floor(src[closest_side] / ratio)
+                    offset[closest_side] = round(
+                        (dst[closest_side] - new_size[closest_side]) / 2
+                    )
 
-                print('CLOSEST ', closest_side)
-                print('OTHER ', other_side)
-                print('RATIO ', ratio)
+                return (new_size[0], new_size[1]), (offset[0], offset[1])
+
 
 
 
