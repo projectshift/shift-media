@@ -24,8 +24,8 @@ class Resizer:
         than requested target size.
 
         """
-        if not mode: mode = Resizer.RESIZE_TO_FILL
-        if not algo: algo = Resizer.RESIZE_SAMPLE
+        mode = mode or Resizer.RESIZE_TO_FILL
+        algo = algo or Resizer.RESIZE_SAMPLE
 
         if mode == Resizer.RESIZE_TO_FIT:
             result = Resizer.get_ratio_to_fit(src, dst, upscale)
@@ -143,6 +143,7 @@ class Resizer:
 
         # upscale
         if upscale:
+
             # both sides smaller - enlarge until further fits
             if src[0] <= dst[0] and src[1] <= dst[1]:
                 percents = (dst[0] / (src[0] / 100), dst[1] / (src[1] / 100))
@@ -156,81 +157,44 @@ class Resizer:
                     offset[closest_side] = round(
                         (src[closest_side] - new_size[closest_side]) / 2
                     )
-
                 if algo == Resizer.RESIZE_ORIGINAL:
-                    new_size[other_side] = dst[other_side]  # shrink src
+                    new_size[other_side] = dst[other_side]
                     new_size[closest_side] = floor(src[closest_side] / ratio)
                     offset[closest_side] = round(
                         (new_size[closest_side] - dst[closest_side]) / 2
                     )
                 return (new_size[0], new_size[1]), (offset[0], offset[1])
 
-
-
             # one side smaller - enlarge until it fits
-            # normal - enlarge closest
+            elif src[0] <= dst[0] or src[1] <= dst[1]:
+                short_side = 0 if src[0] <= dst[0] else 1
+                other_side = 1 if short_side == 0 else 0
+                ratio = src[short_side] / dst[short_side]
+                if algo == Resizer.RESIZE_ORIGINAL:
+                    new_size[short_side] = dst[short_side]
+                    new_size[other_side] = floor(src[other_side] / ratio)
+                    offset[other_side] = round(
+                        (new_size[other_side] - dst[other_side]) / 2
+                    )
+                if algo == Resizer.RESIZE_SAMPLE:
+                    new_size[short_side] = src[short_side]
+                    new_size[other_side] = floor(dst[other_side] * ratio)
+                    offset[other_side] = round(
+                        (src[other_side] - new_size[other_side]) / 2
+                    )
+                return (new_size[0], new_size[1]), (offset[0], offset[1])
 
+            # src bigger - shrink until closes side fits
+            else:
+                percents = (dst[0] / (src[0] / 100), dst[1] / (src[1] / 100))
+                percents = [p if p < 100 else p * -1 for p in percents]
+                closest_side = 0 if percents[0] >= percents[1] else 1
+                other_side = 1 if closest_side == 0 else 0
+                ratio = src[other_side] / dst[other_side]
 
-
-        #todo both sides are shorter and upscale
-        return 'bull', 'shit'
-
-
-
-
-        # if one src side is shorter than same dst side, crop the other
-        if src[0] <= dst[0] or src[1] <= dst[1] and not upscale:
-
-
-            new_size = dict()
-            new_size[short_side] = src[short_side]
-            new_size[other_side] = dst[other_side]
-
-            offset = dict()
-            offset[other_side] = 0
-            offset[short_side] = floor(
-                (dst[other_side] - src[other_side]) / 2
-            )
-
-            return (new_size[0], new_size[1]), (offset[0], offset[1])
-
-        # otherwise resize to fill normally
-        percents = (dst[0] / (src[0] / 100), dst[1] / (src[1] / 100))
-        closest_side = 0 if percents[0] >= percents[1] else 1
-        other_side = 1 if closest_side == 0 else 0
-        ratio = src[closest_side] / dst[closest_side]
-
-        # get new size and crop offset to center
-        new_size = dict()
-        new_size[closest_side] = 0
-        new_size[other_side] = 0
-
-        offset = dict()
-        offset[closest_side] = 0
-        offset[other_side] = 0
-
-        # enlarge dst
-        # todo: test if this one is quicker
-        # todo: this will not work with upscaling
-        if algo == Resizer.RESIZE_SAMPLE:
-            new_size[closest_side] = src[closest_side]
-            new_size[other_side] = floor(dst[other_side] * ratio)
-            offset[other_side] = round(
-                (src[other_side] - dst[other_side]) / 2
-            )
-
-        # shrink src
-        # todo: test if this one is quicker
-        if algo == Resizer.RESIZE_ORIGINAL:
-            new_size[closest_side] = dst[closest_side]  # shrink src
-            new_size[other_side] = floor(dst[other_side] * ratio)
-            offset[other_side] = round(
-                (src[other_side] - dst[other_side]) / 2
-            )
-
-        # and return
-        return (new_size[0], new_size[1]), (offset[0], offset[1])
-
+                print('CLOSEST ', closest_side)
+                print('OTHER ', other_side)
+                print('RATIO ', ratio)
 
 
 
