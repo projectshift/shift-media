@@ -22,101 +22,6 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         super().tearDown()
 
     # ------------------------------------------------------------------------
-    # Tests
-    # ------------------------------------------------------------------------
-
-    def get_image_data_with_pil(self):
-        """ Open a local image with PIL """
-        self.prepare_uploads()
-        path = os.path.join(self.upload_path, 'original_horizontal.jpg')
-        from PIL import Image
-        img = Image.open(path)
-        img.thumbnail((1000, 1000))
-        # img.show()
-
-        self.assertEquals('JPEG', img.format)
-        self.assertEquals('RGB', img.mode)
-
-    def calculate_resize_ratio(self):
-        """ Calculating resize ratio """
-        dsts = dict(
-            horizontal1=(500,200),
-            horizontal2=(700,40),
-            vertical1=(200,500),
-            vertical2=(40,700),
-            square=(300,300)
-        )
-        srcs=dict(
-            horizontal=(4000, 1500),
-            vertical=(1500, 4000),
-            square=(3000, 3000),
-            upscale=(30, 10),
-        )
-
-        print('\n')
-        hr = '-' * 40
-
-        for src in srcs.keys():
-            head = 'SRC {} ({}x{})\n' + hr
-            print(head.format(src.upper(), srcs[src][0], srcs[src][1], hr))
-
-            for dst in dsts.keys():
-                ratio = Resizer.get_ratio(srcs[src], dsts[dst])
-
-                row = 'DST {} ({}x{}): '
-                row = row.format(dst.upper(), dsts[dst][0], dsts[dst][1])
-
-                # ratio = [str(x) for x in Resizer.getRatio(*params)]
-                # print(row, ratio[0] +'x'+ ratio[1])
-
-                print(row, ratio)
-
-            print('\n')
-
-    def return_src_if_smaller_than_dst_without_upscale(self):
-        """ No upscale returns original if smaller than resize """
-        resizer = Resizer
-        result = Resizer.get_ratio((100, 100), (200,200), upscale=False)
-        self.assertEquals((100,100), result['size'])
-        self.assertEquals((0,0), result['position'])
-
-    def upscaling_to_fit(self):
-        """ Can upscale smaller src to fit dst """
-        resizer = Resizer
-        mode = resizer.RESIZE_TO_FIT
-        result = resizer.get_ratio(
-            src=(100, 100),
-            dst=(300, 200),
-            mode=mode,
-            upscale=True
-        )
-
-        self.assertEquals((200, 200), result['size'])
-        self.assertEquals((0,0), result['position'])
-
-    def calculate_to_fit_if_one_side_is_shorter(self):
-        """ Calculating to-fit size if one src side is shorter than dst"""
-        resizer = Resizer
-        mode = resizer.RESIZE_TO_FIT
-        result = resizer.get_ratio(src=(200, 400), dst=(300, 200), mode=mode)
-        self.assertEquals((100, 200), result['size'])
-        self.assertEquals((0,0), result['position'])
-
-    def calculate_to_fit_if_src_larger_than_dst(self):
-        """ Calculating to-fit size if src is larger than dst"""
-        resizer = Resizer
-        mode = resizer.RESIZE_TO_FIT
-        result = resizer.get_ratio(src=(400, 800), dst=(200, 200), mode=mode)
-        self.assertEquals((100,200), result['size'])
-        self.assertEquals((0,0), result['position'])
-
-    def calculate_to_fill_if_one_side_is_shorter(self):
-        """ Calculating to-fit size if one src side is shorter than dst"""
-        resizer = Resizer
-        mode = resizer.RESIZE_TO_FIT
-        result = resizer.get_ratio((),(),mode=mode)
-
-    # ------------------------------------------------------------------------
     # Resize to fit math
     # ------------------------------------------------------------------------
 
@@ -262,18 +167,6 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((1333, 1000), result['size'])
         self.assertEquals((334, 0), result['position'])
 
-    def test_fill_upscale_original_smaller_risize_original(self):
-        """ Fill, upscale, original smaller - resize original algo """
-        resizer = Resizer
-        algo = resizer.RESIZE_ORIGINAL
-        mode = resizer.RESIZE_TO_FILL
-        src = (2000, 1000)
-        dst = (4000, 3000)
-        upscale = True
-        result = resizer.get_ratio(src, dst, mode, algo, upscale)
-        self.assertEquals((6000, 3000), result['size'])
-        self.assertEquals((1000, 0), result['position'])
-
     def test_fill_upscale_one_side_smaller_risize_sample(self):
         """ Fill, upscale, one side smaller - resize sample algo """
         resizer = Resizer
@@ -322,7 +215,34 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((1333, 1000), result['size'])
         self.assertEquals((334, 0), result['position'])
 
+    # ------------------------------------------------------------------------
+    # Image manipulation tests
+    # ------------------------------------------------------------------------
 
+    def get_image_data_with_pil(self):
+        """ Open a local image with PIL """
+        self.prepare_uploads()
+        path = os.path.join(self.upload_path, 'original_horizontal.jpg')
+        from PIL import Image
+        img = Image.open(path)
+        img.thumbnail((1000, 1000))
+        # img.show()
+
+        self.assertEquals('JPEG', img.format)
+        self.assertEquals('RGB', img.mode)
+
+    @attr('xxx')
+    def test_can_resize_image(self):
+        """ Resizing an image """
+        filename = 'original_vertical.jpg'
+        target_size = '100x200'
+        algo = Resizer.RESIZE_SAMPLE
+        mode = Resizer.RESIZE_TO_FILL
+        upscale = True
+        self.prepare_uploads()
+        src = os.path.join(self.upload_path, filename)
+        dst = os.path.join(self.tmp_path, filename)
+        result = Resizer.resize(src, dst, target_size, algo, upscale)
 
 
 

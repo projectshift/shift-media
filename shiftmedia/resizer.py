@@ -13,6 +13,17 @@ class Resizer:
     RESIZE_ORIGINAL = 'algo_resize_original'
 
     @staticmethod
+    def resize(self, src, dst, size, algo=None, uscale=False):
+        """
+        Resize an image
+        Accepts source image and destination name, as well as target size
+        and resize algorithm. May optionally perform source image upscale
+        in cse it is smaller than target size.
+        """
+        print('RESIZE', src)
+
+
+    @staticmethod
     def get_ratio(src, dst, mode=None, algo=None, upscale=False):
         """
         Get ratio
@@ -174,8 +185,6 @@ class Resizer:
                     offset[other_side] = round(
                         (new_size[other_side] - dst[other_side]) / 2
                     )
-
-
 
                 if algo == Resizer.RESIZE_SAMPLE:
                     new_size[short_side] = src[short_side]
