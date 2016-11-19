@@ -17,7 +17,7 @@ www.esproj
 
 # Project ignores
 /config
-
+/var
 
 
 
