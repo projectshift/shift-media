@@ -42,12 +42,18 @@ class Resizer:
         # resize original and take sample
         if algo == Resizer.RESIZE_ORIGINAL:
             img = img.resize((width, height), Image.LANCZOS)
-            box = (x, y, x+dst_size[0], y+dst_size[1])
+            x2 = x+dst_size[0] if x+dst_size[0] <= img.size[0] else img.size[0]
+            y2 = y+dst_size[1] if x+dst_size[1] <= img.size[1] else img.size[1]
+            box = (x, y, x2, y2)
             img = img.crop(box)
 
         # take sample and off original and resize
         if algo == Resizer.RESIZE_SAMPLE:
-            pass
+            x2 = x+width
+            y2 = y+height
+            box = (x, y, x2, y2)
+            img = img.crop(box)
+            img = img.resize(dst_size, Image.LANCZOS)
 
         print(ratio)
         return img
@@ -235,11 +241,11 @@ class Resizer:
                         (new_size[other_side] - dst[other_side]) / 2
                     )
                 if algo == Resizer.RESIZE_SAMPLE:
-                    ratio = src[other_side] / dst[other_side]
-                    new_size[other_side] = dst[other_side]
-                    new_size[closest_side] = floor(src[closest_side] / ratio)
-                    offset[closest_side] = round(
-                        (dst[closest_side] - new_size[closest_side]) / 2
+                    ratio = dst[closest_side] / src[closest_side]
+                    new_size[closest_side] = src[closest_side]
+                    new_size[other_side] = floor(dst[other_side] / ratio)
+                    offset[other_side] = round(
+                        (src[other_side] - new_size[other_side]) / 2
                     )
 
                 return (new_size[0], new_size[1]), (offset[0], offset[1])

@@ -212,33 +212,22 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         dst = (2000, 1000)
         upscale = True
         result = resizer.get_ratio(src, dst, mode, algo, upscale)
-        self.assertEquals((1333, 1000), result['size'])
-        self.assertEquals((334, 0), result['position'])
+        print(result)
+        self.assertEquals((4000, 2000), result['size'])
+        self.assertEquals((0, 500), result['position'])
 
     # ------------------------------------------------------------------------
     # Image manipulation tests
     # ------------------------------------------------------------------------
 
-    def get_image_data_with_pil(self):
-        """ Open a local image with PIL """
-        self.prepare_uploads()
-        path = os.path.join(self.upload_path, 'original_horizontal.jpg')
-        from PIL import Image
-        img = Image.open(path)
-        img.thumbnail((1000, 1000))
-        # img.show()
-
-        self.assertEquals('JPEG', img.format)
-        self.assertEquals('RGB', img.mode)
-
     @attr('xxx')
     def test_can_resize_image(self):
         """ Resizing an image """
         filename = 'original_vertical.jpg'  # 248x768
-        target_size = '100x200'
-        algo = Resizer.RESIZE_ORIGINAL
+        target_size = '1000x2000'
+        algo = Resizer.RESIZE_SAMPLE
         mode = Resizer.RESIZE_TO_FILL
-        upscale = True
+        upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
         result = Resizer.resize(src, target_size, mode, algo, upscale)
