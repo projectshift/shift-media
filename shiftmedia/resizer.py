@@ -13,18 +13,48 @@ class Resizer:
     RESIZE_ORIGINAL = 'algo_resize_original'
 
     @staticmethod
-    def resize(self, src, dst, size, algo=None, uscale=False):
+    def resize(src, size, mode=None, algo=None, upscale=False):
         """
         Resize an image
         Accepts source image and destination name, as well as target size
         and resize algorithm. May optionally perform source image upscale
-        in cse it is smaller than target size.
+        in case it is smaller than target size.
+        :param src: Source file path
+        :param size: Target size
+        :param mode: Resize mode (fit/fill)
+        :param algo: Resize algorithm (resize sample/resize original)
+        :param upscale: Whether to enlarge src if its smaller than dst
+        :param write: Write to dst or return image object (for testing)
+        :return: PIL image object
         """
-        print('RESIZE', src)
+        mode = mode or Resizer.RESIZE_TO_FILL
+        algo = algo or Resizer.RESIZE_SAMPLE
+
+        # todo: add tests for modes and algos
+
+        img = Image.open(src)
+        src_size = img.size
+        dst_size = [int(x) for x in size.split('x')]
+        ratio = Resizer.get_ratio(src_size, dst_size, mode, algo, upscale)
+        width, height = ratio['size']
+        x, y = ratio['position']
+
+        # resize original and take sample
+        if algo == Resizer.RESIZE_ORIGINAL:
+            img = img.resize((width, height), Image.LANCZOS)
+            box = (x, y, x+dst_size[0], y+dst_size[1])
+            img = img.crop(box)
+
+        # take sample and off original and resize
+        if algo == Resizer.RESIZE_SAMPLE:
+            pass
+
+        print(ratio)
+        return img
 
 
     @staticmethod
-    def get_ratio(src, dst, mode=None, algo=None, upscale=False):
+    def get_ratio(src, dst, mode, algo, upscale=False):
         """
         Get ratio
         Calculates resize ratio and crop offset for two resize modes:
@@ -35,9 +65,6 @@ class Resizer:
         than requested target size.
 
         """
-        mode = mode or Resizer.RESIZE_TO_FILL
-        algo = algo or Resizer.RESIZE_SAMPLE
-
         if mode == Resizer.RESIZE_TO_FIT:
             result = Resizer.get_ratio_to_fit(src, dst, upscale)
         else:

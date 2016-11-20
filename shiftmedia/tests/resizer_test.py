@@ -234,15 +234,15 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
     @attr('xxx')
     def test_can_resize_image(self):
         """ Resizing an image """
-        filename = 'original_vertical.jpg'
+        filename = 'original_vertical.jpg'  # 248x768
         target_size = '100x200'
-        algo = Resizer.RESIZE_SAMPLE
+        algo = Resizer.RESIZE_ORIGINAL
         mode = Resizer.RESIZE_TO_FILL
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        dst = os.path.join(self.tmp_path, filename)
-        result = Resizer.resize(src, dst, target_size, algo, upscale)
+        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result.show()
 
 
 
