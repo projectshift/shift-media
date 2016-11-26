@@ -49,31 +49,29 @@ class Resizer:
             original_smaller = one_side_smaller = False
             original_bigger = True
 
-
-
         # resize to fit, no upscale
         if mode == Resizer.RESIZE_TO_FIT and not upscale:
-            print('RESIZE TO FIT, NO UPSCALE')
             if original_smaller:
-                return img
+                return img # todo: the only special case, return early
             elif one_side_smaller:
                 img = img.resize(ratio['size'], Image.LANCZOS)
                 return img
             else:
-                if algo == Resizer.RESIZE_ORIGINAL:
-                    img = img.resize(ratio['size'], Image.LANCZOS)
-                    return img
-
+                img = img.resize(ratio['size'], Image.LANCZOS)
+                return img
 
         # resize to fit, upscale
         elif mode == Resizer.RESIZE_TO_FIT and upscale:
             print('RESIZE TO FIT, UPSCALE')
             if original_smaller:
-                pass
+                img = img.resize(ratio['size'], Image.LANCZOS)
+                return img
             elif one_side_smaller:
-                pass
+                img = img.resize(ratio['size'], Image.LANCZOS)
+                return img
             else:
-                pass
+                img = img.resize(ratio['size'], Image.LANCZOS)
+                return img
 
         # resize to fill, no upscale
         elif mode == Resizer.RESIZE_TO_FILL and not upscale:
@@ -141,7 +139,7 @@ class Resizer:
 
         """
         if mode == Resizer.RESIZE_TO_FIT:
-            result = Resizer.get_ratio_to_fit(src, dst, algo, upscale)
+            result = Resizer.get_ratio_to_fit(src, dst, upscale)
         else:
             result = Resizer.get_ratio_to_fill(src, dst, algo, upscale)
 
@@ -152,7 +150,7 @@ class Resizer:
         )
 
     @staticmethod
-    def get_ratio_to_fit(src, dst, algo, upscale=False):
+    def get_ratio_to_fit(src, dst, upscale=False):
         """
         Get ratio to fit
         Resizes original to fit target size without discarding anything.
@@ -188,15 +186,12 @@ class Resizer:
 
         # src bigger - fit longer side
         else:
-            if algo == Resizer.RESIZE_ORIGINAL:
-                longer_side = 0 if src[0] >= src[1] else 1
-                other_side = 0 if longer_side == 1 else 1
-                ratio = src[longer_side] / dst[longer_side]
-                new_size[longer_side] = dst[longer_side]
-                new_size[other_side] = floor(src[other_side] / ratio)
-                return (new_size[0], new_size[1]), (0, 0)
-            if algo == Resizer.RESIZE_SAMPLE:
-                raise Exception('Implement me!')
+            longer_side = 0 if src[0] >= src[1] else 1
+            other_side = 0 if longer_side == 1 else 1
+            ratio = src[longer_side] / dst[longer_side]
+            new_size[longer_side] = dst[longer_side]
+            new_size[other_side] = floor(src[other_side] / ratio)
+            return (new_size[0], new_size[1]), (0, 0)
 
     @staticmethod
     def get_ratio_to_fill(src, dst, algo, upscale=False):
