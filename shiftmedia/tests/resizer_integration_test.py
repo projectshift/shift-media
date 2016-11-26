@@ -173,8 +173,6 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals(100, result.size[1])
         # result.show()
 
-
-    @attr('xxx')
     def test_integration_fill_no_upscale_bigger_original_risize_sample(self):
         """ Fill, no upscale, original bigger - resize sample algo """
         img = self.files['horizontal']  # 248x768
@@ -189,6 +187,49 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         # self.assertEquals(200, result.size[0])
         # self.assertEquals(100, result.size[1])
         result.show()
+
+
+    @attr('xxx')
+    def test_algorithm_performance(self):
+        """ Testing algorithm performance """
+        root = os.path.realpath(os.path.dirname(__file__) + '/../../')
+        src = os.path.join(root, 'var', 'earthview')
+        tmp = self.tmp_path
+        ignores = ['.DS_Store', 'earthview.txt']
+        files = [item for item in os.scandir(src) if item.is_file() and item.name not in ignores]
+        import time
+
+        start1 = time.perf_counter()
+        for file in files:
+            target_size = '500x500'
+            mode = Resizer.RESIZE_TO_FILL
+            algo = Resizer.RESIZE_SAMPLE # TIME TAKEN: 139.14194644900272
+            # algo = Resizer.RESIZE_ORIGINAL # TIME TAKEN: 153.24238268200133
+            dst = os.path.join(tmp, file.name)
+            img = Resizer.resize(file.path, target_size, mode, algo)
+            img.save(dst)
+
+        end1 = time.perf_counter()
+        dif1 = (start1 - end1) * -1
+
+        start2 = time.perf_counter()
+        for file in files:
+            target_size = '500x500'
+            mode = Resizer.RESIZE_TO_FILL
+            # algo = Resizer.RESIZE_SAMPLE # TIME TAKEN: 139.14194644900272
+            algo = Resizer.RESIZE_ORIGINAL # TIME TAKEN: 153.24238268200133
+            dst = os.path.join(tmp, file.name)
+            img = Resizer.resize(file.path, target_size, mode, algo)
+            img.save(dst)
+
+        end2 = time.perf_counter()
+        dif2 = (start2 - end2) * -1
+
+        print('RESIZE SAMPLE:', dif1)
+        print('RESIZE ORIGINAL:', dif2)
+
+
+
 
 
     def test_integration_fill_upscale_original_smaller_risize_original(self):
