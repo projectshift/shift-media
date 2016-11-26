@@ -30,8 +30,6 @@ class Resizer:
         mode = mode or Resizer.RESIZE_TO_FILL
         algo = algo or Resizer.RESIZE_SAMPLE
 
-        # todo: add tests for modes and algos
-
         img = Image.open(src)
         src_size = img.size
         dst_size = [int(x) for x in size.split('x')]
@@ -39,28 +37,32 @@ class Resizer:
         width, height = ratio['size']
         x, y = ratio['position']
 
-        # resize original and take sample
-        if algo == Resizer.RESIZE_ORIGINAL:
-            img = img.resize((width, height), Image.LANCZOS)
-            x2 = x+dst_size[0] if x+dst_size[0] <= img.size[0] else img.size[0]
-            y2 = y+dst_size[1] if x+dst_size[1] <= img.size[1] else img.size[1]
-            box = (x, y, x2, y2)
-            img = img.crop(box)
+        print('RATIO', ratio)
 
-        # take sample and off original and resize
-        if algo == Resizer.RESIZE_SAMPLE:
-            x2 = x+width
-            y2 = y+height
-            box = (x, y, x2, y2)
-            img = img.crop(box)
-            img = img.resize(dst_size, Image.LANCZOS)
 
-        print(ratio)
-        return img
+        # # resize original and take sample
+        # if algo == Resizer.RESIZE_ORIGINAL:
+        #     img = img.resize((width, height), Image.LANCZOS)
+        #     x2 = x+dst_size[0] if x+dst_size[0] <= img.size[0] else img.size[0]
+        #     y2 = y+dst_size[1] if x+dst_size[1] <= img.size[1] else img.size[1]
+        #     box = (x, y, x2, y2)
+        #     img = img.crop(box)
+        #
+        # # take sample and off original and resize
+        # if algo == Resizer.RESIZE_SAMPLE:
+        #     # todo: how do we know when to return original?
+        #     x2 = x+width
+        #     y2 = y+height
+        #     box = (x, y, x2, y2)
+        #     img = img.crop(box)
+        #     img = img.resize(dst_size, Image.LANCZOS)
+        #
+
+        # return img
 
 
     @staticmethod
-    def get_ratio(src, dst, mode, algo, upscale=False):
+    def get_ratio(src, dst, mode, algo=None, upscale=False):
         """
         Get ratio
         Calculates resize ratio and crop offset for two resize modes:
