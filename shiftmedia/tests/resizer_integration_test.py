@@ -23,38 +23,62 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         # self.clean()
         super().tearDown()
 
+    # test assets
     files = dict(
-        vertical='original_vertical.jpg',  # 248x768
-        horizontal='original_horizontal.jpg',  # 768x248
-        square='original_square.jpg',  # 700x700
+        vertical=dict(file='original_vertical.jpg', size=(248, 768)),
+        horizontal=dict(file='original_horizontal.jpg', size=(768, 248)),
+        square=dict(file='original_square.jpg', size=(700, 700))
     )
 
     # ------------------------------------------------------------------------
     # Image manipulation tests: to fit
     # ------------------------------------------------------------------------
 
-    @attr('xxx')
     def test_integration_fit_no_upscale_smaller_original(self):
         """ INTEGRATION: Fit, no upscale, src smaller """
-        filename = self.files['vertical']
-        target_size = '300x1000'
+        img = self.files['vertical'] #248x768
+        filename = img['file']
+        target_size = '3000x1000'
         mode = Resizer.RESIZE_TO_FIT
-        algo = Resizer.RESIZE_SAMPLE
+        algo = None
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
         result = Resizer.resize(src, target_size, mode, algo, upscale)
-        # result.show()
-
+        self.assertEquals(img['size'][0], result.size[0])
+        self.assertEquals(img['size'][1], result.size[1])
+        result.show()
 
     def test_integration_fit_no_upscale_one_side_smaller(self):
         """ INTEGRATION: Fit, no upscale, one side smaller"""
-        pass
+        img = self.files['vertical']  # 248x768
+        filename = img['file']
+        target_size = '300x500'
+        mode = Resizer.RESIZE_TO_FIT
+        algo = None
+        upscale = False
+        self.prepare_uploads()
+        src = os.path.join(self.upload_path, filename)
+        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        self.assertEquals(161, result.size[0])
+        self.assertEquals(500, result.size[1])
+        # result.show()
 
-
+    @attr('xxx')
     def test_integration_fit_no_upscale_bigger_original(self):
         """ INTEGRATION: Fit, no upscale, original bigger"""
-        pass
+        img = self.files['vertical']  # 248x768
+        filename = img['file']
+        target_size = '200x300'
+        mode = Resizer.RESIZE_TO_FIT
+        algo = Resizer.RESIZE_ORIGINAL
+        upscale = False
+        self.prepare_uploads()
+        src = os.path.join(self.upload_path, filename)
+        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        self.assertEquals(96, result.size[0])
+        self.assertEquals(300, result.size[1])
+        # result.show()
 
 
     def test_integration_fit_upscale_smaller_original(self):
