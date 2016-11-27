@@ -6,7 +6,8 @@ class Resizer:
     """
     Resizer
     Handles resizing of local image files using different crop-factors.
-    Supports resizing to fill or to fit with optional upscale.
+    Supports resizing to fill or to fit with optional upscale for static
+    images and animated GIFs.
 
     A note on algorithms
     When producing resize from large original we can make it in two ways:
@@ -26,8 +27,6 @@ class Resizer:
     difference is negligible we might still prefer faster approach.
     """
 
-    # todo: make a universal resize_and_save()
-
     # resize modes (crop factor)
     RESIZE_TO_FILL = 'mode_resize_to_fill'
     RESIZE_TO_FIT = 'mode_resize_to_fit'
@@ -37,7 +36,15 @@ class Resizer:
     RESIZE_ORIGINAL = 'algo_resize_original'
 
     @staticmethod
-    def resize(src, dst, size, format=None, mode=None, upscale=False):
+    def resize(
+            src,
+            dst,
+            size,
+            mode=None,
+            upscale=False,
+            format=None,
+            quality=100
+    ):
         """
         Resize and write
         Accepts source and destination path, as well as target size
@@ -52,16 +59,18 @@ class Resizer:
         :param src: Source file path
         :param dst: Destination file path
         :param size: Target size
-        :param format: Target format (None to guess by extension)
         :param mode: Resize mode (fit/fill)
         :param upscale: Whether to enlarge src if its smaller than dst
+        :param format: Target format (None to guess by extension)
+        :param quality: Output quality
         :return: destination image path
         """
         img = Image.open(src)
-        animated_gif = img.info and img.info.duration > 0
+        animated_gif = 'duration' in img.info and img.info['duration'] > 0
 
         # resize regular image
         if not animated_gif:
+            img = img.convert(mode='RGBA')
             img = Resizer.resize_img(img, size, mode, None, upscale)
             img.save(dst, format=format)
 

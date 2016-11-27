@@ -1,10 +1,8 @@
 from unittest import mock, TestCase
 from nose.plugins.attrib import attr
 
-import os, shutil
-from config.local import LocalConfig
-from shiftmedia import BackendLocal
-from shiftmedia import Storage
+import os, PIL
+from PIL import Image, JpegImagePlugin
 from shiftmedia.resizer import Resizer
 from shiftmedia.testing.localstorage_testhelpers import LocalStorageTestHelpers
 
@@ -284,27 +282,61 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
 
     def test_resize_jpeg(self):
         """ Resizing JPG image """
-        pass
+        filename = 'original_vertical.jpg'
+        target_size = '200x300'
+        self.prepare_uploads()
+        src = os.path.join(self.upload_path, filename)
+        dst = os.path.join(self.tmp_path, filename)
+        result = Resizer.resize(src, dst, target_size)
+        self.assertTrue(os.path.isfile(result))
+        out = Image.open(result)
+        self.assertEquals(200, out.size[0])
+        self.assertEquals(300, out.size[1])
+        # out.show()
 
     def test_resize_single_frame_gif(self):
         """ Resizing single frame GIF image """
-        pass
+        filename = 'single_frame.gif'
+        target_size = '50x50'
+        self.prepare_uploads()
+        src = os.path.join(self.upload_path, filename)
+        dst = os.path.join(self.tmp_path, filename)
+        result = Resizer.resize(src, dst, target_size)
+        self.assertTrue(os.path.isfile(result))
+        out = Image.open(result)
+        self.assertEquals(50, out.size[0])
+        self.assertEquals(50, out.size[1])
+        # out.show()
 
     def test_resize_animated_gif(self):
         """ Resizing animated GIF image """
-        pass
-
-    @attr('xxx')
-    def test_integration_resize_animated_gif(self):
-        from PIL import Image, ImageSequence
-
-        filename = 'single_frame.gif'
-        src = os.path.join(self.upload_path, filename)
+        filename = 'test.gif'
+        target_size = '100x100'
         self.prepare_uploads()
-        img = Image.open(src)
-        print(img.mode)
+        src = os.path.join(self.upload_path, filename)
+        dst = os.path.join(self.tmp_path, filename)
+        result = Resizer.resize(src, dst, target_size)
+        self.assertTrue(os.path.isfile(result))
+        out = Image.open(result)
+        self.assertEquals(100, out.size[0])
+        self.assertEquals(100, out.size[1])
+        self.assertTrue(out.info['duration'] > 0)
+        # out.show()
 
-
+    def test_resize_with_conversion(self):
+        """ Resizing image with format conversion"""
+        filename = 'single_frame.gif'
+        target_size = '50x50'
+        self.prepare_uploads()
+        src = os.path.join(self.upload_path, filename)
+        dst = os.path.join(self.tmp_path, filename)
+        result = Resizer.resize(src, dst, target_size, format='JPEG')
+        self.assertTrue(os.path.isfile(result))
+        out = Image.open(result)
+        self.assertEquals(50, out.size[0])
+        self.assertEquals(50, out.size[1])
+        self.assertTrue(isinstance(out, JpegImagePlugin.JpegImageFile))
+        # out.show()
 
 
 
