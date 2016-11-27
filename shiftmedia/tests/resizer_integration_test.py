@@ -288,7 +288,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         """ Resizing animated gifs """
         from PIL import Image, ImageSequence
 
-        filename = 'test.gif'  #275x252
+        filename = 'countdown.gif'  #275x252
         # filename = 'original_vertical.jpg'  #275x252
         target_size = '100x100'
         mode = Resizer.RESIZE_TO_FILL
@@ -299,28 +299,17 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         dst = os.path.join(self.tmp_path, filename)
 
         img = Image.open(src)
-        out = Resizer.resize(img, target_size, mode, algo, upscale)
-        out = out.convert(mode='RGBA')
-        print('IMAGE MODE:', img.mode, out.mode)
-
+        out = Resizer.resize(img.convert(mode='RGBA'), target_size, mode, algo, upscale)
         frames = []
         for frame in ImageSequence.Iterator(img):
-            frame = Resizer.resize(frame.copy(), target_size, mode, algo, upscale)
             frame = frame.convert(mode='RGBA')
+            frame = Resizer.resize(frame, target_size, mode, algo, upscale)
             frames.append(frame)
 
 
         # out = frames[10]
         out.save(dst, format="GIF", save_all=True, append_images=frames)
 
-
-
-        # out = Resizer.resize(src, target_size, mode, algo, upscale)
-        # frames = []
-        # for index, frame in enumerate(ImageSequence.Iterator(Image.open(src))):
-        #     frames.append(Resizer.resize(src, target_size, mode, algo, upscale))
-        #
-        # out.save(dst, save_all=True, append_images=frames)
 
 
 
