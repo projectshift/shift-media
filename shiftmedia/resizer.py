@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageSequence
 from math import floor
 
 
@@ -49,11 +49,28 @@ class Resizer:
         :param write: Write to dst or return image object (for testing)
         :return: PIL image object
         """
+        pass
+
+    @staticmethod
+    def resize(img, size, mode=None, algo=None, upscale=False):
+        """
+        Resize an image
+        Accepts source image and destination name, as well as target size
+        and resize algorithm. May optionally perform source image upscale
+        in case it is smaller than target size.
+        :param img: Source file path or PIL.Image object
+        :param size: Target size
+        :param mode: Resize mode (fit/fill)
+        :param algo: Resize algorithm (resize sample/resize original)
+        :param upscale: Whether to enlarge src if its smaller than dst
+        :param write: Write to dst or return image object (for testing)
+        :return: PIL.Image object
+        """
         mode = mode or Resizer.RESIZE_TO_FILL
         algo = algo or Resizer.RESIZE_SAMPLE
 
         # get size and offset
-        img = Image.open(original)
+        img = img if isinstance(img, Image.Image) else Image.open(img)
         src = img.size
         dst = [int(x) for x in size.split('x')]
         ratio = Resizer.get_ratio(src, dst, mode, algo, upscale)

@@ -114,7 +114,6 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals((2000, 2000), result['size'])
         self.assertEquals((0, 500), result['position'])
 
-    @attr('xxx')
     def test_fill_no_upscale_bigger_original_risize_original(self):
         """ Fill, no upscale, original bigger - resize original algo """
         resizer = Resizer

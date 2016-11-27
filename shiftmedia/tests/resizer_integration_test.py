@@ -263,7 +263,6 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals(300, result.size[1])
         # result.show()
 
-    @attr('xxx')
     def test_integration_fill_upscale_original_bigger_risize_sample(self):
         """ Fill, upscale, original bigger - resize sample algo """
         img = self.files['vertical']  # 248x768
@@ -279,9 +278,57 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals(300, result.size[1])
         # result.show()
 
+    # ------------------------------------------------------------------------
+    # Image manipulation tests: GIF animations
+    # ------------------------------------------------------------------------
+
+
+    @attr('xxx')
+    def test_integration_resize_animated_gif(self):
+        """ Resizing animated gifs """
+        from PIL import Image, ImageSequence
+
+        filename = 'test.gif'  #275x252
+        # filename = 'original_vertical.jpg'  #275x252
+        target_size = '100x100'
+        mode = Resizer.RESIZE_TO_FILL
+        algo = Resizer.RESIZE_SAMPLE
+        upscale = True
+        self.prepare_uploads()
+        src = os.path.join(self.upload_path, filename)
+        dst = os.path.join(self.tmp_path, filename)
+
+        img = Image.open(src)
+        out = Resizer.resize(img, target_size, mode, algo, upscale)
+        out = out.convert(mode='RGBA')
+        print('IMAGE MODE:', img.mode, out.mode)
+
+        frames = []
+        for frame in ImageSequence.Iterator(img):
+            frame = Resizer.resize(frame.copy(), target_size, mode, algo, upscale)
+            frame = frame.convert(mode='RGBA')
+            frames.append(frame)
+
+
+        # out = frames[10]
+        out.save(dst, format="GIF", save_all=True, append_images=frames)
 
 
 
+        # out = Resizer.resize(src, target_size, mode, algo, upscale)
+        # frames = []
+        # for index, frame in enumerate(ImageSequence.Iterator(Image.open(src))):
+        #     frames.append(Resizer.resize(src, target_size, mode, algo, upscale))
+        #
+        # out.save(dst, save_all=True, append_images=frames)
+
+
+
+
+        # result = Resizer.resize(src, target_size, mode, algo, upscale)
+        # self.assertEquals(200, result.size[0])
+        # self.assertEquals(300, result.size[1])
+        # result.show()
 
 
 
