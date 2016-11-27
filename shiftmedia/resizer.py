@@ -99,7 +99,7 @@ class Resizer:
             else:
                 if algo == Resizer.RESIZE_ORIGINAL:
                     img = img.resize(ratio['size'], Image.LANCZOS)
-                    box = (x, y, dst[0] + x, dst[1] + y)
+                    box = (x, y, dst[0]+x, dst[1]+y)
                     img = img.crop(box)
                 if algo == Resizer.RESIZE_SAMPLE:
                     box = (x, y, width+x, height+y)
@@ -110,11 +110,32 @@ class Resizer:
         elif mode == Resizer.RESIZE_TO_FILL and upscale:
             print('RESIZE TO FILL, UPSCALE')
             if original_smaller:
-                pass
+                if algo == Resizer.RESIZE_ORIGINAL:
+                    img = img.resize(ratio['size'], Image.LANCZOS)
+                    box = (x, y, dst[0]+x, dst[1]+y)
+                    img = img.crop(box)
+                if algo == Resizer.RESIZE_SAMPLE:
+                    box = (x, y, width+x, height+y)
+                    img = img.crop(box)
+                    img = img.resize(dst, Image.LANCZOS)
             elif one_side_smaller:
-                pass
+                if algo == Resizer.RESIZE_ORIGINAL:
+                    img = img.resize(ratio['size'], Image.LANCZOS)
+                    box = (x, y, dst[0]+x, dst[1]+y)
+                    img = img.crop(box)
+                if algo == Resizer.RESIZE_SAMPLE:
+                    box = (x, y, width+x, height+y)
+                    img = img.crop(box)
+                    img = img.resize(dst, Image.LANCZOS)
             else:
-                pass
+                if algo == Resizer.RESIZE_ORIGINAL:
+                    img = img.resize(ratio['size'], Image.LANCZOS)
+                    box = (x, y, dst[0]+x, dst[1]+y)
+                    img = img.crop(box)
+                if algo == Resizer.RESIZE_SAMPLE:
+                    box = (x, y, width+x, height+y)
+                    img = img.crop(box)
+                    img = img.resize(dst, Image.LANCZOS)
 
         # error out otherwise
         else:
@@ -124,33 +145,6 @@ class Resizer:
         # and return
         print('RATIO', ratio)
         return img
-
-
-
-
-
-
-
-
-        # # resize original and take sample
-        # if algo == Resizer.RESIZE_ORIGINAL:
-        #     img = img.resize((width, height), Image.LANCZOS)
-        #     x2 = x+dst_size[0] if x+dst_size[0] <= img.size[0] else img.size[0]
-        #     y2 = y+dst_size[1] if x+dst_size[1] <= img.size[1] else img.size[1]
-        #     box = (x, y, x2, y2)
-        #     img = img.crop(box)
-        #
-        # # take sample and off original and resize
-        # if algo == Resizer.RESIZE_SAMPLE:
-        #     # todo: how to know when to return original (same size, no offset)
-        #     x2 = x+width
-        #     y2 = y+height
-        #     box = (x, y, x2, y2)
-        #     img = img.crop(box)
-        #     img = img.resize(dst_size, Image.LANCZOS)
-        #
-
-        # return img
 
 
     @staticmethod
