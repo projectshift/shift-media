@@ -44,7 +44,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(img['size'][0], result.size[0])
         self.assertEquals(img['size'][1], result.size[1])
         # result.show()
@@ -59,7 +59,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(161, result.size[0])
         self.assertEquals(500, result.size[1])
         # result.show()
@@ -74,7 +74,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(96, result.size[0])
         self.assertEquals(300, result.size[1])
         # result.show()
@@ -89,7 +89,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(290, result.size[0])
         self.assertEquals(900, result.size[1])
         # result.show()
@@ -104,7 +104,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(161, result.size[0])
         self.assertEquals(500, result.size[1])
         # result.show()
@@ -119,7 +119,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(96, result.size[0])
         self.assertEquals(300, result.size[1])
         # result.show()
@@ -138,7 +138,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(248, result.size[0])
         self.assertEquals(768, result.size[1])
         # result.show()
@@ -153,7 +153,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(150, result.size[0])
         self.assertEquals(768, result.size[1])
         # result.show()
@@ -168,7 +168,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(200, result.size[0])
         self.assertEquals(100, result.size[1])
         # result.show()
@@ -183,7 +183,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(200, result.size[0])
         self.assertEquals(100, result.size[1])
         # result.show()
@@ -198,7 +198,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(250, result.size[0])
         self.assertEquals(1000, result.size[1])
         # result.show()
@@ -213,7 +213,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(300, result.size[0])
         self.assertEquals(1000, result.size[1])
         # result.show()
@@ -228,7 +228,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(200, result.size[0])
         self.assertEquals(1500, result.size[1])
         # result.show()
@@ -243,7 +243,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(200, result.size[0])
         self.assertEquals(1500, result.size[1])
         # result.show()
@@ -258,7 +258,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(200, result.size[0])
         self.assertEquals(300, result.size[1])
         # result.show()
@@ -273,7 +273,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize(src, target_size, mode, algo, upscale)
+        result = Resizer.resize_img(src, target_size, mode, algo, upscale)
         self.assertEquals(200, result.size[0])
         self.assertEquals(300, result.size[1])
         # result.show()
@@ -282,43 +282,27 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
     # Image manipulation tests: GIF animations
     # ------------------------------------------------------------------------
 
+    def test_resize_jpeg(self):
+        """ Resizing JPG image """
+        pass
+
+    def test_resize_single_frame_gif(self):
+        """ Resizing single frame GIF image """
+        pass
+
+    def test_resize_animated_gif(self):
+        """ Resizing animated GIF image """
+        pass
 
     @attr('xxx')
     def test_integration_resize_animated_gif(self):
-        """ Resizing animated gifs """
         from PIL import Image, ImageSequence
 
-        filename = 'countdown.gif'  #275x252
-        # filename = 'original_vertical.jpg'  #275x252
-        target_size = '100x100'
-        mode = Resizer.RESIZE_TO_FILL
-        algo = Resizer.RESIZE_SAMPLE
-        upscale = True
-        self.prepare_uploads()
+        filename = 'single_frame.gif'
         src = os.path.join(self.upload_path, filename)
-        dst = os.path.join(self.tmp_path, filename)
-
+        self.prepare_uploads()
         img = Image.open(src)
-        out = Resizer.resize(img.convert(mode='RGBA'), target_size, mode, algo, upscale)
-        frames = []
-        for frame in ImageSequence.Iterator(img):
-            frame = frame.convert(mode='RGBA')
-            frame = Resizer.resize(frame, target_size, mode, algo, upscale)
-            frames.append(frame)
-
-
-        # out = frames[10]
-        out.save(dst, format="GIF", save_all=True, append_images=frames)
-
-
-
-
-
-        # result = Resizer.resize(src, target_size, mode, algo, upscale)
-        # self.assertEquals(200, result.size[0])
-        # self.assertEquals(300, result.size[1])
-        # result.show()
-
+        print(img.mode)
 
 
 

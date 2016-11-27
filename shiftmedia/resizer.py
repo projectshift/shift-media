@@ -26,6 +26,8 @@ class Resizer:
     difference is negligible we might still prefer faster approach.
     """
 
+    # todo: make a universal resize_and_save()
+
     # resize modes (crop factor)
     RESIZE_TO_FILL = 'mode_resize_to_fill'
     RESIZE_TO_FIT = 'mode_resize_to_fit'
@@ -35,29 +37,58 @@ class Resizer:
     RESIZE_ORIGINAL = 'algo_resize_original'
 
     @staticmethod
-    def resize(original, size, mode=None, algo=None, upscale=False):
+    def resize(src, dst, size, format=None, mode=None, upscale=False):
         """
-        Resize an image
-        Accepts source image and destination name, as well as target size
-        and resize algorithm. May optionally perform source image upscale
-        in case it is smaller than target size.
-        :param original: Source file path
+        Resize and write
+        Accepts source and destination path, as well as target size
+        and format. May optionally perform upscale in case src image is
+        smaller than target size. Writes file to destination on success.
+
+        A note on GIFs:
+        As there is currently an issue ('unknown raw mode') in Pillow when
+        working with GIFs that are in mode=P, we have to forcefully convert
+        image mode to RGBA for gif images to preserve animation.
+
+        :param src: Source file path
+        :param dst: Destination file path
         :param size: Target size
+        :param format: Target format (None to guess by extension)
         :param mode: Resize mode (fit/fill)
-        :param algo: Resize algorithm (resize sample/resize original)
         :param upscale: Whether to enlarge src if its smaller than dst
-        :param write: Write to dst or return image object (for testing)
-        :return: PIL image object
+        :return: destination image path
         """
-        pass
+        img = Image.open(src)
+        animated_gif = img.info and img.info.duration > 0
+
+        # resize regular image
+        if not animated_gif:
+            img = Resizer.resize_img(img, size, mode, None, upscale)
+            img.save(dst, format=format)
+
+        # resize animated gif
+        else:
+            out = img.convert(mode='RGBA')
+            out = Resizer.resize_img(out, size, mode, None, upscale)
+            frames = []
+            for index, frame in enumerate(ImageSequence.Iterator(img)):
+                if index == 0: continue
+                frame = frame.convert(mode='RGBA')
+                frame = Resizer.resize_img(frame, size, mode, None, upscale)
+                frames.append(frame)
+            out.save(dst, format=format, save_all=True, append_images=frames)
+
+        # and return
+        return dst
 
     @staticmethod
-    def resize(img, size, mode=None, algo=None, upscale=False):
+    def resize_img(img, size, mode=None, algo=None, upscale=False):
         """
-        Resize an image
-        Accepts source image and destination name, as well as target size
-        and resize algorithm. May optionally perform source image upscale
-        in case it is smaller than target size.
+        Resize and img return
+        Accepts source image (file or object) and target size. May optionally
+        perform source image upscale in case it is smaller than dst.
+        Does not write anything, but instead returns PIL.Image object which
+        makes it reusable for gif sequence animations.
+
         :param img: Source file path or PIL.Image object
         :param size: Target size
         :param mode: Resize mode (fit/fill)
