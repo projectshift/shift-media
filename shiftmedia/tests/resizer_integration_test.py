@@ -47,7 +47,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         result = Resizer.resize(src, target_size, mode, algo, upscale)
         self.assertEquals(img['size'][0], result.size[0])
         self.assertEquals(img['size'][1], result.size[1])
-        result.show()
+        # result.show()
 
     def test_integration_fit_no_upscale_one_side_smaller(self):
         """ INTEGRATION: Fit, no upscale, one side smaller"""
@@ -83,7 +83,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         """ INTEGRATION: Fit, upscale, original smaller """
         img = self.files['vertical']  # 248x768
         filename = img['file']
-        target_size = '300x500'
+        target_size = '300x900'
         mode = Resizer.RESIZE_TO_FIT
         algo = None
         upscale = True
@@ -277,7 +277,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         result = Resizer.resize(src, target_size, mode, algo, upscale)
         self.assertEquals(200, result.size[0])
         self.assertEquals(300, result.size[1])
-        result.show()
+        # result.show()
 
 
 

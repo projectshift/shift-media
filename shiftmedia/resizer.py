@@ -108,7 +108,6 @@ class Resizer:
 
         # resize to fill, upscale
         elif mode == Resizer.RESIZE_TO_FILL and upscale:
-            print('RESIZE TO FILL, UPSCALE')
             if original_smaller:
                 if algo == Resizer.RESIZE_ORIGINAL:
                     img = img.resize(ratio['size'], Image.LANCZOS)
@@ -141,9 +140,7 @@ class Resizer:
         else:
             raise Exception('Invalid resize parameters')
 
-
         # and return
-        print('RATIO', ratio)
         return img
 
 
