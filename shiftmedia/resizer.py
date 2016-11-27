@@ -31,10 +31,6 @@ class Resizer:
     RESIZE_TO_FILL = 'mode_resize_to_fill'
     RESIZE_TO_FIT = 'mode_resize_to_fit'
 
-    # rezise to fill algorithms
-    RESIZE_SAMPLE = 'algo_resize_sample'
-    RESIZE_ORIGINAL = 'algo_resize_original'
-
     @staticmethod
     def resize(
             src,
@@ -71,18 +67,18 @@ class Resizer:
         # resize regular image
         if not animated_gif:
             img = img.convert(mode='RGBA')
-            img = Resizer.resize_img(img, size, mode, None, upscale)
+            img = Resizer.resize_img(img, size, mode, upscale)
             img.save(dst, format=format)
 
         # resize animated gif
         else:
             out = img.convert(mode='RGBA')
-            out = Resizer.resize_img(out, size, mode, None, upscale)
+            out = Resizer.resize_img(out, size, mode, upscale)
             frames = []
             for index, frame in enumerate(ImageSequence.Iterator(img)):
                 if index == 0: continue
                 frame = frame.convert(mode='RGBA')
-                frame = Resizer.resize_img(frame, size, mode, None, upscale)
+                frame = Resizer.resize_img(frame, size, mode, upscale)
                 frames.append(frame)
             out.save(dst, format=format, save_all=True, append_images=frames)
 
@@ -90,7 +86,7 @@ class Resizer:
         return dst
 
     @staticmethod
-    def resize_img(img, size, mode=None, algo=None, upscale=False):
+    def resize_img(img, size, mode=None, upscale=False):
         """
         Resize and img return
         Accepts source image (file or object) and target size. May optionally
@@ -101,19 +97,17 @@ class Resizer:
         :param img: Source file path or PIL.Image object
         :param size: Target size
         :param mode: Resize mode (fit/fill)
-        :param algo: Resize algorithm (resize sample/resize original)
         :param upscale: Whether to enlarge src if its smaller than dst
         :param write: Write to dst or return image object (for testing)
         :return: PIL.Image object
         """
         mode = mode or Resizer.RESIZE_TO_FILL
-        algo = algo or Resizer.RESIZE_SAMPLE
 
         # get size and offset
         img = img if isinstance(img, Image.Image) else Image.open(img)
         src = img.size
         dst = [int(x) for x in size.split('x')]
-        ratio = Resizer.get_ratio(src, dst, mode, algo, upscale)
+        ratio = Resizer.get_ratio(src, dst, mode, upscale)
         width, height = ratio['size']
         x, y = ratio['position']
 
@@ -154,44 +148,28 @@ class Resizer:
                 box = (x, y, width+x, height+y)
                 img = img.crop(box)
             else:
-                if algo == Resizer.RESIZE_ORIGINAL:
-                    img = img.resize(ratio['size'], Image.LANCZOS)
-                    box = (x, y, dst[0]+x, dst[1]+y)
-                    img = img.crop(box)
-                if algo == Resizer.RESIZE_SAMPLE:
-                    box = (x, y, width+x, height+y)
-                    img = img.crop(box)
-                    img = img.resize(dst, Image.LANCZOS)
+                box = (x, y, width + x, height + y)
+                img = img.crop(box)
+                img = img.resize(dst, Image.LANCZOS)
+
 
         # resize to fill, upscale
         elif mode == Resizer.RESIZE_TO_FILL and upscale:
             if original_smaller:
-                if algo == Resizer.RESIZE_ORIGINAL:
-                    img = img.resize(ratio['size'], Image.LANCZOS)
-                    box = (x, y, dst[0]+x, dst[1]+y)
-                    img = img.crop(box)
-                if algo == Resizer.RESIZE_SAMPLE:
-                    box = (x, y, width+x, height+y)
-                    img = img.crop(box)
-                    img = img.resize(dst, Image.LANCZOS)
+                box = (x, y, width + x, height + y)
+                img = img.crop(box)
+                img = img.resize(dst, Image.LANCZOS)
+
             elif one_side_smaller:
-                if algo == Resizer.RESIZE_ORIGINAL:
-                    img = img.resize(ratio['size'], Image.LANCZOS)
-                    box = (x, y, dst[0]+x, dst[1]+y)
-                    img = img.crop(box)
-                if algo == Resizer.RESIZE_SAMPLE:
-                    box = (x, y, width+x, height+y)
-                    img = img.crop(box)
-                    img = img.resize(dst, Image.LANCZOS)
+                box = (x, y, width + x, height + y)
+                img = img.crop(box)
+                img = img.resize(dst, Image.LANCZOS)
+
             else:
-                if algo == Resizer.RESIZE_ORIGINAL:
-                    img = img.resize(ratio['size'], Image.LANCZOS)
-                    box = (x, y, dst[0]+x, dst[1]+y)
-                    img = img.crop(box)
-                if algo == Resizer.RESIZE_SAMPLE:
-                    box = (x, y, width+x, height+y)
-                    img = img.crop(box)
-                    img = img.resize(dst, Image.LANCZOS)
+                box = (x, y, width + x, height + y)
+                img = img.crop(box)
+                img = img.resize(dst, Image.LANCZOS)
+
 
         # error out otherwise
         else:
@@ -202,7 +180,7 @@ class Resizer:
 
 
     @staticmethod
-    def get_ratio(src, dst, mode, algo=None, upscale=False):
+    def get_ratio(src, dst, mode, upscale=False):
         """
         Get ratio
         Calculates resize ratio and crop offset for two resize modes:
@@ -216,7 +194,7 @@ class Resizer:
         if mode == Resizer.RESIZE_TO_FIT:
             result = Resizer.get_ratio_to_fit(src, dst, upscale)
         else:
-            result = Resizer.get_ratio_to_fill(src, dst, algo, upscale)
+            result = Resizer.get_ratio_to_fill(src, dst, upscale)
 
         # return result
         return dict(
@@ -311,19 +289,13 @@ class Resizer:
                 closest_side = 0 if percents[0] >= percents[1] else 1
                 other_side = 1 if closest_side == 0 else 0
                 ratio = src[closest_side] / dst[closest_side]
-                if algo == Resizer.RESIZE_ORIGINAL:
-                    new_size[closest_side] = dst[closest_side]  # shrink src
-                    new_size[other_side] = floor(src[other_side] / ratio)
-                    offset[other_side] = round(
-                        (new_size[other_side] - dst[other_side]) / 2
-                    )
-                if algo == Resizer.RESIZE_SAMPLE:
-                    new_size[closest_side] = src[closest_side]
-                    new_size[other_side] = floor(dst[other_side] * ratio)
-                    offset[other_side] = round(
-                        (src[other_side] - new_size[other_side]) / 2
-                    )
+                new_size[closest_side] = src[closest_side]
+                new_size[other_side] = floor(dst[other_side] * ratio)
+                offset[other_side] = round(
+                    (src[other_side] - new_size[other_side]) / 2
+                )
                 return (new_size[0], new_size[1]), (offset[0], offset[1])
+
 
         # upscale
         if upscale:
@@ -335,38 +307,22 @@ class Resizer:
                 closest_side = 0 if percents[0] >= percents[1] else 1
                 other_side = 1 if closest_side == 0 else 0
                 ratio = src[other_side] / dst[other_side]
-                if algo == Resizer.RESIZE_SAMPLE:
-                    new_size[other_side] = src[other_side]
-                    new_size[closest_side] = floor(dst[closest_side] * ratio)
-                    offset[closest_side] = round(
-                        (src[closest_side] - new_size[closest_side]) / 2
-                    )
-                if algo == Resizer.RESIZE_ORIGINAL:
-                    new_size[other_side] = dst[other_side]
-                    new_size[closest_side] = floor(src[closest_side] / ratio)
-                    offset[closest_side] = round(
-                        (new_size[closest_side] - dst[closest_side]) / 2
-                    )
-                return (new_size[0], new_size[1]), (offset[0], offset[1])
+                new_size[other_side] = src[other_side]
+                new_size[closest_side] = floor(dst[closest_side] * ratio)
+                offset[closest_side] = round(
+                    (src[closest_side] - new_size[closest_side]) / 2
+                )
 
             # one side smaller - enlarge until it fits
             elif src[0] <= dst[0] or src[1] <= dst[1]:
                 short_side = 0 if src[0] <= dst[0] else 1
                 other_side = 1 if short_side == 0 else 0
                 ratio = src[short_side] / dst[short_side]
-                if algo == Resizer.RESIZE_ORIGINAL:
-                    new_size[short_side] = dst[short_side]
-                    new_size[other_side] = floor(src[other_side] / ratio)
-                    offset[other_side] = round(
-                        (new_size[other_side] - dst[other_side]) / 2
-                    )
-
-                if algo == Resizer.RESIZE_SAMPLE:
-                    new_size[short_side] = src[short_side]
-                    new_size[other_side] = floor(dst[other_side] * ratio)
-                    offset[other_side] = round(
-                        (src[other_side] - new_size[other_side]) / 2
-                    )
+                new_size[short_side] = src[short_side]
+                new_size[other_side] = floor(dst[other_side] * ratio)
+                offset[other_side] = round(
+                    (src[other_side] - new_size[other_side]) / 2
+                )
                 return (new_size[0], new_size[1]), (offset[0], offset[1])
 
             # src bigger - shrink until closest side fits
@@ -375,24 +331,10 @@ class Resizer:
                 percents = [p if p < 100 else p * -1 for p in percents]
                 closest_side = 0 if percents[0] >= percents[1] else 1
                 other_side = 1 if closest_side == 0 else 0
-                if algo == Resizer.RESIZE_ORIGINAL:
-                    ratio = src[closest_side] / dst[closest_side]
-                    new_size[closest_side] = dst[closest_side]
-                    new_size[other_side] = floor(src[other_side] / ratio)
-                    offset[other_side] = round(
-                        (new_size[other_side] - dst[other_side]) / 2
-                    )
-                if algo == Resizer.RESIZE_SAMPLE:
-                    ratio = dst[closest_side] / src[closest_side]
-                    new_size[closest_side] = src[closest_side]
-                    new_size[other_side] = floor(dst[other_side] / ratio)
-                    offset[other_side] = round(
-                        (src[other_side] - new_size[other_side]) / 2
-                    )
-
+                ratio = dst[closest_side] / src[closest_side]
+                new_size[closest_side] = src[closest_side]
+                new_size[other_side] = floor(dst[other_side] / ratio)
+                offset[other_side] = round(
+                    (src[other_side] - new_size[other_side]) / 2
+                )
                 return (new_size[0], new_size[1]), (offset[0], offset[1])
-
-
-
-
-
