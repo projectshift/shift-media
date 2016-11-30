@@ -247,7 +247,7 @@ class Resizer:
             return (new_size[0], new_size[1]), (0, 0)
 
     @staticmethod
-    def get_ratio_to_fill(src, dst, algo, upscale=False):
+    def get_ratio_to_fill(src, dst, upscale=False):
         """
         Get ratio to fit
         Eesizes original to fill destination and discards excess.
@@ -312,6 +312,7 @@ class Resizer:
                 offset[closest_side] = round(
                     (src[closest_side] - new_size[closest_side]) / 2
                 )
+                return (new_size[0], new_size[1]), (offset[0], offset[1])
 
             # one side smaller - enlarge until it fits
             elif src[0] <= dst[0] or src[1] <= dst[1]:
