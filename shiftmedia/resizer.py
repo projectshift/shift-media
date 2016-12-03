@@ -63,15 +63,13 @@ class Resizer:
         """
         img = Image.open(src)
         animated_gif = 'duration' in img.info and img.info['duration'] > 0
-
-        # resize regular image
         if not animated_gif:
+            # resize regular image
             img = img.convert(mode='RGBA')
             img = Resizer.resize_img(img, size, mode, upscale)
             img.save(dst, format=format)
-
-        # resize animated gif
         else:
+            # resize animated gif
             out = img.convert(mode='RGBA')
             out = Resizer.resize_img(out, size, mode, upscale)
             frames = []
@@ -103,239 +101,128 @@ class Resizer:
         """
         mode = mode or Resizer.RESIZE_TO_FILL
 
-        # get size and offset
+        # create image and get size
         img = img if isinstance(img, Image.Image) else Image.open(img)
         src = img.size
         dst = [int(x) for x in size.split('x')]
-        ratio = Resizer.get_ratio(src, dst, mode, upscale)
-        width, height = ratio['size']
-        x, y = ratio['position']
+
+        # get src sides
+        long_side = 0 if src[0] >= src[1] else 1
+        short_side = 0 if long_side == 1 else 1
+
+        # get src side shorter than dst (if applicable)
+        shorter_side = 0 if src[0] <= dst[0] else 1
+        longer_side = 1 if shorter_side == 0 else 0
+
+        # get src side closest to dst
+        percents = [dst[0] / (src[0] / 100), dst[1] / (src[1] / 100)]
+        percents = [p if p < 100 else p * -1 for p in percents]
+        closest_side = 0 if percents[0] >= percents[1] else 1
+        farthest_side = 1 if closest_side == 0 else 0
 
         # get resize logic
-        if src[0] <= dst[0] and src[1] <= dst[1]:
-            one_side_smaller = original_bigger = False
-            original_smaller = True
-        elif src[0] <= dst[0] or src[1] <= dst[1]:
-            original_smaller = original_bigger = False
-            one_side_smaller = True
-        else:
-            original_smaller = one_side_smaller = False
-            original_bigger = True
+        original_smaller = (src[0] <= dst[0] and src[1] <= dst[1])
+        original_bigger = (src[0] > dst[0] and src[1] > dst[1])
+        one_side_smaller = (src[0] <= dst[0] or src[1] <= dst[1])
 
-        # resize to fit, no upscale
-        if mode == Resizer.RESIZE_TO_FIT and not upscale:
-            if original_smaller:
-                pass  # return original
-            elif one_side_smaller:
-                img = img.resize(ratio['size'], Image.LANCZOS)
-            else:
-                img = img.resize(ratio['size'], Image.LANCZOS)
+        # defaults
+        new_size = {0: 0, 1: 0}
+        offset = {0: 0, 1: 0}
 
-        # resize to fit, upscale
-        elif mode == Resizer.RESIZE_TO_FIT and upscale:
-            if original_smaller:
-                img = img.resize(ratio['size'], Image.LANCZOS)
+        # resize to fit
+        if mode == Resizer.RESIZE_TO_FIT:
+            if original_smaller and not upscale:
+                return img
+            elif original_smaller and upscale:
+                ratio = src[closest_side] / dst[closest_side]
+                new_size[closest_side] = dst[closest_side]
+                new_size[farthest_side] = floor(src[farthest_side] / ratio)
+                resize = (new_size[0], new_size[1])
+                return img.resize(resize, Image.LANCZOS)
             elif one_side_smaller:
-                img = img.resize(ratio['size'], Image.LANCZOS)
-            else:
-                img = img.resize(ratio['size'], Image.LANCZOS)
+                ratio = src[longer_side] / dst[longer_side]
+                new_size[longer_side] = dst[longer_side]
+                new_size[shorter_side] = floor(src[shorter_side] / ratio)
+                resize = (new_size[0], new_size[1])
+                return img.resize(resize, Image.LANCZOS)
+            elif original_bigger:
+                ratio = src[long_side] / dst[long_side]
+                new_size[long_side] = dst[long_side]
+                new_size[short_side] = floor(src[short_side] / ratio)
+                resize = (new_size[0], new_size[1])
+                return img.resize(resize, Image.LANCZOS)
 
         # resize to fill, no upscale
         elif mode == Resizer.RESIZE_TO_FILL and not upscale:
-            if original_smaller:
-                pass # return original
-            elif one_side_smaller:
-                box = (x, y, width+x, height+y)
+            if original_smaller: # return src
+                return img
+            elif one_side_smaller:  # one crop the other
+                new_size[shorter_side] = src[shorter_side]
+                new_size[longer_side] = dst[longer_side]
+                diff = src[longer_side] - dst[longer_side]
+                offset[longer_side] = floor(diff / 2)
+                box = (
+                    offset[0], offset[1],
+                    new_size[0] + offset[0], new_size[1] + offset[1]
+                )
+                return img.crop(box)
+            elif original_bigger:  # fit closest side
+                ratio = src[closest_side] / dst[closest_side]
+                new_size[closest_side] = src[closest_side]
+                new_size[farthest_side] = floor(dst[farthest_side] * ratio)
+                diff = src[farthest_side] - new_size[farthest_side]
+                offset[farthest_side] = round(diff / 2)
+                box = (
+                    offset[0], offset[1],
+                    new_size[0] + offset[0], new_size[1] + offset[1]
+                )
                 img = img.crop(box)
-            else:
-                box = (x, y, width + x, height + y)
-                img = img.crop(box)
-                img = img.resize(dst, Image.LANCZOS)
-
+                return img.resize(dst, Image.LANCZOS)
 
         # resize to fill, upscale
         elif mode == Resizer.RESIZE_TO_FILL and upscale:
             if original_smaller:
-                box = (x, y, width + x, height + y)
+                ratio = src[farthest_side] / dst[farthest_side]
+                new_size[farthest_side] = src[farthest_side]
+                new_size[closest_side] = floor(dst[closest_side] * ratio)
+                diff = src[closest_side] - new_size[closest_side]
+                offset[closest_side] = round(diff / 2)
+                box = (
+                    offset[0], offset[1],
+                    new_size[0] + offset[0], new_size[1] + offset[1]
+                )
                 img = img.crop(box)
-                img = img.resize(dst, Image.LANCZOS)
+                return img.resize(dst, Image.LANCZOS)
 
             elif one_side_smaller:
-                box = (x, y, width + x, height + y)
+                ratio = src[shorter_side] / dst[shorter_side]
+                new_size[shorter_side] = src[shorter_side]
+                new_size[longer_side] = floor(dst[longer_side] * ratio)
+                diff = src[longer_side] - new_size[longer_side]
+                offset[longer_side] = round(diff / 2)
+                box = (
+                    offset[0], offset[1],
+                    new_size[0] + offset[0], new_size[1] + offset[1]
+                )
                 img = img.crop(box)
-                img = img.resize(dst, Image.LANCZOS)
+                return img.resize(dst, Image.LANCZOS)
 
             else:
-                box = (x, y, width + x, height + y)
+                ratio = dst[closest_side] / src[closest_side]
+                new_size[closest_side] = src[closest_side]
+                new_size[farthest_side] = floor(dst[farthest_side] / ratio)
+                diff = src[farthest_side] - new_size[farthest_side]
+                offset[farthest_side] = round(diff / 2)
+                box = (
+                    offset[0], offset[1],
+                    new_size[0] + offset[0], new_size[1] + offset[1]
+                )
                 img = img.crop(box)
-                img = img.resize(dst, Image.LANCZOS)
+                return img.resize(dst, Image.LANCZOS)
 
 
         # error out otherwise
         else:
             raise Exception('Invalid resize parameters')
 
-        # and return
-        return img
 
-
-    @staticmethod
-    def get_ratio(src, dst, mode, upscale=False):
-        """
-        Get ratio
-        Calculates resize ratio and crop offset for two resize modes:
-            * Resize to fit original
-            * Resize to fill target
-
-        May additionally perform source image upscale in case it is smaller
-        than requested target size.
-
-        """
-        if mode == Resizer.RESIZE_TO_FIT:
-            result = Resizer.get_ratio_to_fit(src, dst, upscale)
-        else:
-            result = Resizer.get_ratio_to_fill(src, dst, upscale)
-
-        # return result
-        return dict(
-            size=result[0],
-            position=result[1],
-        )
-
-    @staticmethod
-    def get_ratio_to_fit(src, dst, upscale=False):
-        """
-        Get ratio to fit
-        Resizes original to fit target size without discarding anything.
-        In this mode most of the time resulting size will be smaller
-        than requested.
-        """
-        new_size = {0: 0, 1: 0}
-
-        # both sides smaller
-        if src[0] <= dst[0] and src[1] <= dst[1]:
-            if not upscale:
-                # no upscale: return src
-                return (src[0], src[1]), (0, 0)
-            else:
-                # upscale - fit closest side
-                percents = [dst[0] / (src[0] / 100), dst[1] / (src[1] / 100)]
-                percents = [p if p < 100 else p * -1 for p in percents]
-                closest_side = 0 if percents[0] >= percents[1] else 1
-                other_side = 1 if closest_side == 0 else 0
-                ratio = src[closest_side] / dst[closest_side]
-                new_size[closest_side] = dst[closest_side]
-                new_size[other_side] = floor(src[other_side] / ratio)
-                return (new_size[0], new_size[1]), (0, 0)
-
-        # one side smaller - fit the other side
-        elif src[0] <= dst[0] or src[1] <= dst[1]:
-            short_side = 0 if src[0] <= dst[0] else 1
-            other_side = 1 if short_side == 0 else 0
-            ratio = src[other_side] / dst[other_side]
-            new_size[other_side] = dst[other_side]
-            new_size[short_side] = floor(src[short_side] / ratio)
-            return (new_size[0], new_size[1]), (0, 0)
-
-        # src bigger - fit longer side
-        else:
-            longer_side = 0 if src[0] >= src[1] else 1
-            other_side = 0 if longer_side == 1 else 1
-            ratio = src[longer_side] / dst[longer_side]
-            new_size[longer_side] = dst[longer_side]
-            new_size[other_side] = floor(src[other_side] / ratio)
-            return (new_size[0], new_size[1]), (0, 0)
-
-    @staticmethod
-    def get_ratio_to_fill(src, dst, upscale=False):
-        """
-        Get ratio to fit
-        Eesizes original to fill destination and discards excess.
-        In this mode most of the time original will be cropped.
-
-        Operates in two modes:
-            resize_original - shrinks src to fit dst, then cuts excess
-            resize_sample - enlarges dst to fit src, then shrinks
-
-        The second algorithm might be more performant as we  resize
-        smaller sample, not the full original.
-        """
-        new_size = {0: 0, 1: 0}
-        offset = {0: 0, 1: 0}
-
-        # no upscale
-        if not upscale:
-
-            # both sides smaller - return src
-            if src[0] <= dst[0] and src[1] <= dst[1]:
-                return (src[0], src[1]), (0, 0)
-
-            # one side smaller - crop the other
-            elif src[0] <= dst[0] or src[1] <= dst[1]:
-                short_side = 0 if src[0] <= dst[0] else 1
-                other_side = 0 if short_side == 1 else 1
-                new_size[short_side] = src[short_side]
-                new_size[other_side] = dst[other_side]
-                offset[short_side] = 0
-                offset[other_side] = floor(
-                    (src[other_side] - dst[other_side]) / 2
-                )
-                return (new_size[0], new_size[1]), (offset[0], offset[1])
-
-            # src bigger - fit closest side
-            else:
-                percents = (dst[0] / (src[0] / 100), dst[1] / (src[1] / 100))
-                percents = [p if p < 100 else p * -1 for p in percents]
-                closest_side = 0 if percents[0] >= percents[1] else 1
-                other_side = 1 if closest_side == 0 else 0
-                ratio = src[closest_side] / dst[closest_side]
-                new_size[closest_side] = src[closest_side]
-                new_size[other_side] = floor(dst[other_side] * ratio)
-                offset[other_side] = round(
-                    (src[other_side] - new_size[other_side]) / 2
-                )
-                return (new_size[0], new_size[1]), (offset[0], offset[1])
-
-
-        # upscale
-        if upscale:
-
-            # both sides smaller - enlarge until further fits
-            if src[0] <= dst[0] and src[1] <= dst[1]:
-                percents = (dst[0] / (src[0] / 100), dst[1] / (src[1] / 100))
-                percents = [p if p < 100 else p * -1 for p in percents]
-                closest_side = 0 if percents[0] >= percents[1] else 1
-                other_side = 1 if closest_side == 0 else 0
-                ratio = src[other_side] / dst[other_side]
-                new_size[other_side] = src[other_side]
-                new_size[closest_side] = floor(dst[closest_side] * ratio)
-                offset[closest_side] = round(
-                    (src[closest_side] - new_size[closest_side]) / 2
-                )
-                return (new_size[0], new_size[1]), (offset[0], offset[1])
-
-            # one side smaller - enlarge until it fits
-            elif src[0] <= dst[0] or src[1] <= dst[1]:
-                short_side = 0 if src[0] <= dst[0] else 1
-                other_side = 1 if short_side == 0 else 0
-                ratio = src[short_side] / dst[short_side]
-                new_size[short_side] = src[short_side]
-                new_size[other_side] = floor(dst[other_side] * ratio)
-                offset[other_side] = round(
-                    (src[other_side] - new_size[other_side]) / 2
-                )
-                return (new_size[0], new_size[1]), (offset[0], offset[1])
-
-            # src bigger - shrink until closest side fits
-            else:
-                percents = (dst[0] / (src[0] / 100), dst[1] / (src[1] / 100))
-                percents = [p if p < 100 else p * -1 for p in percents]
-                closest_side = 0 if percents[0] >= percents[1] else 1
-                other_side = 1 if closest_side == 0 else 0
-                ratio = dst[closest_side] / src[closest_side]
-                new_size[closest_side] = src[closest_side]
-                new_size[other_side] = floor(dst[other_side] / ratio)
-                offset[other_side] = round(
-                    (src[other_side] - new_size[other_side]) / 2
-                )
-                return (new_size[0], new_size[1]), (offset[0], offset[1])
