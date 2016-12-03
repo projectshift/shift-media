@@ -153,73 +153,72 @@ class Resizer:
                 return img.resize(resize, Image.LANCZOS)
 
         # resize to fill, no upscale
-        elif mode == Resizer.RESIZE_TO_FILL and not upscale:
+        elif mode == Resizer.RESIZE_TO_FILL:
             if original_smaller: # return src
-                return img
+                if not upscale:
+                    return img
+                else:
+                    ratio = src[farthest_side] / dst[farthest_side]
+                    new_size[farthest_side] = src[farthest_side]
+                    new_size[closest_side] = floor(dst[closest_side] * ratio)
+                    diff = src[closest_side] - new_size[closest_side]
+                    offset[closest_side] = round(diff / 2)
+                    box = (
+                        offset[0], offset[1],
+                        new_size[0] + offset[0], new_size[1] + offset[1]
+                    )
+                    img = img.crop(box)
+                    return img.resize(dst, Image.LANCZOS)
+
             elif one_side_smaller:  # one crop the other
-                new_size[shorter_side] = src[shorter_side]
-                new_size[longer_side] = dst[longer_side]
-                diff = src[longer_side] - dst[longer_side]
-                offset[longer_side] = floor(diff / 2)
-                box = (
-                    offset[0], offset[1],
-                    new_size[0] + offset[0], new_size[1] + offset[1]
-                )
-                return img.crop(box)
-            elif original_bigger:  # fit closest side
-                ratio = src[closest_side] / dst[closest_side]
-                new_size[closest_side] = src[closest_side]
-                new_size[farthest_side] = floor(dst[farthest_side] * ratio)
-                diff = src[farthest_side] - new_size[farthest_side]
-                offset[farthest_side] = round(diff / 2)
-                box = (
-                    offset[0], offset[1],
-                    new_size[0] + offset[0], new_size[1] + offset[1]
-                )
-                img = img.crop(box)
-                return img.resize(dst, Image.LANCZOS)
+                if not upscale:
+                    new_size[shorter_side] = src[shorter_side]
+                    new_size[longer_side] = dst[longer_side]
+                    diff = src[longer_side] - dst[longer_side]
+                    offset[longer_side] = floor(diff / 2)
+                    box = (
+                        offset[0], offset[1],
+                        new_size[0] + offset[0], new_size[1] + offset[1]
+                    )
+                    return img.crop(box)
+                else:
+                    ratio = src[shorter_side] / dst[shorter_side]
+                    new_size[shorter_side] = src[shorter_side]
+                    new_size[longer_side] = floor(dst[longer_side] * ratio)
+                    diff = src[longer_side] - new_size[longer_side]
+                    offset[longer_side] = round(diff / 2)
+                    box = (
+                        offset[0], offset[1],
+                        new_size[0] + offset[0], new_size[1] + offset[1]
+                    )
+                    img = img.crop(box)
+                    return img.resize(dst, Image.LANCZOS)
 
-        # resize to fill, upscale
-        elif mode == Resizer.RESIZE_TO_FILL and upscale:
-            if original_smaller:
-                ratio = src[farthest_side] / dst[farthest_side]
-                new_size[farthest_side] = src[farthest_side]
-                new_size[closest_side] = floor(dst[closest_side] * ratio)
-                diff = src[closest_side] - new_size[closest_side]
-                offset[closest_side] = round(diff / 2)
-                box = (
-                    offset[0], offset[1],
-                    new_size[0] + offset[0], new_size[1] + offset[1]
-                )
-                img = img.crop(box)
-                return img.resize(dst, Image.LANCZOS)
-
-            elif one_side_smaller:
-                ratio = src[shorter_side] / dst[shorter_side]
-                new_size[shorter_side] = src[shorter_side]
-                new_size[longer_side] = floor(dst[longer_side] * ratio)
-                diff = src[longer_side] - new_size[longer_side]
-                offset[longer_side] = round(diff / 2)
-                box = (
-                    offset[0], offset[1],
-                    new_size[0] + offset[0], new_size[1] + offset[1]
-                )
-                img = img.crop(box)
-                return img.resize(dst, Image.LANCZOS)
-
-            else:
-                ratio = dst[closest_side] / src[closest_side]
-                new_size[closest_side] = src[closest_side]
-                new_size[farthest_side] = floor(dst[farthest_side] / ratio)
-                diff = src[farthest_side] - new_size[farthest_side]
-                offset[farthest_side] = round(diff / 2)
-                box = (
-                    offset[0], offset[1],
-                    new_size[0] + offset[0], new_size[1] + offset[1]
-                )
-                img = img.crop(box)
-                return img.resize(dst, Image.LANCZOS)
-
+            elif original_bigger:
+                if not upscale:
+                    ratio = src[closest_side] / dst[closest_side]
+                    new_size[closest_side] = src[closest_side]
+                    new_size[farthest_side] = floor(dst[farthest_side] * ratio)
+                    diff = src[farthest_side] - new_size[farthest_side]
+                    offset[farthest_side] = round(diff / 2)
+                    box = (
+                        offset[0], offset[1],
+                        new_size[0] + offset[0], new_size[1] + offset[1]
+                    )
+                    img = img.crop(box)
+                    return img.resize(dst, Image.LANCZOS)
+                else:
+                    ratio = dst[closest_side] / src[closest_side]
+                    new_size[closest_side] = src[closest_side]
+                    new_size[farthest_side] = floor(dst[farthest_side] / ratio)
+                    diff = src[farthest_side] - new_size[farthest_side]
+                    offset[farthest_side] = round(diff / 2)
+                    box = (
+                        offset[0], offset[1],
+                        new_size[0] + offset[0], new_size[1] + offset[1]
+                    )
+                    img = img.crop(box)
+                    return img.resize(dst, Image.LANCZOS)
 
         # error out otherwise
         else:
