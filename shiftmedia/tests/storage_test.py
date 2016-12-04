@@ -21,7 +21,6 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.clean()
         super().tearDown()
 
-
     # ------------------------------------------------------------------------
     # Tests
     # ------------------------------------------------------------------------
@@ -36,7 +35,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         """ Can create local temp upon getting """
         shutil.rmtree(self.tmp_path)
         storage = Storage(self.config, mock.MagicMock())
-        storage.tmp
+        tmp = storage.tmp
         self.assertTrue(os.path.exists(self.tmp_path))
 
     def test_put_file(self):

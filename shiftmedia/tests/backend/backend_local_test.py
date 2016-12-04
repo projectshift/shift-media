@@ -84,6 +84,21 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         expected_dst = os.path.join(self.tmp_path, id, 'original.tar.gz')
         self.assertTrue(os.path.exists(expected_dst))
 
+    @attr('xxx')
+    def test_extract_params_from_resize_filename(self):
+        """ Parse resize filename to a set of resize parameters"""
+        pass
+
+    @attr('xxx')
+    def test_raise_on_malformed_resize_filename(self):
+        """ Raise exception if resize filename is malformed """
+        pass
+
+    @attr('xxx')
+    def test_raise_on_bad_resize_signature(self):
+        """ Raise exception on bad resize signature """
+        pass
+
 
 
 

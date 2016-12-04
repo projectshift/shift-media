@@ -22,24 +22,16 @@ class Storage:
             os.makedirs(self._tmp_path)
         return self._tmp_path
 
-    def validate_file(self):
-        """
-        Validate file
-        Checks whether the file is indeed what it pretends to be.
-        """
-        pass
-
-    def put(self, src, delete_local=True):
+    def put(self, src, filename='original', delete_local=True):
         """
         Put local file to storage
-        Generates a uuid for the file, tells backend ti put
-        local file to storage by that id and removes original.
+        Generates a uuid for the file, tells backend to accept
+        it by that id and removes original on success.
         """
         id = str(uuid.uuid1())
-        self.backend.put(src, id)
+        self.backend.put(src, id, filename)
         if delete_local:
             os.remove(src)
-
         return id
 
     def delete(self, id):
@@ -49,25 +41,47 @@ class Storage:
         """
         return self.backend.delete(id)
 
+    def filename_to_resize_params(self, filename):
+        """
+        Filename to parameters
+        Parses resize filename to a set of usable parameters. Will perform
+        filename signature checking and throw an exception if requested
+        resize filename is malformed.
 
-    def clean_cache(self):
-        """ Walk each directory in storage and delete resize caches """
-        pass
+        :param filename: resize filename
+        :return: dict of parameters
+        """
 
-    def resize(self, *args, **kwargs):
-        resizer = Resizer
-        resizer.resize(*args, **kwargs)
+        """
+        AUTOCROP FORMAT:
+            * id
+            * size
+            * fit/fill
+            * format
+            * quality
+            * upscale <-- move to settings?
+            * signature
+
+        MANUAL CROP FORMAT:
+            * id
+            * size
+            * box selection (must be proportional to size)
+            * format
+            * quality
+            * upscale <-- move to settings?
+            * signature
+
+        """
 
 
+        print('FILENAME:', filename)
 
-        pass
 
-    def get_resize_url(self, id):
-        """ Return storage url of resized file """
-        pass
-
-    def get_original_url(self, id):
-        """ Return storage url of the original file """
-        # get path to original
-        # combine with storage url from config
-        pass
+    def create_resize(self):
+        """
+        Create resize
+        Retrieve resize from storage to local temp.
+        Perform resize and put back to storage.
+        Return url of resized image.
+        """
+        id_format = ''

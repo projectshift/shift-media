@@ -25,7 +25,12 @@ Will it save a request when retrieving the original?
 How to define crops?
 How to define arbitrary crops?
 
+
+
+
 How to tunnel video to server? How to tunnel all files to server?
+This will require sockets and async. As well as authentication.
+
 
 Download vs open
 Will mean setting content-type policy

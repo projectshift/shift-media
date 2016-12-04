@@ -12,10 +12,11 @@ class Backend(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def put(self, local_path, id):
+    def put(self, local_path, id, filename='original'):
         """
         Put file
-        Save local file in storage under given id.
+        Save local file in storage under given id. Can put both originals
+        and resizes.
         """
         pass
 
@@ -62,10 +63,10 @@ class BackendLocal(Backend):
             os.makedirs(self._path)
         return self._path
 
-    def put(self, local_path, id):
+    def put(self, local_path, id, filename='original'):
         """
-        Put file
-        Save local file in storage under given id.
+        Save local file in storage under given id. Can put both originals
+        and resizes.
         """
         if not os.path.exists(local_path):
             msg = 'Unable to find local file [{}]'
@@ -76,7 +77,7 @@ class BackendLocal(Backend):
         dir = os.path.join(self.path, *parts)
         os.makedirs(dir)
 
-        dst = os.path.join(self.path, *parts, 'original' + extension)
+        dst = os.path.join(self.path, *parts, filename + extension)
         shutil.copyfile(local_path, dst)
         return id
 
