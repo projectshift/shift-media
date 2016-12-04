@@ -8,23 +8,6 @@ class Resizer:
     Handles resizing of local image files using different crop-factors.
     Supports resizing to fill or to fit with optional upscale for static
     images and animated GIFs.
-
-    A note on algorithms
-    When producing resize from large original we can make it in two ways:
-
-        - Scale down original and discard excess
-        - Take a proportional sample of original and scale sample down
-
-    The former performs scaling on a larger image, when the latter only
-    operates with a sample area in question, wich is always smaller.
-
-    In reality performance testing shows very little difference:
-
-        - Resize original:  158.1552695589926 seconds
-        - Resize sample:    136.1955325910094 seconds
-
-    Testing was done on a 1GB directory of 1551 JPEG images. Although the
-    difference is negligible we might still prefer faster approach.
     """
 
     # resize modes (crop factor)
@@ -67,7 +50,7 @@ class Resizer:
             # resize regular image
             img = img.convert(mode='RGBA')
             img = Resizer.resize_img(img, size, mode, upscale)
-            img.save(dst, format=format)
+            img.save(dst, format=format, quality=quality)
         else:
             # resize animated gif
             out = img.convert(mode='RGBA')
