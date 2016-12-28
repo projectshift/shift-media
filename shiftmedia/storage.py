@@ -53,17 +53,19 @@ class Storage:
         """
 
         """
-        AUTOCROP FORMAT:
-            * id
-            * size
-            * fit/fill
-            * format
-            * quality
-            * upscale <-- move to settings?
-            * signature
+        (1) AUTOCROP FORMAT:
+            * schema id (1)
+            * id (3c72aedc-ba25-11e6-a569-406c8f413974)
+            * size (200x300)
+            * fit/fill (fill)
+            * format (jpg)
+            * quality (100)
+            * upscale (scale)<-- move to settings?
+            * signature (12345)
 
-        MANUAL CROP FORMAT:
-            * id
+        (2) MANUAL CROP FORMAT:
+            * schema id (2)
+            * id (3c72aedc-ba25-11e6-a569-406c8f413974)
             * size
             * box selection (must be proportional to size)
             * format
@@ -72,6 +74,38 @@ class Storage:
             * signature
 
         """
+
+        #todo: is id=path, or is it backend logic
+        #todo: put original vs put resize
+        #todo: problem with backend is that it only puts originals
+        #todo: to solve this we need filename schema
+        #todo: why does it require id separately? - because how to organize it is up to storage
+
+        #todo: filename MUST include path
+        #todo: put methods return full backend paths to file
+        #todo: every backend method should accept src, path and filename
+
+
+        schema1 = '3c72aedc/ba25/11e6-a569/406c8f413974/200x300-fit-100-upscale-SIGNME.jpg'
+        schema2 = '3c72aedc-ba25-11e6-a569-406c8f413974-200x300-0x0-20x30-jpg-100-upscale'
+
+        #todo: if this is gonna be put result, then why it's backend handled
+
+        # todo: WRITE USER STORIES FOR PATH/ID SERVICE
+
+        # USE CASE:
+        #       1. UPLOAD ORIGINAL
+        #          Original gets assigned an id and put to storage
+
+        #       2. GET SOMETHING BACK
+        #          What is this something? An id?
+
+        #       3. USE THAT TO CREATE RESIZE 
+        #       4. USE THAT TO GET ORIGINAL
+        #          Original must be retrievable with a single request
+        #          It must contain extension
+
+
 
 
         print('FILENAME:', filename)

@@ -55,6 +55,16 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         storage.delete(id)
         backend.delete.assert_called_with(id)
 
+    @attr('xxx')
+    def test_parse_autocrop_filename(self):
+        """ Parsing autocrop filename """
+        pass
+
+    @attr('xxx')
+    def test_parse_manual_crop_filename(self):
+        """ Parsing manual crop filename """
+        pass
+
 
 
 
