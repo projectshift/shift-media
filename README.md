@@ -65,6 +65,21 @@ Go to AWS S3 console and create a new bucket that we'll use to store our media f
 }
 ```
 
+### Troubleshooting: Pillow fails to install on MacOS
+
+If pillow fails to install with this message:
+
+```
+ValueError: jpeg is required unless explicitly disabled using --disable-jpeg, aborting
+```
+
+Which means lack of jpeg support, you should install it with homebrew first:
+
+```
+brew install jpeg
+pip install pillow
+```
+
 
 
 
