@@ -19,11 +19,11 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         self.clean()
         super().tearDown()
 
-
     # ------------------------------------------------------------------------
     # Tests
     # ------------------------------------------------------------------------
 
+    @attr('fff')
     def test_can_instantiate_backend(self):
         """ Can instantiate backend  """
         backend = BackendLocal(self.path)

@@ -55,7 +55,7 @@ class Storage:
         """
         (1) AUTOCROP FORMAT:
             * schema id (1)
-            * id (3c72aedc-ba25-11e6-a569-406c8f413974)
+            * id (3c72aedc-ba25-11e6-a569-406c8f413974-jpg)
             * size (200x300)
             * fit/fill (fill)
             * format (jpg)
@@ -65,7 +65,7 @@ class Storage:
 
         (2) MANUAL CROP FORMAT:
             * schema id (2)
-            * id (3c72aedc-ba25-11e6-a569-406c8f413974)
+            * id (3c72aedc-ba25-11e6-a569-406c8f413974-jpg)
             * size
             * box selection (must be proportional to size)
             * format
@@ -85,13 +85,14 @@ class Storage:
         #todo: put methods return full backend paths to file
         #todo: every backend method should accept src, path and filename
 
+        original_schema1 = 'jpg-3c72aedc-ba25-11e6-a569-406c8f413974'
+        original_schema2 = '3c72aedc-ba25-11e6-a569-406c8f413974-jpg'
 
-        schema1 = '3c72aedc/ba25/11e6-a569/406c8f413974/200x300-fit-100-upscale-SIGNME.jpg'
-        schema2 = '3c72aedc-ba25-11e6-a569-406c8f413974-200x300-0x0-20x30-jpg-100-upscale'
+        resize_schema1 = '3c72aedc/ba25/11e6-a569/406c8f413974/200x300-fit-100-upscale-SIGNME.jpg'
+        resize_schema2 = '3c72aedc-ba25-11e6-a569-406c8f413974-200x300-0x0-20x30-jpg-100-upscale'
 
-        #todo: if this is gonna be put result, then why it's backend handled
+        #todo: if this is gonna be result of put, then why is it backend handled
 
-        # todo: WRITE USER STORIES FOR PATH/ID SERVICE
 
         # USE CASE:
         #       1. UPLOAD ORIGINAL
@@ -99,11 +100,12 @@ class Storage:
 
         #       2. GET SOMETHING BACK
         #          What is this something? An id?
+        #       3. USE THAT TO GET ORIGINAL
+        #          No extra storage queries to get extension
+        #          It must contain extension in the id
 
         #       3. USE THAT TO CREATE RESIZE 
-        #       4. USE THAT TO GET ORIGINAL
-        #          Original must be retrievable with a single request
-        #          It must contain extension
+
 
 
 
