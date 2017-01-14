@@ -22,6 +22,19 @@ class Storage:
             os.makedirs(self._tmp_path)
         return self._tmp_path
 
+    def generate_id(self, original_format):
+        """
+        Generate id
+        Accepts an original file type and generates id string.
+        Id will look like this:
+            3c72aedc-ba25-11e6-a569-406c8f413974-jpg
+
+        :param original_format: original file type
+        :return: storage id
+        """
+        extension = self.normalize_extension(original_format)
+        id = str(uuid.uuid1())
+
     def put(self, src, filename='original', delete_local=True):
         """
         Put local file to storage
@@ -40,6 +53,8 @@ class Storage:
         Removes file and all its artifacts from storage by id
         """
         return self.backend.delete(id)
+
+
 
     def filename_to_resize_params(self, filename):
         """
