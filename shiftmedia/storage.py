@@ -91,7 +91,11 @@ class Storage:
         resize_schema1 = '3c72aedc/ba25/11e6-a569/406c8f413974/200x300-fit-100-upscale-SIGNME.jpg'
         resize_schema2 = '3c72aedc-ba25-11e6-a569-406c8f413974-200x300-0x0-20x30-jpg-100-upscale'
 
-        #todo: if this is gonna be result of put, then why is it backend handled
+        # todo: if this is the result of put, then why is it backend handled
+        # todo: we do not actually need that. result of put must be an id
+        # todo: this will get used only by link-builder and resize parser
+        # todo: backend can decide how to store stuff based on id
+
 
 
         # USE CASE:
@@ -100,6 +104,7 @@ class Storage:
 
         #       2. GET SOMETHING BACK
         #          What is this something? An id?
+
         #       3. USE THAT TO GET ORIGINAL
         #          No extra storage queries to get extension
         #          It must contain extension in the id
