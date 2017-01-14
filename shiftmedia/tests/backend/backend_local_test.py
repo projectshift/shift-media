@@ -19,11 +19,11 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         self.clean()
         super().tearDown()
 
+
     # ------------------------------------------------------------------------
     # Tests
     # ------------------------------------------------------------------------
 
-    @attr('fff')
     def test_can_instantiate_backend(self):
         """ Can instantiate backend  """
         backend = BackendLocal(self.path)
@@ -55,19 +55,6 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         full_file_path = os.path.join(current, 'original.tar.gz')
         self.assertTrue(os.path.exists(full_file_path))
 
-    def test_put_returns_path_from_storage_root(self):
-        """ Put returns filepath from storage root """
-        self.prepare_uploads()
-        backend = BackendLocal(self.path)
-        uploads = self.upload_path
-        src = os.path.join(uploads, 'test.tar.gz')
-        id = str(uuid.uuid1())
-        result = backend.put(src, id)
-        result = [item for item in result.split('/') if item]
-        self.assertTrue(os.path.exists(os.path.join(self.path, *result)))
-
-
-
     def test_delete_file(self):
         """ Deleting file from local storage """
         # put file
@@ -96,7 +83,6 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         backend.retrieve(id, self.tmp_path)
         expected_dst = os.path.join(self.tmp_path, id, 'original.tar.gz')
         self.assertTrue(os.path.exists(expected_dst))
-
 
 
 
