@@ -12,18 +12,18 @@ class Backend(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def put(self, local_src, backend_dst):
+    def put(self, local_path, id):
         """
         Put file
-        Save local file in storage under given path.
+        Save local file in storage under given id.
         """
         pass
 
     @abstractmethod
-    def retrieve_original(self, id, local_path):
+    def retrieve(self, id, local_path):
         """
         Retrieve
-        Download original from storage and put to local path
+        Download file from storage and put to local temp path
         """
         pass
 
@@ -62,25 +62,23 @@ class BackendLocal(Backend):
             os.makedirs(self._path)
         return self._path
 
-    def put(self, local_path, id, filename='original'):
+    def put(self, local_path, id):
         """
-        Save local file in storage under given id. Can put both originals
-        and resizes. Returns path from to storage root.
+        Put file
+        Save local file in storage under given id.
         """
-        # if not os.path.exists(local_path):
-        #     msg = 'Unable to find local file [{}]'
-        #     raise x.LocalFileNotFound(msg.format(local_path))
-        #
-        # extension = ''.join(Path(local_path).suffixes)
-        # parts = id.split('-')
-        # dir = os.path.join(self.path, *parts)
-        # os.makedirs(dir)
-        #
-        # dst = os.path.join(self.path, *parts, filename + extension)
-        # shutil.copyfile(local_path, dst)
-        # result = dst.replace(self.path, '')
-        # return result
-        pass
+        if not os.path.exists(local_path):
+            msg = 'Unable to find local file [{}]'
+            raise x.LocalFileNotFound(msg.format(local_path))
+
+        extension = ''.join(Path(local_path).suffixes)
+        parts = id.split('-')
+        dir = os.path.join(self.path, *parts)
+        os.makedirs(dir)
+
+        dst = os.path.join(self.path, *parts, 'original' + extension)
+        shutil.copyfile(local_path, dst)
+        return id
 
     def delete(self, id):
         """
@@ -92,30 +90,31 @@ class BackendLocal(Backend):
         shutil.rmtree(path)
         return True
 
-    def retrieve_original(self, id, local_path):
+    def retrieve(self, id, local_path):
         """
         Retrieve
         Download file from storage and put to local temp path
         """
-        # id = str(id)
-        # path = os.path.join(self.path, *id.split('-'))
-        #
-        # files = [item for item in os.scandir(path) if item.is_file()]
-        # for file in files:
-        #     if not file.name.startswith('original.'):
-        #         continue
-        #
-        #     src = file.path
-        #     dst_dir = os.path.join(local_path, id)
-        #     dst = os.path.join(dst_dir, file.name)
-        #     if not os.path.exists(dst_dir):
-        #         os.makedirs(dst_dir)
-        #
-        #     shutil.copyfile(src, dst)
-        #     return dst
+        id = str(id)
+        path = os.path.join(self.path, *id.split('-'))
+
+        files = [item for item in os.scandir(path) if item.is_file()]
+        for file in files:
+            if not file.name.startswith('original.'):
+                continue
+
+            src = file.path
+            dst_dir = os.path.join(local_path, id)
+            dst = os.path.join(dst_dir, file.name)
+            if not os.path.exists(dst_dir):
+                os.makedirs(dst_dir)
+
+            shutil.copyfile(src, dst)
+            return dst
+
+
+    def list(self, path=None):
         pass
-
-
 
 
 
