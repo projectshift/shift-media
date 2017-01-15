@@ -37,7 +37,7 @@ class Storage:
         id = str(uuid.uuid1()) + '-' + extension
         return id
 
-    def put(self, src, filename=None, delete_local=True):
+    def put(self, src, delete_local=True):
         """
         Put local file to storage
         Generates a uuid for the file, tells backend to accept
@@ -52,9 +52,7 @@ class Storage:
             raise x.LocalFileNotFound(msg.format(src))
 
         extension = ''.join(Path(src).suffixes)[1:]
-        if not filename:
-            filename = 'original.' + extension
-
+        filename = 'original.' + extension
         id = self.generate_id(extension)
         self.backend.put(src, id, filename)
         if delete_local:
@@ -102,27 +100,12 @@ class Storage:
 
         """
 
-        #todo: is id=path, or is it backend logic
-        #todo: put original vs put resize
-        #todo: problem with backend is that it only puts originals
-        #todo: to solve this we need filename schema
-        #todo: why does it require id separately? - because how to organize it is up to storage
-
-        #todo: filename MUST include path
-        #todo: put methods return full backend paths to file
-        #todo: every backend method should accept src, path and filename
 
         original_schema1 = 'jpg-3c72aedc-ba25-11e6-a569-406c8f413974'
         original_schema2 = '3c72aedc-ba25-11e6-a569-406c8f413974-jpg'
 
         resize_schema1 = '3c72aedc/ba25/11e6-a569/406c8f413974/200x300-fit-100-upscale-SIGNME.jpg'
         resize_schema2 = '3c72aedc-ba25-11e6-a569-406c8f413974-200x300-0x0-20x30-jpg-100-upscale'
-
-        # todo: if this is the result of put, then why is it backend handled
-        # todo: we do not actually need that. result of put must be an id
-        # todo: this will get used only by link-builder and resize parser
-        # todo: backend can decide how to store stuff based on id
-
 
 
         # USE CASE:
