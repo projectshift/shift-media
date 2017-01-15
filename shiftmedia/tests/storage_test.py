@@ -1,11 +1,10 @@
 from unittest import mock, TestCase
 from nose.plugins.attrib import attr
+from nose.tools import assert_raises
 
 import os, shutil
-from config.local import LocalConfig
-from shiftmedia import BackendLocal
 from shiftmedia import Storage
-from shiftmedia.resizer import Resizer
+from shiftmedia import exceptions as x
 from shiftmedia.testing.localstorage_testhelpers import LocalStorageTestHelpers
 
 
@@ -55,6 +54,14 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         filepath = os.path.join(self.upload_path, 'test.png')
         id = storage.put(filepath)
         self.assertFalse(os.path.exists(filepath))
+        self.assertTrue(id.endswith('png'))
+
+    def test_put_raises_on_nonexistent_src(self):
+        """ Storage raises exception on nonexistent file put"""
+        backend = mock.MagicMock()
+        storage = Storage(self.config, backend)
+        with assert_raises(x.LocalFileNotFound) as exception:
+            storage.put('CRAP')
 
     def test_delete_file_by_id(self):
         """ Deleting file from storage by id """
@@ -63,16 +70,6 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         storage = Storage(self.config, backend)
         storage.delete(id)
         backend.delete.assert_called_with(id)
-
-    @attr('xxx')
-    def test_parse_autocrop_filename(self):
-        """ Parsing autocrop filename """
-        pass
-
-    @attr('xxx')
-    def test_parse_manual_crop_filename(self):
-        """ Parsing manual crop filename """
-        pass
 
 
 

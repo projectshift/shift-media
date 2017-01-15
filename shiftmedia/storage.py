@@ -46,13 +46,12 @@ class Storage:
 
         # todo: validate file before put
         # todo: get real file extension to generate id with
-        # todo: were should this validation happen?
 
         if not os.path.exists(src):
             msg = 'Unable to find local file [{}]'
             raise x.LocalFileNotFound(msg.format(src))
 
-        extension = ''.join(Path(src).suffixes)
+        extension = ''.join(Path(src).suffixes)[1:]
         if not filename:
             filename = 'original.' + extension
 
