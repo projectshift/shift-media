@@ -43,7 +43,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         uploads = self.upload_path
         src = os.path.join(uploads, 'test.tar.gz')
         id = str(uuid.uuid1())
-        backend.put(src, id)
+        backend.put(src, id, 'original.tar.gz')
 
         # assert directories created
         current = self.path
@@ -63,7 +63,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         uploads = self.upload_path
         src = os.path.join(uploads, 'test.tar.gz')
         id = str(uuid.uuid1())
-        backend.put(src, id)
+        backend.put(src, id, 'original.tar.gz')
 
         # delete file
         backend.delete(id)
@@ -77,7 +77,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         backend = BackendLocal(self.path)
         src = os.path.join(self.upload_path, 'test.tar.gz')
         id = str(uuid.uuid1())
-        backend.put(src, id)
+        backend.put(src, id, 'original.tar.gz')
 
         # retrieve file
         backend.retrieve(id, self.tmp_path)

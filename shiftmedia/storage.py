@@ -3,6 +3,7 @@ from pathlib import Path
 import uuid
 from shiftmedia import exceptions as x
 from shiftmedia.resizer import Resizer
+from shiftmedia import utils
 
 
 class Storage:
@@ -32,16 +33,30 @@ class Storage:
         :param original_format: original file type
         :return: storage id
         """
-        extension = self.normalize_extension(original_format)
-        id = str(uuid.uuid1())
+        extension = utils.normalize_extension(original_format)
+        id = str(uuid.uuid1()) + '-' + extension
+        return id
 
-    def put(self, src, filename='original', delete_local=True):
+    def put(self, src, filename=None, delete_local=True):
         """
         Put local file to storage
         Generates a uuid for the file, tells backend to accept
         it by that id and removes original on success.
         """
-        id = str(uuid.uuid1())
+
+        # todo: validate file before put
+        # todo: get real file extension to generate id with
+        # todo: were should this validation happen?
+
+        if not os.path.exists(src):
+            msg = 'Unable to find local file [{}]'
+            raise x.LocalFileNotFound(msg.format(src))
+
+        extension = ''.join(Path(src).suffixes)
+        if not filename:
+            filename = 'original.' + extension
+
+        id = self.generate_id(extension)
         self.backend.put(src, id, filename)
         if delete_local:
             os.remove(src)
@@ -53,8 +68,6 @@ class Storage:
         Removes file and all its artifacts from storage by id
         """
         return self.backend.delete(id)
-
-
 
     def filename_to_resize_params(self, filename):
         """
