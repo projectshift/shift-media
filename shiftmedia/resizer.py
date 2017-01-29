@@ -10,6 +10,8 @@ class Resizer:
     images and animated GIFs.
     """
 
+    # TODO: IMPLEMENT MANUAL RESIZE
+
     # resize modes (crop factor)
     RESIZE_TO_FILL = 'mode_resize_to_fill'
     RESIZE_TO_FIT = 'mode_resize_to_fit'
