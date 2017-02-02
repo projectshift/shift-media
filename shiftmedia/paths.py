@@ -3,24 +3,12 @@ from shiftmedia.config.default import DefaultConfig
 from shiftmedia import exceptions as x
 
 
-# todo: paths will need secret_key to sign/validate url
-# todo: secret_key comes from config, but we may request it in constructor
-# todo: what would be the easiest way to use this from client code?
-# todo: we can pass the secret all around and then wrap these methods
-# todo: or we can require mandatory instantiation
-# todo: passing secret around seems better although pollutes method signatures
-# todo: it will also be hard to use link builder standalone
-# todo: link builder has a dependency (config) and thus is a service
-
-# todo: THINK OF A BETTER NAME
-
-
 class PathBuilder:
 
     def __init__(self, secret_key):
         """
         Path builder constructor
-        Initializes path builder service
+        Initializes path builder service.
         :param secret_key: string - secret key from config
         """
         self.validate_secret_key(secret_key)
@@ -90,10 +78,51 @@ class PathBuilder:
         :param factor: string - crop factor, fit/fill
         :param output_format: string - output format
         :param upscale: bool - enlarge smaller original
-        :param upscale: bool - enlarge smaller original
-        :return:
+        :param quality: string - differs per format. i.e. 0-100 for jpg
+        :return: string - signed filename
         """
-        pass
+
+        # validate size
+        err = False
+        dimensions = size.lower().split('x')
+        if len(dimensions) != 2:
+            err = True
+        for dimension in dimensions:
+            if not dimension.isdigit() or int(dimension) <= 0:
+                err = True
+        if err:
+            err = 'Invalid size provided must be in 100x200 format'
+            raise x.InvalidArgumentException(err)
+
+        # validate factor
+        if factor not in ['fit', 'fill']:
+            err = 'Factor must be either fit or fill'
+            raise x.InvalidArgumentException(err)
+
+        # validate quality
+        if not str(quality).isdigit():
+            err = 'Quality must be numeric'
+            raise x.InvalidArgumentException(err)
+
+        # prepare upscale
+        upscale = 'upscale' if bool(upscale) else 'noupscale'
+
+        # initial filename
+        schema = '{size}-{factor}-{quality}-{upscale}.{format}'
+        signed_schema = '{size}-{factor}-{quality}-{upscale}-{sig}.{format}'
+        params = dict(
+            size=size,
+            factor=factor,
+            quality=quality,
+            upscale=upscale,
+            format=output_format
+        )
+        nonsigend_filename = schema.format(**params)
+
+        # sign
+        params['sig'] = self.generate_signature(id, nonsigend_filename)
+        signed_filename = signed_schema.format(**params)
+        return signed_filename
 
 
     def filename_to_resize_params(self, filename):

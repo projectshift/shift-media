@@ -3,7 +3,12 @@ class MediaException(Exception):
     pass
 
 
-class ConfigurationException(MediaException, Exception):
+class InvalidArgumentException(MediaException, ValueError):
+    """ Raised when there is an invalid argument supplied """
+    pass
+
+
+class ConfigurationException(MediaException, ValueError):
     """ Raised when there is something wrong with configuration """
     pass
 

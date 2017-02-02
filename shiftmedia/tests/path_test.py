@@ -35,10 +35,26 @@ class PathBuilderTests(TestCase):
     #     """ Generating filename signature"""
     #     raise Exception('Not implemented')
     #
-    # @attr('xxx')
-    # def test_create_auto_resize_url(self):
-    #     """ Creating URL for auto resizing"""
-    #     pass
+    @attr('xxx')
+    def test_create_auto_resize_url(self):
+        """ Creating URL for auto resizing"""
+        params = dict(
+            id=utils.generate_id('jpg'),
+            size='100x200',
+            factor='fill',
+            output_format='jpg',
+            upscale=True,
+            quality=80
+        )
+        pb = PathBuilder('12345')
+        filename = pb.get_autocrop_filename(**params)
+
+
+
+
+
+
+
     #
     # def test_create_manual_crop_url(self):
     #     """ Create manual crop url """
