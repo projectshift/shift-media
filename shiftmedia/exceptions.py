@@ -3,6 +3,11 @@ class MediaException(Exception):
     pass
 
 
+class ConfigurationException(MediaException, Exception):
+    """ Raised when there is something wrong with configuration """
+    pass
+
+
 class LocalFileNotFound(MediaException, FileNotFoundError):
     """ Raised wen trying to put nonexistent file to storage """
     pass

@@ -1,8 +1,7 @@
 import os
 from pathlib import Path
-import uuid
+
 from shiftmedia import exceptions as x
-from shiftmedia.resizer import Resizer
 from shiftmedia import utils
 
 
@@ -23,20 +22,6 @@ class Storage:
             os.makedirs(self._tmp_path)
         return self._tmp_path
 
-    def generate_id(self, original_format):
-        """
-        Generate id
-        Accepts an original file type and generates id string.
-        Id will look like this:
-            3c72aedc-ba25-11e6-a569-406c8f413974-jpg
-
-        :param original_format: original file type
-        :return: storage id
-        """
-        extension = utils.normalize_extension(original_format)
-        id = str(uuid.uuid1()) + '-' + extension
-        return id
-
     def put(self, src, delete_local=True):
         """
         Put local file to storage
@@ -53,7 +38,7 @@ class Storage:
 
         extension = ''.join(Path(src).suffixes)[1:]
         filename = 'original.' + extension
-        id = self.generate_id(extension)
+        id = utils.generate_id(extension)
         self.backend.put(src, id, filename)
         if delete_local:
             os.remove(src)

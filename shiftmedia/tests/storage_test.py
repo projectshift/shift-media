@@ -37,15 +37,6 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         tmp = storage.tmp
         self.assertTrue(os.path.exists(self.tmp_path))
 
-    def test_generate_id(self):
-        """ Generating unique id"""
-        backend = mock.MagicMock()
-        storage = Storage(self.config, backend)
-        id1 = storage.generate_id('JPEG')
-        id2 = storage.generate_id('JPEG')
-        self.assertNotEqual(id1, id2)
-        self.assertTrue(id1.endswith('-jpg'))
-
     def test_put_file(self):
         """ Put uploaded file to storage """
         backend = mock.MagicMock()

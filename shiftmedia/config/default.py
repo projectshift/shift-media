@@ -11,3 +11,5 @@ class DefaultConfig():
     AWS_S3_BUCKET = None
     BASE_STORAGE_URL = None
     LOCAL_TEMP = None
+
+    SECRET_KEY = 'PleaseDefineSecretKey'
