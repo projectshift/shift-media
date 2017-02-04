@@ -60,20 +60,23 @@ class PathBuilder:
         """
         pass
 
-    def get_autocrop_filename(
+
+
+    def get_auto_crop_filename(
             self,
             id,
             size,
             factor,
-            output_format,
+            output_format='jpg',
             upscale=True,
             quality=65
-        ):
+    ):
         """
-        Get autocrop filename
+        Get auto crop filename
         Encodes parameters for automatic cropping/resizing into a filename.
+        Resulting filename will contain hash signature.
 
-        :param id: string - storage id
+        :param id: string - storage id (used to generate signature)
         :param size: string - width x height
         :param factor: string - crop factor, fit/fill
         :param output_format: string - output format
@@ -96,7 +99,7 @@ class PathBuilder:
 
         # validate factor
         if factor not in ['fit', 'fill']:
-            err = 'Factor must be either fit or fill'
+            err = 'Auto crop factor must be either fit or fill'
             raise x.InvalidArgumentException(err)
 
         # validate quality
@@ -123,6 +126,30 @@ class PathBuilder:
         params['sig'] = self.generate_signature(id, nonsigend_filename)
         signed_filename = signed_schema.format(**params)
         return signed_filename
+
+    def get_manual_crop_filename(
+            self,
+            id,
+            sample_size,
+            target_size,
+            output_format='jpg',
+            upscale=True,
+            quality=65
+    ):
+        """
+        Get manual crop filename
+        Encodes parameters for automatic cropping/resizing into a filename.
+        Resulting filename will contain hash signature.
+
+        :param id: string - storage id (used to generate signature)
+        :param target_size: string - width x height
+        :param sample_size: string - width x height, must be proportional
+        :param output_format: string - output format
+        :param upscale: bool - enlarge smaller original
+        :param quality: string - differs per format. i.e. 0-100 for jpg
+        :return: string - signed filename
+        """
+        pass
 
 
     def filename_to_resize_params(self, filename):
