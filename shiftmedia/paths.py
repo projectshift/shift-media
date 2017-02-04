@@ -110,7 +110,7 @@ class PathBuilder:
         # prepare upscale
         upscale = 'upscale' if bool(upscale) else 'noupscale'
 
-        # initial filename
+        # create filename filename
         schema = '{size}-{factor}-{quality}-{upscale}.{format}'
         signed_schema = '{size}-{factor}-{quality}-{upscale}-{sig}.{format}'
         params = dict(
@@ -149,7 +149,67 @@ class PathBuilder:
         :param quality: string - differs per format. i.e. 0-100 for jpg
         :return: string - signed filename
         """
-        pass
+
+        # validate sample size
+        err = False
+        sample_dimensions = sample_size.lower().split('x')
+        if len(sample_dimensions) != 2:
+            err = True
+        for dimension in sample_dimensions:
+            if not dimension.isdigit() or int(dimension) <= 0:
+                err = True
+        if err:
+            err = 'Invalid sample provided must be in 100x200 format'
+            raise x.InvalidArgumentException(err)
+
+        # validate target size
+        err = False
+        target_dimensions = target_size.lower().split('x')
+        if len(target_dimensions) != 2:
+            err = True
+        for dimension in target_dimensions:
+            if not dimension.isdigit() or int(dimension) <= 0:
+                err = True
+        if err:
+            err = 'Invalid target provided must be in 100x200 format'
+            raise x.InvalidArgumentException(err)
+
+        # validate sample and target sizes being proportional
+        sw = sample_dimensions[0]
+        sh = sample_dimensions[1]
+        tw = target_dimensions[0]
+        th = target_dimensions[1]
+        if (sw/sh) != (tw/th):
+            err = 'Sample size and target size must be proportional'
+            raise x.InvalidArgumentException(err)
+
+        # validate quality
+        if not str(quality).isdigit():
+            err = 'Quality must be numeric'
+            raise x.InvalidArgumentException(err)
+
+        # prepare upscale
+        upscale = 'upscale' if bool(upscale) else 'noupscale'
+
+        # initial filename
+        schema = '{sample}-{target}-{quality}-{upscale}.{format}'
+        signed_schema = '{sample}-{target}-{quality}-{upscale}-{sig}.{format}'
+        params = dict(
+            sample=sample_size,
+            target=target_size,
+            quality=quality,
+            upscale=upscale,
+            format=output_format
+        )
+        nonsigend_filename = schema.format(**params)
+
+        # sign
+        params['sig'] = self.generate_signature(id, nonsigend_filename)
+        signed_filename = signed_schema.format(**params)
+        return signed_filename
+
+
+
 
 
     def filename_to_resize_params(self, filename):

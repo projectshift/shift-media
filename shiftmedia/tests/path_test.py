@@ -31,8 +31,50 @@ class PathBuilderTests(TestCase):
         signature2 = pb.generate_signature(id, filename)
         self.assertEquals(signature1, signature2)
 
-    def test_create_auto_resize_url(self):
-        """ Creating URL for auto resizing"""
+    def test_auto_crop_filename_generator_raises_on_bad_size(self):
+        """ Auto crop filename generator raises exception on bad size """
+        params = dict(
+            id=utils.generate_id('jpg'),
+            size='100xCRAP',
+            factor='fill',
+            output_format='jpg',
+            upscale=True,
+            quality=80
+        )
+        pb = PathBuilder('12345')
+        with assert_raises(x.InvalidArgumentException):
+            pb.get_auto_crop_filename(**params)
+
+    def test_auto_crop_filename_generator_raises_on_bad_factor(self):
+        """ Auto crop filename generator raises exception on bad crop factor """
+        params = dict(
+            id=utils.generate_id('jpg'),
+            size='100x200',
+            factor='CRAP',
+            output_format='jpg',
+            upscale=True,
+            quality=80
+        )
+        pb = PathBuilder('12345')
+        with assert_raises(x.InvalidArgumentException):
+            pb.get_auto_crop_filename(**params)
+
+    def test_auto_crop_filename_generator_raises_on_bad_quality(self):
+        """ Auto crop filename generator raises exception on bad quality """
+        params = dict(
+            id=utils.generate_id('jpg'),
+            size='100x200',
+            factor='fit',
+            output_format='jpg',
+            upscale=True,
+            quality="CRAP"
+        )
+        pb = PathBuilder('12345')
+        with assert_raises(x.InvalidArgumentException):
+            pb.get_auto_crop_filename(**params)
+
+    def test_create_auto_crop_filename(self):
+        """ Creating filename for auto crop"""
         params = dict(
             id=utils.generate_id('jpg'),
             size='100x200',
@@ -46,57 +88,34 @@ class PathBuilderTests(TestCase):
         start = '100x200-fill-80-upscale'
         self.assertTrue(filename.startswith(start))
 
-    def test_auto_crop_url_generator_raises_on_bad_size(self):
-        """ Auto crop URL generator raises exception on bad size """
-        params = dict(
-            id=utils.generate_id('jpg'),
-            size='100xCRAP',
-            factor='fill',
-            output_format='jpg',
-            upscale=True,
-            quality=80
-        )
-        pb = PathBuilder('12345')
-        with assert_raises(x.InvalidArgumentException):
-            pb.get_auto_crop_filename(**params)
+    @attr('xxx')
+    def test_manual_crop_filename_generator_raises_on_bad_sample_size(self):
+        """ Manual crop filename generator raises on bad sample size"""
+        self.fail('Implement me')
 
-    def test_auto_crop_url_generator_raises_on_bad_factor(self):
-        """ Auto crop URL generator raises exception on bad crop factor """
-        params = dict(
-            id=utils.generate_id('jpg'),
-            size='100x200',
-            factor='CRAP',
-            output_format='jpg',
-            upscale=True,
-            quality=80
-        )
-        pb = PathBuilder('12345')
-        with assert_raises(x.InvalidArgumentException):
-            pb.get_auto_crop_filename(**params)
+    @attr('xxx')
+    def test_manual_crop_filename_generator_raises_on_bad_target_size(self):
+        """ Manual crop filename generator raises on bad target size"""
+        self.fail('Implement me')
 
-    def test_auto_crop_url_generator_raises_on_bad_quality(self):
-        """ Auto crop URL generator raises exception on bad quality """
-        params = dict(
-            id=utils.generate_id('jpg'),
-            size='100x200',
-            factor='fit',
-            output_format='jpg',
-            upscale=True,
-            quality="CRAP"
-        )
-        pb = PathBuilder('12345')
-        with assert_raises(x.InvalidArgumentException):
-            pb.get_auto_crop_filename(**params)
+    @attr('xxx')
+    def test_manual_crop_filename_generator_raises_on_bad_sizes(self):
+        """ Manual crop filename generator raises on disproportional sizes """
+        self.fail('Implement me')
 
-    #
-    # def test_create_manual_crop_url(self):
-    #     """ Create manual crop url """
-    #     pass
+    @attr('xxx')
+    def test_manual_crop_filename_generator_raises_on_quality(self):
+        """ Manual crop filename generator raises on bad  quality """
+        self.fail('Implement me')
 
+    @attr('xxx')
+    def test_generate_manual_crop_filename(self):
+        """ Generating manual crop filename"""
+        self.fail('Implement me')
 
     def test_validate_signature(self):
         """ Validating signature contained with filename  """
-        raise Exception('Not implemented')
+        self.fail('Implement me')
 
 
 
