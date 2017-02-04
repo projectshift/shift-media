@@ -159,7 +159,7 @@ class PathBuilder:
             if not dimension.isdigit() or int(dimension) <= 0:
                 err = True
         if err:
-            err = 'Invalid sample provided must be in 100x200 format'
+            err = 'Invalid sample size provided must be in 100x200 format'
             raise x.InvalidArgumentException(err)
 
         # validate target size
@@ -171,14 +171,14 @@ class PathBuilder:
             if not dimension.isdigit() or int(dimension) <= 0:
                 err = True
         if err:
-            err = 'Invalid target provided must be in 100x200 format'
+            err = 'Invalid target size provided must be in 100x200 format'
             raise x.InvalidArgumentException(err)
 
         # validate sample and target sizes being proportional
-        sw = sample_dimensions[0]
-        sh = sample_dimensions[1]
-        tw = target_dimensions[0]
-        th = target_dimensions[1]
+        sw = int(sample_dimensions[0])
+        sh = int(sample_dimensions[1])
+        tw = int(target_dimensions[0])
+        th = int(target_dimensions[1])
         if (sw/sh) != (tw/th):
             err = 'Sample size and target size must be proportional'
             raise x.InvalidArgumentException(err)

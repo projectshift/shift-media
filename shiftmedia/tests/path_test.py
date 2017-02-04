@@ -88,33 +88,79 @@ class PathBuilderTests(TestCase):
         start = '100x200-fill-80-upscale'
         self.assertTrue(filename.startswith(start))
 
-    @attr('xxx')
     def test_manual_crop_filename_generator_raises_on_bad_sample_size(self):
         """ Manual crop filename generator raises on bad sample size"""
-        self.fail('Implement me')
+        params = dict(
+            id=utils.generate_id('jpg'),
+            sample_size='200xCRAP',
+            target_size='100x200',
+            output_format='jpg',
+            upscale=True,
+            quality=80
+        )
+        pb = PathBuilder('12345')
+        with assert_raises(x.InvalidArgumentException):
+            pb.get_manual_crop_filename(**params)
 
-    @attr('xxx')
     def test_manual_crop_filename_generator_raises_on_bad_target_size(self):
         """ Manual crop filename generator raises on bad target size"""
-        self.fail('Implement me')
+        params = dict(
+            id=utils.generate_id('jpg'),
+            sample_size='200x400',
+            target_size='100xCRAP',
+            output_format='jpg',
+            upscale=True,
+            quality=80
+        )
+        pb = PathBuilder('12345')
+        with assert_raises(x.InvalidArgumentException):
+            pb.get_manual_crop_filename(**params)
 
-    @attr('xxx')
     def test_manual_crop_filename_generator_raises_on_bad_sizes(self):
         """ Manual crop filename generator raises on disproportional sizes """
-        self.fail('Implement me')
+        params = dict(
+            id=utils.generate_id('jpg'),
+            sample_size='200x300',
+            target_size='100x200',
+            output_format='jpg',
+            upscale=True,
+            quality=80
+        )
+        pb = PathBuilder('12345')
+        with assert_raises(x.InvalidArgumentException):
+            pb.get_manual_crop_filename(**params)
 
-    @attr('xxx')
     def test_manual_crop_filename_generator_raises_on_quality(self):
         """ Manual crop filename generator raises on bad  quality """
-        self.fail('Implement me')
+        params = dict(
+            id=utils.generate_id('jpg'),
+            sample_size='200x400',
+            target_size='100x200',
+            output_format='jpg',
+            upscale=True,
+            quality='CRAP'
+        )
+        pb = PathBuilder('12345')
+        with assert_raises(x.InvalidArgumentException):
+            pb.get_manual_crop_filename(**params)
 
-    @attr('xxx')
     def test_generate_manual_crop_filename(self):
         """ Generating manual crop filename"""
-        self.fail('Implement me')
+        params = dict(
+            id=utils.generate_id('jpg'),
+            sample_size='200x400',
+            target_size='100x200',
+            output_format='jpg',
+            upscale=True,
+            quality=80
+        )
+        pb = PathBuilder('12345')
+        filename = pb.get_manual_crop_filename(**params)
+        start = '200x400-100x200-80-upscale'
+        self.assertTrue(filename.startswith(start))
 
     def test_validate_signature(self):
-        """ Validating signature contained with filename  """
+        """ Validating signature contained within filename  """
         self.fail('Implement me')
 
 
