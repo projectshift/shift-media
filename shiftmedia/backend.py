@@ -10,6 +10,13 @@ class Backend(metaclass=ABCMeta):
     This defines methods your backend must implement in order to
     work with media storage
     """
+    @abstractmethod
+    def put_original(self, src, id):
+        """
+        Put original file to storage
+        Does not require a filename as it will be extracted from provided id.
+        """
+        pass
 
     @abstractmethod
     def put(self, src, id, filename):
@@ -20,10 +27,10 @@ class Backend(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def retrieve(self, id, local_path):
+    def retrieve_original(self, id, local_path):
         """
-        Retrieve
-        Download file from storage and put to local temp path
+        Retrieve original
+        Download file original from storage and put to local temp path
         """
         pass
 
@@ -35,13 +42,13 @@ class Backend(metaclass=ABCMeta):
         """
         pass
 
-    @abstractmethod
-    def list(self, path=None):
-        """
-        List
-        Returns a list of files in storage under given path
-        """
-        pass
+    # @abstractmethod
+    # def list(self, path=None):
+    #     """
+    #     List
+    #     Returns a list of files in storage under given path
+    #     """
+    #     pass
 
 
 class BackendLocal(Backend):
@@ -62,19 +69,32 @@ class BackendLocal(Backend):
             os.makedirs(self._path)
         return self._path
 
+    def put_original(self, src, id):
+        """
+        Put original file to storage
+        Does not require a filename as it will be extracted from provided id.
+        the resulting path will have following structure:
+            3c72aedc/ba25/11e6/569/406c8f413974/original-filename.jpg
+
+        :param src: string - path to source file
+        :param id: string - generated id
+        :return: string - generated id
+        """
+        filename = '-'.join(id.split('-')[5:])
+        return self.put(src, id, filename)
+
     def put(self, src, id, filename):
         """
-        Put file
+        Put file to storage
         Save local file in storage under given id and filename.
         """
         if not os.path.exists(src):
             msg = 'Unable to find local file [{}]'
             raise x.LocalFileNotFound(msg.format(src))
 
-        parts = id.split('-')
+        parts = id.split('-')[0:5]
         dir = os.path.join(self.path, *parts)
         os.makedirs(dir)
-
         dst = os.path.join(self.path, *parts, filename)
         shutil.copyfile(src, dst)
         return id
@@ -85,36 +105,24 @@ class BackendLocal(Backend):
         Remove file from storage by id
         """
         id = str(id)
-        path = os.path.join(self.path, id.split('-')[0])
+        path = os.path.join(self.path, *id.split('-')[0:5])
         shutil.rmtree(path)
         return True
 
-    def retrieve(self, id, local_path):
+    def retrieve_original(self, id, local_path):
         """
-        Retrieve
+        Retrieve original
         Download file from storage and put to local temp path
         """
-        id = str(id)
-        path = os.path.join(self.path, *id.split('-'))
-
-        files = [item for item in os.scandir(path) if item.is_file()]
-        for file in files:
-            if not file.name.startswith('original.'):
-                continue
-
-            src = file.path
-            dst_dir = os.path.join(local_path, id)
-            dst = os.path.join(dst_dir, file.name)
-            if not os.path.exists(dst_dir):
-                os.makedirs(dst_dir)
-
-            shutil.copyfile(src, dst)
-            return dst
-
-
-    def list(self, path=None):
-        pass
-
+        filename = '-'.join(id.split('-')[5:])
+        src = os.path.join(self.path, *id.split('-')[0:5], filename)
+        dst_dir = os.path.join(local_path, '-'.join(id.split('-')[:5]))
+        dst = os.path.join(dst_dir, filename)
+        if not os.path.exists(dst_dir):
+            os.makedirs(dst_dir)
+        dst = os.path.join(dst_dir, filename)
+        shutil.copyfile(src, dst)
+        return dst
 
 
 class BackendS3(Backend):

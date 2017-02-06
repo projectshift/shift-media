@@ -60,8 +60,6 @@ class PathBuilder:
         """
         pass
 
-
-
     def get_auto_crop_filename(
             self,
             id,

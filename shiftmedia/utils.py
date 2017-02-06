@@ -9,25 +9,13 @@ def normalize_extension(extension):
     :return: normalized extension
     """
     extension = extension.lower()
-    extensions = dict(
-        jpg=[
-            'jpeg',
-            'jpe',
-            'jif',
-            'jfif',
-            'jfi'
-            'jp2',
-            'j2k',
-            'jpx',
-            'jpf',
-            'jpm'
-        ],
-        tif=[
-            'tiff'
-        ],
-    )
 
-    for canonical, variants in extensions.items():
+    exts = dict()
+    exts['jpg'] = ['jpeg','jpe','jif','jfif','jfi''jp2','j2k','jpx','jpf','jpm']
+    exts['tif'] = ['tiff']
+    exts['tar.gz'] = ['tgz']
+
+    for canonical, variants in exts.items():
         if extension in variants:
             extension = canonical
             break
@@ -35,16 +23,21 @@ def normalize_extension(extension):
     return extension
 
 
-def generate_id(original_format):
+def generate_id(original_filename):
     """
     Generate id
-    Accepts an original file type and generates id string.
+    Accepts an original filename and generates id string.
     Id will look like this:
-        3c72aedc-ba25-11e6-a569-406c8f413974-jpg
+        3c72aedc-ba25-11e6-a569-406c8f413974-original_filename.jpg
 
-    :param original_format: original file type
-    :return: storage id
+    :param original_filename: string - original file name
+    :return: string - storage id
     """
-    extension = normalize_extension(original_format)
-    id = str(uuid.uuid1()) + '-' + extension
+
+    # todo: how to make filename part of id?
+    # todo: whatever is our separator, it can not be part of filename
+    # todo: 3c72aedc-ba25-11e6-a569-406c8f413974-original-filename.jpg
+    # todo: however uuid consists of exactly 5 sequences
+
+    id = str(uuid.uuid1()) + '-' + original_filename.lower()
     return id
