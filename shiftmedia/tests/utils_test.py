@@ -18,14 +18,13 @@ class UtilsTests(TestCase):
         extension = 'UNKNOWN'
         self.assertEquals('unknown', utils.normalize_extension(extension))
 
-    @attr('fff')
     def test_generate_id(self):
         """ Generating unique id"""
         id1 = utils.generate_id('ORIGINAL.JPEG')
         id2 = utils.generate_id('ORIGINAL.JPG')
-        self.fail('Implement filename')
-        # self.assertNotEqual(id1, id2)
-        # self.assertTrue(id1.endswith('-jpg'))
+        self.assertNotEqual(id1, id2)
+        self.assertTrue(id1.endswith('-original.jpeg'))
+        self.assertTrue(id2.endswith('-original.jpg'))
 
 
 

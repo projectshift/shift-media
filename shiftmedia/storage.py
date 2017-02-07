@@ -4,18 +4,6 @@ from pathlib import Path
 from shiftmedia import exceptions as x
 from shiftmedia import utils
 
-# TODO: how to force file download?
-# TODO: how to serve original filename?
-# TODO: files for storage as is vs. file for processing
-
-# USE CASE: we might want file stored under its original name, i.e. cv.pdf
-
-# TODO: make original filename part of the ID?
-# TODO: 3c72aedc-ba25-11e6-a569-406c8f413974-original_filename.jpg
-# TODO: how do we transform such an id to original url?
-
-
-
 
 class Storage:
 
@@ -43,9 +31,6 @@ class Storage:
 
         # todo: validate file before put
         # todo: get real file extension to generate id with
-
-        # todo: whos responsibility it is to get file extension?
-        # todo: is it storage?
 
         if not os.path.exists(src):
             msg = 'Unable to find local file [{}]'

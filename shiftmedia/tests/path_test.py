@@ -159,7 +159,6 @@ class PathBuilderTests(TestCase):
         start = '200x400-100x200-80-upscale'
         self.assertTrue(filename.startswith(start))
 
-    @attr('xxx')
     def test_validate_signature(self):
         """ Validating signature contained within filename  """
         auto_id = utils.generate_id('jpg')
@@ -184,7 +183,16 @@ class PathBuilderTests(TestCase):
         pb = PathBuilder('12345')
         auto = pb.get_auto_crop_filename(**auto_params)
         manual = pb.get_manual_crop_filename(**manual_params)
-        self.fail('Implement me')
+        bad = manual.split('-')
+        bad[4] = 'ZZZ' + bad[4]
+        bad = '-'.join(bad)
+        self.assertTrue(pb.validate_signature(auto_id, auto))
+        self.assertTrue(pb.validate_signature(manual_id, manual))
+        self.assertFalse(pb.validate_signature(manual_id, bad))
+
+
+
+
 
 
 

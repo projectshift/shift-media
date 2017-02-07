@@ -16,7 +16,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
 
     def tearDown(self):
         """ Clean up after yourself """
-        # self.clean()
+        self.clean()
         super().tearDown()
 
 

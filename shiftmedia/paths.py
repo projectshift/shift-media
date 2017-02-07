@@ -38,7 +38,6 @@ class PathBuilder:
 
         :param id: string - storage id
         :param filename: - string, resize filename
-        :param secret_key: - string, secret key to use as salt
         :return: string - signature
         """
         sign_me = bytes(id + filename + self.secret_key, 'utf-8')
@@ -46,7 +45,7 @@ class PathBuilder:
         signature.update(sign_me)
         return signature.hexdigest()
 
-    def validate_signature(self, id, filename, secret_key):
+    def validate_signature(self, id, filename):
         """
         Validate signature
         Accepts storage id and a filename and validates hash signature.
@@ -55,10 +54,15 @@ class PathBuilder:
 
         :param id: string - storage id
         :param filename: - string, resize filename
-        :param secret_key: - string, secret key to use as salt
         :return:
         """
-        pass
+
+        parts = filename.split('-')
+        extension = parts[4][parts[4].index('.'):]
+        non_signed_filename = '-'.join(parts[:4]) + extension
+        signature = parts[4].replace(extension, '')
+        return signature == self.generate_signature(id, non_signed_filename)
+
 
     def get_auto_crop_filename(
             self,

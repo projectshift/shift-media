@@ -33,11 +33,5 @@ def generate_id(original_filename):
     :param original_filename: string - original file name
     :return: string - storage id
     """
-
-    # todo: how to make filename part of id?
-    # todo: whatever is our separator, it can not be part of filename
-    # todo: 3c72aedc-ba25-11e6-a569-406c8f413974-original-filename.jpg
-    # todo: however uuid consists of exactly 5 sequences
-
     id = str(uuid.uuid1()) + '-' + original_filename.lower()
     return id
