@@ -248,9 +248,6 @@ class PathBuilderTests(TestCase):
         self.assertEquals(params['output_format'], result['output_format'])
         self.assertEquals(params['quality'], result['quality'])
 
-
-
-
     """
     PLEASE NOTE: the following is just for fun and is in fact excessive and
     redundant - it can never happen in real life because you can not
