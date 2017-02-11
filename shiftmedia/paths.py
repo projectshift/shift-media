@@ -122,10 +122,10 @@ class PathBuilder:
             upscale=upscale,
             format=output_format
         )
-        nonsigend_filename = schema.format(**params)
+        unsigend_filename = schema.format(**params)
 
         # sign
-        params['sig'] = self.generate_signature(id, nonsigend_filename)
+        params['sig'] = self.generate_signature(id, unsigend_filename)
         signed_filename = signed_schema.format(**params)
         return signed_filename
 
@@ -194,8 +194,8 @@ class PathBuilder:
         upscale = 'upscale' if bool(upscale) else 'noupscale'
 
         # initial filename
-        schema = '{sample}-{target}-{quality}-{upscale}.{format}'
-        signed_schema = '{sample}-{target}-{quality}-{upscale}-{sig}.{format}'
+        schema = '{target}-{sample}-{quality}-{upscale}.{format}'
+        signed_schema = '{target}-{sample}-{quality}-{upscale}-{sig}.{format}'
         params = dict(
             sample=sample_size,
             target=target_size,
@@ -203,53 +203,85 @@ class PathBuilder:
             upscale=upscale,
             format=output_format
         )
-        nonsigend_filename = schema.format(**params)
+        unsigend_filename = schema.format(**params)
 
         # sign
-        params['sig'] = self.generate_signature(id, nonsigend_filename)
+        params['sig'] = self.generate_signature(id, unsigend_filename)
         signed_filename = signed_schema.format(**params)
         return signed_filename
 
-
-
-
-
-    def filename_to_resize_params(self, filename):
+    def filename_to_resize_params(self, id, filename):
         """
         Filename to parameters
         Parses resize filename to a set of usable parameters. Will perform
         filename signature checking and throw an exception if requested
         resize filename is malformed.
 
-        :param filename: resize filename
+        :param id: string - unique storage id
+        :param filename: string - resize filename
         :return: dict of parameters
         """
 
-        """
-        (1) AUTOCROP FORMAT:
-            * schema id (1)
-            * id (3c72aedc-ba25-11e6-a569-406c8f413974-jpg)
-            * size (200x300)
-            * fit/fill (fill)
-            * format (jpg)
-            * quality (100)
-            * upscale (scale)<-- move to settings?
-            * signature (12345)
+        # validate signature
+        if not self.validate_signature(id, filename):
+            err = 'Unable to parse filename: bad signature'
+            raise x.InvalidArgumentException(err)
 
-        (2) MANUAL CROP FORMAT:
-            * schema id (2)
-            * id (3c72aedc-ba25-11e6-a569-406c8f413974-jpg)
-            * size
-            * box selection (must be proportional to size)
-            * format
-            * quality
-            * upscale <-- move to settings?
-            * signature
+        # get parts
+        parts = filename.split('-')
+        target_size,sample_size,quality,upscale,rest = parts
+        target_format = rest[rest.index('.') + 1:]
 
-        """
+        # detect manual/auto
+        if sample_size in ['fill', 'fit']:
+            resize = 'auto'
+        else:
+            err = False
+            sample_size = sample_size.split('x')
+            for dimension in sample_size:
+                if not dimension.isdigit() or int(dimension) <= 0:
+                    err = True
+                    break
+            if err or len(sample_size) != 2:
+                err = 'Unable to parse filename: bad sample size or crop factor'
+                raise x.InvalidArgumentException(err)
+            else:
+                resize = 'manual'
 
-        id = '3c72aedc-ba25-11e6-a569-406c8f413974-jpg'
-        resize_schema1 = '3c72aedc/ba25/11e6-a569/406c8f413974/200x300-fit-100-upscale-SIGNME.jpg'
-        resize_schema2 = '3c72aedc-ba25-11e6-a569-406c8f413974-200x300-0x0-20x30-jpg-100-upscale'
+        # validate size
+        err = False
+        target_size = target_size.split('x')
+        for dimension in target_size:
+            if not dimension.isdigit() or int(dimension) <= 0:
+                err = True
+                break
+        if err or len(target_size) != 2:
+            err = 'Unable to parse filename: bad target size'
+            raise x.InvalidArgumentException(err)
 
-        print('FILENAME:', filename)
+        # validate quality
+        if not str(quality).isdigit():
+            err = 'Quality must be numeric'
+            raise x.InvalidArgumentException(err)
+
+        # prepare upscale
+        upscale = True if upscale == 'upscale' else False
+
+        # prepare result
+        result = dict(
+            id=id,
+            resize_mode=resize,
+            target_size='x'.join(target_size),
+            output_format=target_format,
+            quality=int(quality),
+            filename=filename
+        )
+
+        if resize == 'auto':
+            result['factor'] = sample_size
+        if resize == 'manual':
+            result['sample_size'] = 'x'.join(sample_size)
+
+        return result
+
+
