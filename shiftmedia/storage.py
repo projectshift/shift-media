@@ -31,10 +31,7 @@ class Storage:
         it by that id and removes original on success.
         """
 
-        # todo: validate file before put
-        # todo: get real file extension to generate id with
-        # todo: BACKEND MUST PROVIDE URL BUILDING FUNCTIONS
-        # todo: BACKEND MUST PROVIDE URL TO ID+FILENAME FUNCTIONS
+        # TODO: Implement file validation
 
         if not os.path.exists(src):
             msg = 'Unable to find local file [{}]'
@@ -66,6 +63,7 @@ class Storage:
         :param url: string - url of resize to be created
         :return: string - same url on success
         """
+        # todo: test me
         id, filename = self.backend.parse_resize_url(url)
         resize_params = self.paths.filename_to_resize_params(id, filename)
         local_original = self.backend.retrieve_original(id, self._tmp_path)

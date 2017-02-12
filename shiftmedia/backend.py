@@ -120,7 +120,6 @@ class BackendLocal(Backend):
         dst = os.path.join(dst_dir, filename)
         if not os.path.exists(dst_dir):
             os.makedirs(dst_dir)
-        dst = os.path.join(dst_dir, filename)
         shutil.copyfile(src, dst)
         return dst
 
