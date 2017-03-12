@@ -226,6 +226,7 @@ class PathBuilderTests(TestCase):
         self.assertEquals(params['output_format'], result['output_format'])
         self.assertEquals(params['quality'], result['quality'])
         self.assertEquals(params['factor'], result['factor'])
+        self.assertEquals(params['upscale'], result['upscale'])
 
     def test_parse_manual_resize_filename(self):
         """ Parse manual resize filename into a set of parameters """
@@ -247,6 +248,7 @@ class PathBuilderTests(TestCase):
         self.assertEquals(params['sample_size'], result['sample_size'])
         self.assertEquals(params['output_format'], result['output_format'])
         self.assertEquals(params['quality'], result['quality'])
+        self.assertEquals(params['upscale'], result['upscale'])
 
     """
     PLEASE NOTE: the following is just for fun and is in fact excessive and
@@ -309,6 +311,9 @@ class PathBuilderTests(TestCase):
         signed_filename = signed_schema.format(**params)
         with assert_raises(x.InvalidArgumentException):
             pb.filename_to_resize_params(id, signed_filename)
+
+
+
 
 
 

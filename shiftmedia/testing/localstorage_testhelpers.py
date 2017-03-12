@@ -1,5 +1,20 @@
 import os, shutil
 from config.local import LocalConfig
+from shiftmedia import DefaultConfig
+
+
+class TestConfig(DefaultConfig):
+    """
+    Test config
+    This is a config file used for testing
+    """
+    SECRET_KEY = '123456'
+    LOCAL_TEMP = os.path.join(
+        os.path.realpath(os.path.dirname(__file__) + '/../../'),
+        'var',
+        'testing',
+        'localstorage-tmp'
+    )
 
 
 class LocalStorageTestHelpers():

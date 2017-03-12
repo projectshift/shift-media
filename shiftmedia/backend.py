@@ -10,19 +10,43 @@ class Backend(metaclass=ABCMeta):
     This defines methods your backend must implement in order to
     work with media storage
     """
+
+    # TODO: implement s3 backend
+    # TODO: implement clearing generated files in backend
+
     @abstractmethod
-    def put_original(self, src, id):
+    def __init__(self, url='http://localhost'):
+        """
+        Backend constructor
+        Requires a base storage url to build links.
+        :param url: string - base storage url
+        """
+        self._url = url
+
+    def get_url(self):
+        """
+        Get URL
+        Returns base URL of storage
+        """
+        return self._url
+
+    @abstractmethod
+    def put_original(self, src, id, force=False):
         """
         Put original file to storage
         Does not require a filename as it will be extracted from provided id.
+        Will raise an exception on an attempt to overwrite existing file which
+        you can force to ignore.
         """
         pass
 
     @abstractmethod
-    def put(self, src, id, filename):
+    def put(self, src, id, filename, force=False):
         """
-        Put file
-        Save local file in storage under given id and filename.
+        Put file to storage
+        Save local file in storage under given id and filename. Will raise an
+        exception on an attempt to overwrite existing file which you can force
+        to ignore.
         """
         pass
 
@@ -42,13 +66,17 @@ class Backend(metaclass=ABCMeta):
         """
         pass
 
-    # @abstractmethod
-    # def list(self, path=None):
-    #     """
-    #     List
-    #     Returns a list of files in storage under given path
-    #     """
-    #     pass
+    @abstractmethod
+    def parse_url(self, url):
+        """
+        Parse url
+        Processes url to return a tuple of id and filename. This is being used
+        when we create dynamic image resizes to retrieve the original based on
+        resize filename.
+        :param url: string - resize url
+        :return: tuple - id and filename
+        """
+        pass
 
 
 class BackendLocal(Backend):
@@ -56,7 +84,15 @@ class BackendLocal(Backend):
     Local backend
     Stores file locally in a directory without transferring to remote storage
     """
-    def __init__(self, local_path):
+
+    def __init__(self, local_path=None, url='http://localhost'):
+        """
+        Backend constructor
+        Requires a local storage path and base storage url.
+        :param local_path: string - where to store files
+        :param url: string - base storage url
+        """
+        super().__init__(url)
         self._path = local_path
 
     @property
@@ -69,7 +105,33 @@ class BackendLocal(Backend):
             os.makedirs(self._path)
         return self._path
 
-    def put_original(self, src, id):
+    def id_to_path(self, id):
+        """
+        Id to path
+        Returns a list of directories extracted from id
+        :param id: string, - object id
+        :return: list
+        """
+        parts = id.lower().split('-')[0:5]
+        tail = id[len('-'.join(parts)) + 1:]
+        parts.append(tail)
+        return parts
+
+    def parse_url(self, url):
+        """
+        Parse url
+        Processes url to return a tuple of id and filename. This is being used
+        when we create dynamic image resizes to retrieve the original based on
+        resize filename.
+        :param url: string - resize url
+        :return: tuple - id and filename
+        """
+        url = url.replace(self._url, '')
+        url = url.strip('/')
+        url = url.split('/')
+        return url
+
+    def put_original(self, src, id, force=False):
         """
         Put original file to storage
         Does not require a filename as it will be extracted from provided id.
@@ -78,24 +140,31 @@ class BackendLocal(Backend):
 
         :param src: string - path to source file
         :param id: string - generated id
+        :param force: bool - whether to overwrite existing
         :return: string - generated id
         """
         filename = '-'.join(id.split('-')[5:])
-        return self.put(src, id, filename)
+        return self.put(src, id, filename, force)
 
-    def put(self, src, id, filename):
+    def put(self, src, id, filename, force=False):
         """
         Put file to storage
-        Save local file in storage under given id and filename.
+        Save local file in storage under given id and filename. Will raise an
+        exception on an attempt to overwrite existing file which you can force
+        to ignore.
         """
         if not os.path.exists(src):
             msg = 'Unable to find local file [{}]'
             raise x.LocalFileNotFound(msg.format(src))
 
-        parts = id.split('-')[0:5]
+        parts = self.id_to_path(id)
         dir = os.path.join(self.path, *parts)
-        os.makedirs(dir)
-        dst = os.path.join(self.path, *parts, filename)
+        os.makedirs(dir, exist_ok=True)
+        dst = os.path.join(self.path, *parts, filename.lower())
+        if not force and os.path.exists(dst):
+            msg = 'File [' + filename + '] exists under [' + id + ']. '
+            msg += 'Use force option to overwrite.'
+            raise x.FileExists(msg)
         shutil.copyfile(src, dst)
         return id
 
@@ -115,7 +184,8 @@ class BackendLocal(Backend):
         Download file from storage and put to local temp path
         """
         filename = '-'.join(id.split('-')[5:])
-        src = os.path.join(self.path, *id.split('-')[0:5], filename)
+        path = self.id_to_path(id)
+        src = os.path.join(self.path, *path, filename)
         dst_dir = os.path.join(local_path, '-'.join(id.split('-')[:5]))
         dst = os.path.join(dst_dir, filename)
         if not os.path.exists(dst_dir):
@@ -125,27 +195,4 @@ class BackendLocal(Backend):
 
 
 class BackendS3(Backend):
-
-    # @attr('boto')
-    # def test_can_boto(self):
-    #     """ Can list S3 buckets with boto """
-    #     s3 = boto3.resource('s3', **self.get_config())
-    #     for bucket in s3.buckets.all():
-    #         print(bucket.name)
-    #
-    #     print(list(s3.buckets.all()))
-    #
-    # @attr('boto')
-    # def test_can_upload_to_s3(self):
-    #     """ Can upload stuff to s3 """
-    #     filename = 'test.jpg'
-    #     path = os.path.realpath(os.path.dirname(__file__))
-    #     path = os.path.join(path, 'test_assets', filename)
-    #
-    #     s3 = boto3.resource('s3', **self.get_config())
-    #     bucket = s3.Bucket(LocalConfig.AWS_S3_BUCKET)
-    #
-    #     with open(path, 'rb') as data:
-    #         result = bucket.put_object(Key='my_example_file.jpg', Body=data)
-    #         print('RESULT', result)
     pass

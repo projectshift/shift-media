@@ -14,7 +14,12 @@ class ConfigurationException(MediaException, ValueError):
 
 
 class LocalFileNotFound(MediaException, FileNotFoundError):
-    """ Raised wen trying to put nonexistent file to storage """
+    """ Raised when trying to put nonexistent file to storage """
+    pass
+
+
+class FileExists(MediaException, FileExistsError):
+    """ Raised wen trying to overwrite existing file """
     pass
 
 

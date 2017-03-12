@@ -5,6 +5,14 @@ from shiftmedia import exceptions as x
 
 class PathBuilder:
 
+    # TODO: come up with video transcoding schema
+    # TODO: it should allow for several outputs based on single input
+    # TODO: it should support creating static screenshots
+    # TODO: that will require a testcase with boto3 and elastic transcoder
+    # TODO: will allow us to know what are the url parameters
+    # TODO: and whether we should use config-based templating
+
+
     def __init__(self, secret_key):
         """
         Path builder constructor
@@ -62,7 +70,6 @@ class PathBuilder:
         non_signed_filename = '-'.join(parts[:4]) + extension
         signature = parts[4].replace(extension, '')
         return signature == self.generate_signature(id, non_signed_filename)
-
 
     def get_auto_crop_filename(
             self,
@@ -274,7 +281,8 @@ class PathBuilder:
             target_size='x'.join(target_size),
             output_format=target_format,
             quality=int(quality),
-            filename=filename
+            filename=filename,
+            upscale=upscale
         )
 
         if resize == 'auto':

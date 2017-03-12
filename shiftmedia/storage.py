@@ -43,7 +43,7 @@ class Storage:
         extension = utils.normalize_extension(extension)
         filename = name + '.' + extension
         id = utils.generate_id(filename)
-        self.backend.put(src, id)
+        self.backend.put(src, id, filename)
         if delete_local: os.remove(src)
         return id
 
@@ -54,6 +54,48 @@ class Storage:
         """
         return self.backend.delete(id)
 
+    def get_original_url(self, id):
+        """
+        Get original URL
+        Combines backend base url, path to object id and original filename.
+        :return: string - full object url
+        """
+        base = self.backend.get_url().strip('/')
+        parts = self.backend.id_to_path(id)
+        filename = parts[5]
+        path = '/'.join(parts)
+        return base + '/' + path + '/' + filename
+
+    def get_auto_crop_url(self, *args, **kwargs):
+        """
+        Get auto crop URL
+        Combines backend base url, path to object id and generated filename.
+        :param args: positional args to be passed to filename generator
+        :param kwargs: keyword args to be passed to filename generator
+        :return: string - full object url
+        """
+        id = kwargs['id'] if 'id' in kwargs else args[0]
+        base = self.backend.get_url().strip('/')
+        parts = self.backend.id_to_path(id)
+        path = '/'.join(parts)
+        filename = self.paths.get_auto_crop_filename(*args, **kwargs)
+        return base + '/' + path + '/' + filename
+
+    def get_manual_crop_url(self, *args, **kwargs):
+        """
+        Get manual crop URL
+        Combines backend base url, path to object id and generated filename.
+        :param args: positional args to be passed to filename generator
+        :param kwargs: keyword args to be passed to filename generator
+        :return: string - full object url
+        """
+        id = kwargs['id'] if 'id' in kwargs else args[0]
+        base = self.backend.get_url().strip('/')
+        parts = self.backend.id_to_path(id)
+        path = '/'.join(parts)
+        filename = self.paths.get_manual_crop_filename(*args, **kwargs)
+        return base + '/' + path + '/' + filename
+
     def create_resize(self, url):
         """
         Create resize
@@ -63,7 +105,6 @@ class Storage:
         :param url: string - url of resize to be created
         :return: string - same url on success
         """
-        # todo: test me
         id, filename = self.backend.parse_resize_url(url)
         resize_params = self.paths.filename_to_resize_params(id, filename)
         local_original = self.backend.retrieve_original(id, self._tmp_path)
@@ -72,6 +113,22 @@ class Storage:
         os.remove(local_original)
         os.remove(resize)
         return url
+
+    def transcode_video(self, url):
+        """
+        Transcode video
+        Accepts a url to nonexistent transcoded clip, parses and validates it
+        and then puts it back to storage.
+
+        :param url: string - url of clip to be created
+        :return: string - same url on success
+        """
+
+        # TODO: how can we make it work with local storage?
+        # TODO: shall we limit it to AWS backend only?
+        # TODO: shall we delegate this to backend (how will that work)?
+
+        pass
 
 
 
