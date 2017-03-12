@@ -170,42 +170,27 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
 
         # retrieve file
         result = backend.retrieve_original(id, self.tmp_path)
-        expected_dst = os.path.join(
-            self.tmp_path,
-            '-'.join(id.split('-')[0:5]),
-            'demo-test.tar.gz'
-        )
-
+        expected_dst = os.path.join(self.tmp_path, id, 'demo-test.tar.gz')
         self.assertEquals(expected_dst, result)
         self.assertTrue(os.path.exists(expected_dst))
 
-    @attr('xxx')
     def test_parse_url(self):
         """ Parsing object url into id and filename """
-        raise Exception('Implement me')
-        file = 'somefile.jpg'
-        pb = PathBuilder('123456')
+        filename = 'demo-file.tar.gz'
         backend = BackendLocal(self.path)
-        id = str(uuid.uuid1()) + '-' + file
-        url = backend.get_url()
-        path = url + '/' + str(uuid.uuid1()).replace('-', '/') + '/'
-
-        original = path + file
+        pb = PathBuilder('123456')
+        base_url = backend.get_url()
+        id = utils.generate_id(filename)
+        parts = backend.id_to_path(id)
+        path = '/'.join(parts)
+        object_url = base_url + '/' + path + '/'
+        original = object_url + filename
+        crop_filename = pb.get_auto_crop_filename(id, '100x100', 'fit')
+        resize = object_url + crop_filename
         result1 = backend.parse_url(original)
-
-        print('ORIGINAL', original)
-        print('ORIGINAL RESULT', result1)
-
-
-        resize = path + pb.get_auto_crop_filename(id, '200x200', 'fill')
         result2 = backend.parse_url(resize)
-
-
-        print('RESIZE', resize)
-        print('RESIZE', result2)
-
-
-
-
-
+        self.assertEquals(id, result1[0])
+        self.assertEquals(filename, result1[1])
+        self.assertEquals(id, result2[0])
+        self.assertEquals(crop_filename, result2[1])
 

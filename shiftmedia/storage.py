@@ -101,17 +101,38 @@ class Storage:
         Create resize
         Accepts storage URL of a resize, parses and validates it and then
         creates the resize to be put back to storage.
-
         :param url: string - url of resize to be created
         :return: string - same url on success
         """
-        id, filename = self.backend.parse_resize_url(url)
-        resize_params = self.paths.filename_to_resize_params(id, filename)
+        id, filename = self.backend.parse_url(url)
+        params = self.paths.filename_to_resize_params(id, filename)
+        mode = params['resize_mode']
+        modes = ['auto']
+        if mode not in modes:
+            err = 'Resize mode [' + mode + '] is not yet implemented.'
+            raise x.NotImplementedError(err)
+
         local_original = self.backend.retrieve_original(id, self._tmp_path)
-        resize = Resizer.resize(**resize_params)
+        local_resize = os.path.join(self._tmp_path, id, params['filename'])
+        factor = Resizer.RESIZE_TO_FIT
+        if params['factor'] == 'fill':
+            factor = Resizer.RESIZE_TO_FILL
+
+        resize = Resizer.resize(
+            src=local_original,
+            dst=local_resize,
+            size=params['target_size'],
+            mode= factor,
+            upscale=params['upscale'],
+            format=params['output_format'],
+            quality=params['quality']
+        )
         self.backend.put(resize, id, filename)
         os.remove(local_original)
         os.remove(resize)
+        tmp_dir = os.path.join(self._tmp_path, id)
+        if not os.listdir(tmp_dir):
+            os.rmdir(tmp_dir)
         return url
 
     def transcode_video(self, url):

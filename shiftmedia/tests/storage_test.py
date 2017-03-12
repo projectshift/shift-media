@@ -101,7 +101,6 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertTrue(url[6].startswith('100x200-fill-80-upscale'))
         self.assertTrue(url[6].endswith('.gif'))
 
-
     def test_get_manual_crop_url(self):
         """ Generating manual crop url """
         path = self.path
@@ -124,29 +123,33 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.assertTrue(url[6].startswith('100x200-200x400-80-upscale'))
         self.assertTrue(url[6].endswith('.gif'))
 
-    @attr('zzz')
-    def test_create_resize_from_filename(self):
-        """ Creating resize from filename """
-        raise Exception('Implement me')
+    def test_create_auto_crop_from_filename(self):
+        """ Creating auto crop resize from filename """
         uploads = self.upload_path
         path = self.path
         self.prepare_uploads()
-        file = os.path.join(uploads, 'original_vertical.jpg')
-
+        filename = 'original_vertical.jpg'
+        src = os.path.join(uploads, filename)
         backend = BackendLocal(path)
         storage = Storage(TestConfig, backend)
-        paths = storage.paths
+        id = storage.put(src)
+        resize_url = storage.get_auto_crop_url(id, '100x200', 'fill')
+        storage.create_resize(resize_url)
+        resize_filename = resize_url.split('/')[-1]
 
-        id = storage.put(file)
-        resize_filename = paths.get_auto_crop_filename(id, '100x200', 'fit')
-        url = backend
+        tmp_path = os.path.join(self.tmp_path, id)
+        tmp_original = os.path.join(tmp_path, filename)
+        tmp_resize = os.path.join(tmp_path, resize_filename)
+        parts = backend.id_to_path(id)
+        storage_resize = os.path.join(path, *parts, resize_filename)
 
+        # assert tmp stuff deleted
+        self.assertFalse(os.path.exists(tmp_original))
+        self.assertFalse(os.path.exists(tmp_resize))
+        self.assertFalse(os.path.exists(tmp_path))
 
-        print()
-
-        print('ID: ', id)
-
-        self.clean()
+        # assert put to storage
+        self.assertTrue(os.path.exists(storage_resize))
 
 
 

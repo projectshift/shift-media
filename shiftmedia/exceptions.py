@@ -19,7 +19,12 @@ class LocalFileNotFound(MediaException, FileNotFoundError):
 
 
 class FileExists(MediaException, FileExistsError):
-    """ Raised wen trying to overwrite existing file """
+    """ Raised when trying to overwrite existing file """
+    pass
+
+
+class NotImplementedError(MediaException, Exception):
+    """ Raised when something is not there yet """
     pass
 
 

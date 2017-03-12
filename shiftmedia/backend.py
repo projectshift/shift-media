@@ -127,9 +127,11 @@ class BackendLocal(Backend):
         :return: tuple - id and filename
         """
         url = url.replace(self._url, '')
-        url = url.strip('/')
+        url = url.strip('/').lower()
         url = url.split('/')
-        return url
+        id = '-'.join(url[:-1])
+        filename = url[-1]
+        return id, filename
 
     def put_original(self, src, id, force=False):
         """
@@ -183,16 +185,91 @@ class BackendLocal(Backend):
         Retrieve original
         Download file from storage and put to local temp path
         """
-        filename = '-'.join(id.split('-')[5:])
         path = self.id_to_path(id)
+        filename = path[5]
         src = os.path.join(self.path, *path, filename)
-        dst_dir = os.path.join(local_path, '-'.join(id.split('-')[:5]))
+        dst_dir = os.path.join(local_path, id)
         dst = os.path.join(dst_dir, filename)
         if not os.path.exists(dst_dir):
-            os.makedirs(dst_dir)
+            os.makedirs(dst_dir, exist_ok=True)
         shutil.copyfile(src, dst)
         return dst
 
 
 class BackendS3(Backend):
-    pass
+    """
+    Amazon S3 backend
+    Stores files in an amazon s3 bucket
+    """
+
+    def __init__(self, url='http://localhost'):
+        """
+        Backend constructor
+        :param url: string - base storage url
+        """
+        super().__init__(url)
+
+    @property
+    def path(self):
+        """
+        Get path
+        Returns path to local storage and creates one if necessary
+        """
+        pass
+
+    def id_to_path(self, id):
+        """
+        Id to path
+        Returns a list of directories extracted from id
+        :param id: string, - object id
+        :return: list
+        """
+        pass
+
+    def parse_url(self, url):
+        """
+        Parse url
+        Processes url to return a tuple of id and filename. This is being used
+        when we create dynamic image resizes to retrieve the original based on
+        resize filename.
+        :param url: string - resize url
+        :return: tuple - id and filename
+        """
+        pass
+
+    def put_original(self, src, id, force=False):
+        """
+        Put original file to storage
+        Does not require a filename as it will be extracted from provided id.
+        the resulting path will have following structure:
+            3c72aedc/ba25/11e6/569/406c8f413974/original-filename.jpg
+
+        :param src: string - path to source file
+        :param id: string - generated id
+        :param force: bool - whether to overwrite existing
+        :return: string - generated id
+        """
+        pass
+
+    def put(self, src, id, filename, force=False):
+        """
+        Put file to storage
+        Save local file in storage under given id and filename. Will raise an
+        exception on an attempt to overwrite existing file which you can force
+        to ignore.
+        """
+        pass
+
+    def delete(self, id):
+        """
+        Delete
+        Remove file from storage by id
+        """
+        pass
+
+    def retrieve_original(self, id, local_path):
+        """
+        Retrieve original
+        Download file from storage and put to local temp path
+        """
+        pass

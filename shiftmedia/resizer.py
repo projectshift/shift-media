@@ -1,5 +1,6 @@
 from PIL import Image, ImageSequence
 from math import floor
+from shiftmedia import utils
 
 
 class Resizer:
@@ -11,6 +12,7 @@ class Resizer:
     """
 
     # TODO: IMPLEMENT MANUAL RESIZE
+    # TODO: RENAME RESIZE METHOD
 
     # resize modes (crop factor)
     RESIZE_TO_FILL = 'mode_resize_to_fill'
@@ -48,6 +50,8 @@ class Resizer:
         """
         img = Image.open(src)
         animated_gif = 'duration' in img.info and img.info['duration'] > 0
+        if format:
+            format = utils.extension_to_format(format) # normalize for pil
         if not animated_gif:
             # resize regular image
             img = img.convert(mode='RGBA')

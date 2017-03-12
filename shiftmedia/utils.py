@@ -23,6 +23,23 @@ def normalize_extension(extension):
     return extension
 
 
+def extension_to_format(extension):
+    """
+    Extension to image format
+    Attempts to convert file extension to image format that Pillow
+    library understands.
+    :param extension: string - file extension
+    :return: string - image format name
+    """
+    formats = dict()
+    formats['jpg'] = 'JPEG'
+    formats['tif'] = 'TIFF'
+
+    extension = normalize_extension(extension)
+    format = formats[extension] if extension in formats else extension.upper()
+    return format
+
+
 def generate_id(original_filename):
     """
     Generate id

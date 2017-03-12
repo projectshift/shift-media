@@ -94,7 +94,7 @@ class PathBuilderTests(TestCase):
             id=utils.generate_id('jpg'),
             sample_size='200xCRAP',
             target_size='100x200',
-            output_format='jpg',
+            output_format='JPEG',
             upscale=True,
             quality=80
         )
@@ -108,7 +108,7 @@ class PathBuilderTests(TestCase):
             id=utils.generate_id('jpg'),
             sample_size='200x400',
             target_size='100xCRAP',
-            output_format='jpg',
+            output_format='JPEG',
             upscale=True,
             quality=80
         )

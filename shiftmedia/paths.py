@@ -1,6 +1,7 @@
 import hashlib
 from shiftmedia.config.default import DefaultConfig
 from shiftmedia import exceptions as x
+from shiftmedia import utils
 
 
 class PathBuilder:
@@ -64,7 +65,6 @@ class PathBuilder:
         :param filename: - string, resize filename
         :return:
         """
-
         parts = filename.split('-')
         extension = parts[4][parts[4].index('.'):]
         non_signed_filename = '-'.join(parts[:4]) + extension
