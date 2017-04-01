@@ -2,7 +2,6 @@ from PIL import Image, ImageSequence
 from math import floor
 from shiftmedia import utils
 
-
 class Resizer:
     """
     Resizer
@@ -12,24 +11,49 @@ class Resizer:
     """
 
     # TODO: IMPLEMENT MANUAL RESIZE
-    # TODO: RENAME RESIZE METHOD
+    # TODO: MAKE PATH TO PARAMS COMPATIBLE
 
     # resize modes (crop factor)
     RESIZE_TO_FILL = 'mode_resize_to_fill'
     RESIZE_TO_FIT = 'mode_resize_to_fit'
 
     @staticmethod
-    def resize(
-            src,
-            dst,
-            size,
-            mode=None,
-            upscale=False,
-            format=None,
-            quality=100
+    def manual_crop(
+        src,
+        dst,
+        src_size,
+        dst_size,
+        upscale=False,
+        format=None,
+        quality=100
     ):
         """
-        Resize and write
+        Manual crop
+
+        :param src:
+        :param dst:
+        :param src_size:
+        :param dst_size:
+        :param upscale:
+        :param format:
+        :param quality:
+        :return:
+        """
+        pass
+
+
+    @staticmethod
+    def auto_crop(
+        src,
+        dst,
+        size,
+        mode=None,
+        upscale=False,
+        format=None,
+        quality=100
+    ):
+        """
+        Resize auto crop
         Accepts source and destination path, as well as target size
         and format. May optionally perform upscale in case src image is
         smaller than target size. Writes file to destination on success.
@@ -55,17 +79,17 @@ class Resizer:
         if not animated_gif:
             # resize regular image
             img = img.convert(mode='RGBA')
-            img = Resizer.resize_img(img, size, mode, upscale)
+            img = Resizer.auto_crop_img(img, size, mode, upscale)
             img.save(dst, format=format, quality=quality)
         else:
             # resize animated gif
             out = img.convert(mode='RGBA')
-            out = Resizer.resize_img(out, size, mode, upscale)
+            out = Resizer.auto_crop_img(out, size, mode, upscale)
             frames = []
             for index, frame in enumerate(ImageSequence.Iterator(img)):
                 if index == 0: continue
                 frame = frame.convert(mode='RGBA')
-                frame = Resizer.resize_img(frame, size, mode, upscale)
+                frame = Resizer.auto_crop_img(frame, size, mode, upscale)
                 frames.append(frame)
             out.save(dst, format=format, save_all=True, append_images=frames)
 
@@ -73,9 +97,9 @@ class Resizer:
         return dst
 
     @staticmethod
-    def resize_img(img, size, mode=None, upscale=False):
+    def auto_crop_img(img, size, mode=None, upscale=False):
         """
-        Resize and img return
+        Auto crop and return img
         Accepts source image (file or object) and target size. May optionally
         perform source image upscale in case it is smaller than dst.
         Does not write anything, but instead returns PIL.Image object which

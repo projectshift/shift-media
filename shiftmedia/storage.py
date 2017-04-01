@@ -7,7 +7,6 @@ from shiftmedia.resizer import Resizer
 
 
 class Storage:
-
     def __init__(self, config, backend):
         self.config = config
         self.backend = backend
@@ -107,7 +106,7 @@ class Storage:
         id, filename = self.backend.parse_url(url)
         params = self.paths.filename_to_resize_params(id, filename)
         mode = params['resize_mode']
-        modes = ['auto']
+        modes = ['auto', 'manual']
         if mode not in modes:
             err = 'Resize mode [' + mode + '] is not yet implemented.'
             raise x.NotImplementedError(err)
@@ -118,7 +117,7 @@ class Storage:
         if params['factor'] == 'fill':
             factor = Resizer.RESIZE_TO_FILL
 
-        resize = Resizer.resize(
+        resize = Resizer.auto_crop(
             src=local_original,
             dst=local_resize,
             size=params['target_size'],
