@@ -70,7 +70,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         uploads = self.upload_path
         src = os.path.join(uploads, 'demo-test.tar.gz')
         id = utils.generate_id('demo-test.tar.gz')
-        backend.put(src, id, 'demo-test.tar.gz')
+        backend.put_variant(src, id, 'demo-test.tar.gz')
 
         # assert directories created
         current = self.path
@@ -87,7 +87,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         backend = BackendLocal(self.path)
         id = utils.generate_id('test.tar.gz')
         with assert_raises(x.LocalFileNotFound):
-            backend.put('nonexistent', id, 'random.tar.gz')
+            backend.put_variant('nonexistent', id, 'random.tar.gz')
 
     def test_put_with_sequential_ids(self):
         """ Putting two items in sequence"""
@@ -99,8 +99,8 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         backend = BackendLocal(self.path)
         uploads = self.upload_path
         src = os.path.join(uploads, 'demo-test.tar.gz')
-        backend.put(src, id1, 'demo-test.tar.gz')
-        backend.put(src, id2, 'demo-test.tar.gz')
+        backend.put_variant(src, id1, 'demo-test.tar.gz')
+        backend.put_variant(src, id2, 'demo-test.tar.gz')
         path1 = os.path.join(backend.path, *backend.id_to_path(id1), filename)
         path2 = os.path.join(backend.path, *backend.id_to_path(id2), filename)
         self.assertTrue(os.path.exists(path1))
@@ -114,9 +114,9 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         src1 = os.path.join(uploads, 'demo-test.tar.gz')
         src2 = os.path.join(uploads, 'test.jpg')
         id = utils.generate_id('demo-test.tar.gz')
-        backend.put(src1, id, 'demo-test.tar.gz')
+        backend.put_variant(src1, id, 'demo-test.tar.gz')
         with assert_raises(x.FileExists):
-            backend.put(src2, id, 'demo-test.tar.gz')
+            backend.put_variant(src2, id, 'demo-test.tar.gz')
 
     def test_force_put_to_overwrite_existing(self):
         """ Using force option to overwrite existing file """
@@ -127,12 +127,11 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         src1 = os.path.join(uploads, filename)
         src2 = os.path.join(uploads, 'test.jpg')
         id = utils.generate_id(filename)
-        backend.put(src1, id, filename)
-        backend.put(src2, id, filename, True)
+        backend.put_variant(src1, id, filename)
+        backend.put_variant(src2, id, filename, True)
         path = os.path.join(backend.path, *backend.id_to_path(id), filename)
         # assert overwritten with src2
         self.assertEquals(os.path.getsize(path), os.path.getsize(src2))
-
 
     def test_delete_file(self):
         """ Deleting file from local storage """
@@ -148,8 +147,8 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         id2[4] += 'ZZZ'
         id2 = '-'.join(id2)
 
-        backend.put(src, id1, 'original.tar.gz')
-        backend.put(src, id2, 'original.tar.gz')
+        backend.put_variant(src, id1, 'original.tar.gz')
+        backend.put_variant(src, id2, 'original.tar.gz')
         backend.delete(id1)
 
         path1 = os.path.join(self.path, *id1.split('-')[0:6], 'original.tar.gz')

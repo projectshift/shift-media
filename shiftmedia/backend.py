@@ -41,9 +41,9 @@ class Backend(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def put(self, src, id, filename, force=False):
+    def put_variant(self, src, id, filename, force=False):
         """
-        Put file to storage
+        Put file variant to storage
         Save local file in storage under given id and filename. Will raise an
         exception on an attempt to overwrite existing file which you can force
         to ignore.
@@ -146,11 +146,11 @@ class BackendLocal(Backend):
         :return: string - generated id
         """
         filename = '-'.join(id.split('-')[5:])
-        return self.put(src, id, filename, force)
+        return self.put_variant(src, id, filename, force)
 
-    def put(self, src, id, filename, force=False):
+    def put_variant(self, src, id, filename, force=False):
         """
-        Put file to storage
+        Put file variant to storage
         Save local file in storage under given id and filename. Will raise an
         exception on an attempt to overwrite existing file which you can force
         to ignore.

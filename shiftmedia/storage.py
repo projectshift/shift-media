@@ -42,7 +42,7 @@ class Storage:
         extension = utils.normalize_extension(extension)
         filename = name + '.' + extension
         id = utils.generate_id(filename)
-        self.backend.put(src, id, filename)
+        self.backend.put_variant(src, id, filename)
         if delete_local: os.remove(src)
         return id
 
@@ -126,7 +126,7 @@ class Storage:
             format=params['output_format'],
             quality=params['quality']
         )
-        self.backend.put(resize, id, filename)
+        self.backend.put_variant(resize, id, filename)
         os.remove(local_original)
         os.remove(resize)
         tmp_dir = os.path.join(self._tmp_path, id)
