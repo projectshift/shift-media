@@ -15,13 +15,25 @@ class Backend(metaclass=ABCMeta):
     # TODO: implement clearing generated files in backend
 
     @abstractmethod
-    def __init__(self, url='http://localhost'):
+    def __init__(self, local_path, url='http://localhost'):
         """
         Backend constructor
         Requires a base storage url to build links.
+        :param local_path: string - path to local temp dir
         :param url: string - base storage url
         """
         self._url = url
+        self._path = local_path
+
+    @property
+    def path(self):
+        """
+        Get path
+        Returns path to local storage and creates one if necessary
+        """
+        if not os.path.exists(self._path):
+            os.makedirs(self._path)
+        return self._path
 
     def get_url(self):
         """
@@ -89,21 +101,10 @@ class BackendLocal(Backend):
         """
         Backend constructor
         Requires a local storage path and base storage url.
-        :param local_path: string - where to store files
+        :param local_path: string - path to local temp dir
         :param url: string - base storage url
         """
-        super().__init__(url)
-        self._path = local_path
-
-    @property
-    def path(self):
-        """
-        Get path
-        Returns path to local storage and creates one if necessary
-        """
-        if not os.path.exists(self._path):
-            os.makedirs(self._path)
-        return self._path
+        super().__init__(local_path, url)
 
     def id_to_path(self, id):
         """
@@ -202,20 +203,27 @@ class BackendS3(Backend):
     Stores files in an amazon s3 bucket
     """
 
-    def __init__(self, url='http://localhost'):
+    def __init__(self,
+        key_id,
+        access_secret,
+        bucket,
+        local_path,
+        url='http://localhost'):
         """
-        Backend constructor
+        S3 Backend constructor
+        Creates an instance of s3 backend, requires credentials to access
+        amazon s3 and bucket name.
+
+        :param key_id: string - AWS IAM Key id
+        :param access_secret: string - AWS IAM Access secret
+        :param bucket: string - AWS S3 bucket name, e.g. 'test-bucket'
+        :param local_path: string - path to local temp dir
         :param url: string - base storage url
         """
-        super().__init__(url)
-
-    @property
-    def path(self):
-        """
-        Get path
-        Returns path to local storage and creates one if necessary
-        """
-        pass
+        self.key_id = key_id
+        self.access_secret = access_secret
+        self.bucket = bucket
+        super().__init__(local_path, url)
 
     def id_to_path(self, id):
         """
@@ -237,9 +245,9 @@ class BackendS3(Backend):
         """
         pass
 
-    def put_original(self, src, id, force=False):
+    def put(self, src, id, force=False):
         """
-        Put original file to storage
+        Put file to storage
         Does not require a filename as it will be extracted from provided id.
         the resulting path will have following structure:
             3c72aedc/ba25/11e6/569/406c8f413974/original-filename.jpg
@@ -251,9 +259,9 @@ class BackendS3(Backend):
         """
         pass
 
-    def put(self, src, id, filename, force=False):
+    def put_variant(self, src, id, filename, force=False):
         """
-        Put file to storage
+        Put file variant to storage
         Save local file in storage under given id and filename. Will raise an
         exception on an attempt to overwrite existing file which you can force
         to ignore.
