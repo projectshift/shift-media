@@ -31,9 +31,9 @@ class Backend(metaclass=ABCMeta):
         return self._url
 
     @abstractmethod
-    def put_original(self, src, id, force=False):
+    def put(self, src, id, force=False):
         """
-        Put original file to storage
+        Put  file to storage
         Does not require a filename as it will be extracted from provided id.
         Will raise an exception on an attempt to overwrite existing file which
         you can force to ignore.
@@ -133,9 +133,9 @@ class BackendLocal(Backend):
         filename = url[-1]
         return id, filename
 
-    def put_original(self, src, id, force=False):
+    def put(self, src, id, force=False):
         """
-        Put original file to storage
+        Put file to storage
         Does not require a filename as it will be extracted from provided id.
         the resulting path will have following structure:
             3c72aedc/ba25/11e6/569/406c8f413974/original-filename.jpg
