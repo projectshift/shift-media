@@ -14,6 +14,9 @@ class PathBuilder:
     # TODO: and whether we should use config-based templating
 
 
+    # TODO: evaluate itsdangerous
+
+
     def __init__(self, secret_key):
         """
         Path builder constructor

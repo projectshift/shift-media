@@ -10,7 +10,27 @@ class Resizer:
     images and animated GIFs.
     """
 
+    # TODO: WRITE DOWN HOW MANUAL CROPS WORK IN GENERAL
+
+    # Manual crops allow to choose target size, sample size
+    # and specify position and where this sample will taken from
+
+    # Do we need to specify both target size and sample, or is target enough?
+    # Yes, we need both. That will allow arbitrary crops.
+    # Not just specifying non-centered position of sample.
+
+    # How to deal with dst > src or more generically when sample size and
+    # position goes outside of src?
+
+    # Sample size must be proportional to target size.
+
+
+
+
+
+
     # TODO: IMPLEMENT MANUAL RESIZE
+    # TODO: MAKE UNIVERSAL RESIZE METHOD
     # TODO: MAKE PATH TO PARAMS COMPATIBLE
 
     # resize modes (crop factor)
@@ -39,6 +59,24 @@ class Resizer:
         :param quality:
         :return:
         """
+        pass
+
+
+    def manual_crop_img(self, img, size, upscale=False):
+        """
+        Manual crop and return img
+        Accepts source image (file or object) and target size. May optionally
+        perform source image upscale in case it is smaller than dst.
+        Does not write anything, but instead returns PIL.Image object which
+        makes it reusable for gif sequence animations.
+
+        :param img: Source file path or PIL.Image object
+        :param size: Target size
+        :param upscale: Whether to enlarge src if its smaller than dst
+        :param write: Write to dst or return image object (for testing)
+        :return: PIL.Image object
+        """
+
         pass
 
 
