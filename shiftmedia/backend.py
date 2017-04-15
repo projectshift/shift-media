@@ -260,14 +260,22 @@ class BackendS3(Backend):
         """
         Exists
         Checks whether a file or directory/ exists and returns a boolean result.
+
+        Be careful with directories - it might appear that they exist when
+        in fact they don't, e.g. /some/path/file.txt existence doesn't
+        necessarily mean .some/path exists. Thus it is more helpful to check
+        for file existence, i.e. the FULL key existence.
+
         :param object: string - file or directory/
         :return: bool
         """
         try:
-            client = boto3.client('s3', **self.credentials)
-            client.head_object(Bucket=self.bucket_name, Key=object)
-        except bx.ClientError:
-            return False
+            resource = boto3.resource('s3', **self.credentials)
+            resource.Object(self.bucket_name, object).load()
+        except bx.ClientError as e:
+            if e.response['Error']['Code'] == '404': return False
+            else: raise e
+
         return True
 
     def recursive_delete(self, path=None):
@@ -328,6 +336,7 @@ class BackendS3(Backend):
         if not os.path.exists(src):
             msg = 'Unable to find local file [{}]'
             raise x.LocalFileNotFound(msg.format(src))
+
 
         path = '/'.join(self.id_to_path(id)) + '/' + filename
         if not force and self.exists(path):

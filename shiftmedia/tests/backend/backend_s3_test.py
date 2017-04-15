@@ -30,7 +30,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
     def tearDown(self):
         """ Clean up after yourself """
         self.clean()
-        # self.clean_s3()
+        self.clean_s3()
         super().tearDown()
 
     def clean_s3(self, path=None):
@@ -89,7 +89,13 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
             Key='test-object',
             Body=''
         )
+        client.put_object(
+            Bucket=backend.bucket_name,
+            Key='test-dir/',
+            Body=''
+        )
         self.assertTrue(backend.exists('test-object'))
+        self.assertTrue(backend.exists('test-dir/'))
         self.assertFalse(backend.exists('nonexistent'))
 
     def test_put_raises_on_nonexistent_file(self):
@@ -170,7 +176,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
             str(res['ResponseMetadata']['HTTPHeaders']['content-length'])
         )
 
-    @attr('xxx')
+    @attr('zzz')
     def test_delete_file(self):
         """ Deleting file from local storage """
         # put file
@@ -178,24 +184,30 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         backend = BackendS3(**self.config)
         uploads = self.upload_path
         src = os.path.join(uploads, 'test.tar.gz')
+
         id1 = utils.generate_id('test.tar.gz')
+        backend.put(src, id1)
 
         # regression testing (only delete what requested)
         id2 = id1.split('-')
         id2[4] += 'ZZZ'
         id2 = '-'.join(id2)
 
-        backend.put_variant(src, id1, 'original.tar.gz')
-        backend.put_variant(src, id2, 'original.tar.gz')
+        backend.put(src, id1, True)
+        backend.put_variant(src, id1, 'demo.txt')
+        backend.put(src, id2, True)
         backend.delete(id1)
 
-        path1 = '/'.join(backend.id_to_path(id1))
+        path1 = '/'.join(backend.id_to_path(id1)) + '/test.tar.gz'
+        path2 = '/'.join(backend.id_to_path(id1)) + '/demo.txt'
         self.assertFalse(backend.exists(path1))
+        self.assertFalse(backend.exists(path2))
 
         # assume only proper file deleted
-        path2 = '/'.join(backend.id_to_path(id2)) + '/'
-        print('PATH2', path2)
-        self.assertTrue(backend.exists(path2))
+        path3 = '/'.join(backend.id_to_path(id2)) + '/test.tar.gz'
+        self.assertTrue(backend.exists(path3))
+
+
     #
     # def test_retrieve_original_to_temp(self):
     #     """ Retrieving from backend to local temp """
