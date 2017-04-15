@@ -270,6 +270,39 @@ class BackendS3(Backend):
             return False
         return True
 
+    def recursive_delete(self, path=None):
+        """
+        Recursive delete
+        Deletes all objects recursively under given path. If path is not
+        provided, will delete every object in the bucket. Be careful!
+        :param path: string - objects starting with this will be deleted
+        :return: None
+        """
+        client = boto3.client('s3', **self.credentials)
+        paginator = client.get_paginator('list_objects_v2')
+        params = dict(Bucket=self.bucket_name)
+        if path: params['Prefix'] = path
+        pages = paginator.paginate(**params)
+
+        per_query = 999  # aws limit
+        index = 1
+        delete_us = dict(Objects=[])
+        bucket = self.bucket_name
+        for item in pages.search('Contents'):
+            if not item: continue
+            delete_us['Objects'].append(dict(Key=item['Key']))
+            index += 1
+
+            # flush full page
+            if index >= per_query:
+                client.delete_objects(Bucket=bucket, Delete=delete_us)
+                index = 0
+                delete_us = dict(Objects=[])
+
+        # flush last page
+        if len(delete_us['Objects']):
+            client.delete_objects(Bucket=bucket, Delete=delete_us)
+
     def put(self, src, id, force=False):
         """
         Put file to storage
@@ -318,7 +351,9 @@ class BackendS3(Backend):
         Delete
         Remove file from storage by id
         """
-        pass
+        path = '/'.join(self.id_to_path(id))
+        self.recursive_delete(path)
+
 
     def retrieve_original(self, id, local_path):
         """

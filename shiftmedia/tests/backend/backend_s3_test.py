@@ -30,38 +30,17 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
     def tearDown(self):
         """ Clean up after yourself """
         self.clean()
-        self.clean_s3()
+        # self.clean_s3()
         super().tearDown()
 
-    def clean_s3(self):
+    def clean_s3(self, path=None):
         """
         Recursive delete
         Uses paginator to fetch S3 objects, that deletes them in chunks
         """
         backend = BackendS3(**self.config)
-        resource = boto3.resource('s3', **backend.credentials)
-        client = resource.meta.client
-        paginator = client.get_paginator('list_objects_v2')
-        pages = paginator.paginate(Bucket=backend.bucket_name)
+        backend.recursive_delete()
 
-        per_query = 999 # aws limit
-        index = 1
-        delete_us = dict(Objects=[])
-        bucket = backend.bucket_name
-        for item in pages.search('Contents'):
-            if not item: continue
-            delete_us['Objects'].append(dict(Key=item['Key']))
-            index += 1
-
-            # flush full page
-            if index >= per_query:
-                client.delete_objects(Bucket=bucket, Delete=delete_us)
-                index = 0
-                delete_us = dict(Objects=[])
-
-        # flush last page
-        if len(delete_us['Objects']):
-            client.delete_objects(Bucket=bucket, Delete=delete_us)
 
     # ------------------------------------------------------------------------
     # Tests
@@ -171,7 +150,6 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         with assert_raises(x.FileExists):
             backend.put_variant(src2, id, 'demo-test.tar.gz')
 
-    @attr('xxx')
     def test_force_put_to_overwrite_existing(self):
         """ Using force option to overwrite existing file """
         self.prepare_uploads()
@@ -191,31 +169,33 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
             str(os.path.getsize(src2)),
             str(res['ResponseMetadata']['HTTPHeaders']['content-length'])
         )
-    #
-    # def test_delete_file(self):
-    #     """ Deleting file from local storage """
-    #     # put file
-    #     self.prepare_uploads()
-    #     backend = BackendLocal(self.path)
-    #     uploads = self.upload_path
-    #     src = os.path.join(uploads, 'test.tar.gz')
-    #     id1 = utils.generate_id('test.tar.gz')
-    #
-    #     # regression testing
-    #     id2 = id1.split('-')
-    #     id2[4] += 'ZZZ'
-    #     id2 = '-'.join(id2)
-    #
-    #     backend.put_variant(src, id1, 'original.tar.gz')
-    #     backend.put_variant(src, id2, 'original.tar.gz')
-    #     backend.delete(id1)
-    #
-    #     path1 = os.path.join(self.path, *id1.split('-')[0:6], 'original.tar.gz')
-    #     self.assertFalse(os.path.exists(path1))
-    #
-    #     # assume only proper file deleted
-    #     path2 = os.path.join(self.path, *id2.split('-')[0:6], 'original.tar.gz')
-    #     self.assertTrue(os.path.exists(path2))
+
+    @attr('xxx')
+    def test_delete_file(self):
+        """ Deleting file from local storage """
+        # put file
+        self.prepare_uploads()
+        backend = BackendS3(**self.config)
+        uploads = self.upload_path
+        src = os.path.join(uploads, 'test.tar.gz')
+        id1 = utils.generate_id('test.tar.gz')
+
+        # regression testing (only delete what requested)
+        id2 = id1.split('-')
+        id2[4] += 'ZZZ'
+        id2 = '-'.join(id2)
+
+        backend.put_variant(src, id1, 'original.tar.gz')
+        backend.put_variant(src, id2, 'original.tar.gz')
+        backend.delete(id1)
+
+        path1 = '/'.join(backend.id_to_path(id1))
+        self.assertFalse(backend.exists(path1))
+
+        # assume only proper file deleted
+        path2 = '/'.join(backend.id_to_path(id2)) + '/'
+        print('PATH2', path2)
+        self.assertTrue(backend.exists(path2))
     #
     # def test_retrieve_original_to_temp(self):
     #     """ Retrieving from backend to local temp """
