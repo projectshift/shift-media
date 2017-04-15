@@ -5,7 +5,6 @@ from botocore import exceptions as bx
 from shiftmedia import exceptions as x
 
 
-
 class Backend(metaclass=ABCMeta):
     """
     Abstract backend
@@ -217,7 +216,6 @@ class BackendS3(Backend):
         :param bucket: string - AWS S3 bucket name, e.g. 'test-bucket'
         :param url: string - base storage url
         """
-        self._boto = None
         self.bucket_name = bucket
         self.credentials = dict(
             aws_access_key_id=key_id,
@@ -314,7 +312,6 @@ class BackendS3(Backend):
             )
 
         return id
-
 
     def delete(self, id):
         """

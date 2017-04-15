@@ -141,52 +141,56 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         backend.put_variant(src, id, 'variant.tar.gz')
         path = '/'.join(backend.id_to_path(id)) + '/variant.tar.gz'
         self.assertTrue(backend.exists(path))
-    #
 
-    #
-    # def test_put_with_sequential_ids(self):
-    #     """ Putting two items in sequence"""
-    #     filename = 'demo-test.tar.gz'
-    #     base_id = utils.generate_id(filename).replace('-' + filename, '')
-    #     id1 = base_id + '1-' + filename
-    #     id2 = base_id + '2-' + filename
-    #     self.prepare_uploads()
-    #     backend = BackendLocal(self.path)
-    #     uploads = self.upload_path
-    #     src = os.path.join(uploads, 'demo-test.tar.gz')
-    #     backend.put_variant(src, id1, 'demo-test.tar.gz')
-    #     backend.put_variant(src, id2, 'demo-test.tar.gz')
-    #     path1 = os.path.join(backend.path, *backend.id_to_path(id1), filename)
-    #     path2 = os.path.join(backend.path, *backend.id_to_path(id2), filename)
-    #     self.assertTrue(os.path.exists(path1))
-    #     self.assertTrue(os.path.exists(path2))
-    #
-    # def test_put_raises_on_overwriting(self):
-    #     """ Put raises exception on attempt to overwrite existing path """
-    #     self.prepare_uploads()
-    #     backend = BackendLocal(self.path)
-    #     uploads = self.upload_path
-    #     src1 = os.path.join(uploads, 'demo-test.tar.gz')
-    #     src2 = os.path.join(uploads, 'test.jpg')
-    #     id = utils.generate_id('demo-test.tar.gz')
-    #     backend.put_variant(src1, id, 'demo-test.tar.gz')
-    #     with assert_raises(x.FileExists):
-    #         backend.put_variant(src2, id, 'demo-test.tar.gz')
-    #
-    # def test_force_put_to_overwrite_existing(self):
-    #     """ Using force option to overwrite existing file """
-    #     self.prepare_uploads()
-    #     backend = BackendLocal(self.path)
-    #     uploads = self.upload_path
-    #     filename = 'demo-test.tar.gz'
-    #     src1 = os.path.join(uploads, filename)
-    #     src2 = os.path.join(uploads, 'test.jpg')
-    #     id = utils.generate_id(filename)
-    #     backend.put_variant(src1, id, filename)
-    #     backend.put_variant(src2, id, filename, True)
-    #     path = os.path.join(backend.path, *backend.id_to_path(id), filename)
-    #     # assert overwritten with src2
-    #     self.assertEquals(os.path.getsize(path), os.path.getsize(src2))
+    def test_put_with_sequential_ids(self):
+        """ Putting two items in sequence"""
+        filename = 'demo-test.tar.gz'
+        base_id = utils.generate_id(filename).replace('-' + filename, '')
+        id1 = base_id + '1-' + filename
+        id2 = base_id + '2-' + filename
+        self.prepare_uploads()
+        backend = BackendS3(**self.config)
+        uploads = self.upload_path
+        src = os.path.join(uploads, 'demo-test.tar.gz')
+        backend.put_variant(src, id1, 'demo-test.tar.gz')
+        backend.put_variant(src, id2, 'demo-test.tar.gz')
+        path1 = '/'.join(backend.id_to_path(id1)) + '/demo-test.tar.gz'
+        path2 = '/'.join(backend.id_to_path(id2)) + '/demo-test.tar.gz'
+        self.assertTrue(backend.exists(path1))
+        self.assertTrue(backend.exists(path2))
+
+    def test_put_raises_on_overwriting(self):
+        """ Put raises exception on attempt to overwrite existing path """
+        self.prepare_uploads()
+        backend = BackendS3(**self.config)
+        uploads = self.upload_path
+        src1 = os.path.join(uploads, 'demo-test.tar.gz')
+        src2 = os.path.join(uploads, 'test.jpg')
+        id = utils.generate_id('demo-test.tar.gz')
+        backend.put_variant(src1, id, 'demo-test.tar.gz')
+        with assert_raises(x.FileExists):
+            backend.put_variant(src2, id, 'demo-test.tar.gz')
+
+    @attr('xxx')
+    def test_force_put_to_overwrite_existing(self):
+        """ Using force option to overwrite existing file """
+        self.prepare_uploads()
+        backend = BackendS3(**self.config)
+        uploads = self.upload_path
+        filename = 'demo-test.tar.gz'
+        src1 = os.path.join(uploads, filename)
+        src2 = os.path.join(uploads, 'test.jpg')
+        id = utils.generate_id(filename)
+        backend.put_variant(src1, id, filename)
+        backend.put_variant(src2, id, filename, True)
+
+        path = '/'.join(backend.id_to_path(id)) + '/' + filename
+        client = boto3.client('s3', **backend.credentials)
+        res = client.head_object(Bucket=backend.bucket_name, Key=path)
+        self.assertEquals(
+            str(os.path.getsize(src2)),
+            str(res['ResponseMetadata']['HTTPHeaders']['content-length'])
+        )
     #
     # def test_delete_file(self):
     #     """ Deleting file from local storage """
