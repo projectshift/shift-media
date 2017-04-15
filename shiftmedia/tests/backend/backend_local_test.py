@@ -37,6 +37,26 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals(6, len(parts))
         self.assertEquals(filename, parts[5])
 
+    def test_parse_url(self):
+        """ Parsing object url into id and filename """
+        filename = 'demo-file.tar.gz'
+        backend = BackendLocal(self.path)
+        pb = PathBuilder('123456')
+        base_url = backend.get_url()
+        id = utils.generate_id(filename)
+        parts = backend.id_to_path(id)
+        path = '/'.join(parts)
+        object_url = base_url + '/' + path + '/'
+        original = object_url + filename
+        crop_filename = pb.get_auto_crop_filename(id, '100x100', 'fit')
+        resize = object_url + crop_filename
+        result1 = backend.parse_url(original)
+        result2 = backend.parse_url(resize)
+        self.assertEquals(id, result1[0])
+        self.assertEquals(filename, result1[1])
+        self.assertEquals(id, result2[0])
+        self.assertEquals(crop_filename, result2[1])
+
     def test_getting_path_creates_directory(self):
         """ Can create local path upon getting """
         self.assertFalse(os.path.exists(self.path))
@@ -44,8 +64,8 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         path = backend.path
         self.assertTrue(os.path.exists(path))
 
-    def test_put_original_file(self):
-        """ Put original file to storage """
+    def test_put_file(self):
+        """ Put file to storage """
         self.prepare_uploads()
         backend = BackendLocal(self.path)
         uploads = self.upload_path
@@ -63,8 +83,8 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         full_file_path = os.path.join(current, 'demo-test.tar.gz')
         self.assertTrue(os.path.exists(full_file_path))
 
-    def test_put_file(self):
-        """ Put file to storage by filename"""
+    def test_put_variant(self):
+        """ Put file variant to storage by filename"""
         self.prepare_uploads()
         backend = BackendLocal(self.path)
         uploads = self.upload_path
@@ -173,23 +193,5 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals(expected_dst, result)
         self.assertTrue(os.path.exists(expected_dst))
 
-    def test_parse_url(self):
-        """ Parsing object url into id and filename """
-        filename = 'demo-file.tar.gz'
-        backend = BackendLocal(self.path)
-        pb = PathBuilder('123456')
-        base_url = backend.get_url()
-        id = utils.generate_id(filename)
-        parts = backend.id_to_path(id)
-        path = '/'.join(parts)
-        object_url = base_url + '/' + path + '/'
-        original = object_url + filename
-        crop_filename = pb.get_auto_crop_filename(id, '100x100', 'fit')
-        resize = object_url + crop_filename
-        result1 = backend.parse_url(original)
-        result2 = backend.parse_url(resize)
-        self.assertEquals(id, result1[0])
-        self.assertEquals(filename, result1[1])
-        self.assertEquals(id, result2[0])
-        self.assertEquals(crop_filename, result2[1])
+
 

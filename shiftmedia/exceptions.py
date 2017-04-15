@@ -28,6 +28,13 @@ class NotImplementedError(MediaException, Exception):
     pass
 
 
+class S3Error(MediaException, NameError):
+    """
+    S3 Error
+    Raised when something goes wrong during S3 operation
+    """
+    pass
+
 class InvalidResizeFormat(MediaException, NameError):
     """
     Invalid resize format
