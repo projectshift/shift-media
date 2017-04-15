@@ -265,12 +265,12 @@ class BackendS3(Backend):
         :param object: string - file or directory/
         :return: bool
         """
-        # try:
-        #     bucket = self.s3.Bucket(self.bucket)
-        #     self.s3.head_object(Bucket=self.bucket, Key=object)
-        # except bx.ClientError:
-        #     return False
-        # return True
+        try:
+            client = boto3.client('s3', **self.credentials)
+            client.head_object(Bucket=self.bucket_name, Key=object)
+        except bx.ClientError:
+            return False
+        return True
 
     def put(self, src, id, force=False):
         """
@@ -304,27 +304,17 @@ class BackendS3(Backend):
             msg += 'Use force option to overwrite.'
             raise x.FileExists(msg)
 
-        try:
-            bucket = self.s3.Bucket(self.bucket_name)
-            with open(src, 'rb') as src:
-                bucket.upload_fileobj(Fileobj=src, Key=path)
-        except bx.ClientError as err:
-            raise x.S3Error('Unable to upload to S3: ' + str(err))
+        client = boto3.client('s3', **self.credentials)
+        with open(src, 'rb') as src:
+            client.put_object(
+                ACL='public-read',
+                Bucket=self.bucket_name,
+                Key=path,
+                Body=src
+            )
 
-        # return id
+        return id
 
-
-        #
-        # parts = self.id_to_path(id)
-        # dir = os.path.join(self.path, *parts)
-        # os.makedirs(dir, exist_ok=True)
-        # dst = os.path.join(self.path, *parts, filename.lower())
-        # if not force and os.path.exists(dst):
-        #     msg = 'File [' + filename + '] exists under [' + id + ']. '
-        #     msg += 'Use force option to overwrite.'
-        #     raise x.FileExists(msg)
-        # shutil.copyfile(src, dst)
-        # return id
 
     def delete(self, id):
         """

@@ -3,6 +3,7 @@ from nose.plugins.attrib import attr
 from nose.tools import assert_raises
 
 import os, boto3
+from botocore import exceptions as bx
 from config.local import LocalConfig
 from shiftmedia import BackendS3, utils, PathBuilder, exceptions as x
 from shiftmedia.testing.localstorage_testhelpers import LocalStorageTestHelpers
@@ -29,6 +30,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
     def tearDown(self):
         """ Clean up after yourself """
         self.clean()
+        self.clean_s3()
         super().tearDown()
 
     def clean_s3(self):
@@ -47,14 +49,19 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         delete_us = dict(Objects=[])
         bucket = backend.bucket_name
         for item in pages.search('Contents'):
+            if not item: continue
             delete_us['Objects'].append(dict(Key=item['Key']))
             index += 1
-            if index >= per_query:  # flush full page
+
+            # flush full page
+            if index >= per_query:
                 client.delete_objects(Bucket=bucket, Delete=delete_us)
                 index = 0
                 delete_us = dict(Objects=[])
+
         # flush last page
-        client.delete_objects(Bucket=bucket, Delete=delete_us)
+        if len(delete_us['Objects']):
+            client.delete_objects(Bucket=bucket, Delete=delete_us)
 
     # ------------------------------------------------------------------------
     # Tests
@@ -94,6 +101,18 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals(id, result2[0])
         self.assertEquals(crop_filename, result2[1])
 
+    def test_check_existence(self):
+        """ Checking object existence"""
+        backend = BackendS3(**self.config)
+        client = boto3.client('s3', **backend.credentials)
+        client.put_object(
+            Bucket=backend.bucket_name,
+            Key='test-object',
+            Body=''
+        )
+        self.assertTrue(backend.exists('test-object'))
+        self.assertFalse(backend.exists('nonexistent'))
+
     def test_put_raises_on_nonexistent_file(self):
         """ Put raises exception if source file does not exist """
         backend = BackendS3(**self.config)
@@ -101,10 +120,6 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         with assert_raises(x.LocalFileNotFound):
             backend.put_variant('nonexistent', id, 'random.tar.gz')
 
-
-
-
-    @attr('xxx')
     def test_put_file(self):
         """ Put file to storage """
         self.prepare_uploads()
@@ -112,37 +127,20 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         uploads = self.upload_path
         src = os.path.join(uploads, 'demo-test.tar.gz')
         id = utils.generate_id('demo-test.tar.gz')
-        # backend.put(src, id)
-        self.clean_s3()
+        backend.put(src, id)
+        path = '/'.join(backend.id_to_path(id)) + '/demo-test.tar.gz'
+        self.assertTrue(backend.exists(path))
 
-        # assert directories created
-        # current = self.path
-        # for dir in id.split('-')[0:5]:
-        #     current = os.path.join(current, dir)
-        #     self.assertTrue(os.path.exists(current))
-        #
-        # # assert file put
-        # full_file_path = os.path.join(current, 'demo-test.tar.gz')
-        # self.assertTrue(os.path.exists(full_file_path))
-    #
-    # def test_put_file(self):
-    #     """ Put file to storage by filename"""
-    #     self.prepare_uploads()
-    #     backend = BackendLocal(self.path)
-    #     uploads = self.upload_path
-    #     src = os.path.join(uploads, 'demo-test.tar.gz')
-    #     id = utils.generate_id('demo-test.tar.gz')
-    #     backend.put_variant(src, id, 'demo-test.tar.gz')
-    #
-    #     # assert directories created
-    #     current = self.path
-    #     for dir in backend.id_to_path(id):
-    #         current = os.path.join(current, dir)
-    #         self.assertTrue(os.path.exists(current))
-    #
-    #     # assert file put
-    #     full_file_path = os.path.join(current, 'demo-test.tar.gz')
-    #     self.assertTrue(os.path.exists(full_file_path))
+    def test_put_file_variant(self):
+        """ Put file to storage by filename"""
+        self.prepare_uploads()
+        backend = BackendS3(**self.config)
+        uploads = self.upload_path
+        src = os.path.join(uploads, 'demo-test.tar.gz')
+        id = utils.generate_id('demo-test.tar.gz')
+        backend.put_variant(src, id, 'variant.tar.gz')
+        path = '/'.join(backend.id_to_path(id)) + '/variant.tar.gz'
+        self.assertTrue(backend.exists(path))
     #
 
     #
