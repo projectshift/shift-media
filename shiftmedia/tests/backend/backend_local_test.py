@@ -193,5 +193,43 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         self.assertEquals(expected_dst, result)
         self.assertTrue(os.path.exists(expected_dst))
 
+    @attr('xxx')
+    def test_clear_variants(self):
+        """ Clearing generated variants"""
+        self.prepare_uploads()
+        backend = BackendLocal(self.path)
+
+        src1 = os.path.join(self.upload_path, 'demo-test.tar.gz')
+        id1 = utils.generate_id('demo-test.tar.gz')
+        backend.put(src1, id1)
+        backend.put_variant(src1, id1, 'variant1.tar.gz')
+        backend.put_variant(src1, id1, 'variant2.tar.gz')
+
+        src2 = os.path.join(self.upload_path, 'demo-test.tar.gz')
+        id2 = utils.generate_id('demo-test.tar.gz')
+        backend.put(src2, id2)
+        backend.put_variant(src2, id2, 'variant3.jpg')
+        backend.put_variant(src2, id2, 'variant4.jpg')
+
+        backend.clear_variants()
+
+        path1 = os.path.join(self.path, *backend.id_to_path(id1))
+        original1 = path1 + '/demo-test.tar.gz'
+        variant1 = path1 + '/variant1.tar.gz'
+        variant2 = path1 + '/variant2.tar.gz'
+
+        path2 = os.path.join(self.path, *backend.id_to_path(id2))
+        original2 = path2 + '/demo-test.tar.gz'
+        variant3 = path2 + '/variant3.tar.gz'
+        variant4 = path2 + '/variant4.tar.gz'
+
+        self.assertTrue(os.path.exists(original1))
+        self.assertFalse(os.path.exists(variant1))
+        self.assertFalse(os.path.exists(variant2))
+
+        self.assertTrue(os.path.exists(original2))
+        self.assertFalse(os.path.exists(variant3))
+        self.assertFalse(os.path.exists(variant4))
+
 
 

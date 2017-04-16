@@ -78,6 +78,17 @@ class Backend(metaclass=ABCMeta):
         """
         pass
 
+    @abstractmethod
+    def clear_variants(self):
+        """
+        Clear variants
+        Iterates through storage and removes all files that are not originals.
+        This is a good way to clear residual files not being used and
+        regenerate the once in use.
+        :return: Bool
+        """
+        pass
+
 
 class BackendLocal(Backend):
     """
@@ -195,15 +206,28 @@ class BackendLocal(Backend):
         shutil.copyfile(src, dst)
         return dst
 
+    def clear_variants(self):
+        """
+        Clear variants
+        Iterates through storage and removes all files that are not originals.
+        This is a good way to clear residual files not being used and
+        regenerate the once in use.
+        :return: Bool
+        """
+        for subdir, dirs, files in os.walk(self.path):
+            for file in files:
+                if subdir.endswith(file): continue # skip originals
+                path = os.path.join(subdir, file)
+                os.remove(path)
+
+        return True
+
 
 class BackendS3(Backend):
     """
     Amazon S3 backend
     Stores files in an amazon s3 bucket
     """
-
-    # TODO: Configure lifecycle policy to expire old items in bucket
-
     def __init__(self, key_id, access_secret, bucket, url='http://localhost'):
         """
         S3 Backend constructor
