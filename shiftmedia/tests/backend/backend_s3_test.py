@@ -251,7 +251,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         backend.put_variant(src1, id1, 'variant2.tar.gz')
 
         src2 = os.path.join(self.upload_path, 'demo-test.tar.gz')
-        id2 = utils.generate_id('test.jpg')
+        id2 = utils.generate_id('demo-test.tar.gz')
         backend.put(src2, id2)
         backend.put_variant(src2, id2, 'variant3.jpg')
         backend.put_variant(src2, id2, 'variant4.jpg')
@@ -264,9 +264,9 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         variant2 = path1 + '/variant2.tar.gz'
 
         path2 = '/'.join(backend.id_to_path(id2))
-        original2 = path1 + '/demo-test.tar.gz'
-        variant3 = path1 + '/variant3.tar.gz'
-        variant4 = path1 + '/variant4.tar.gz'
+        original2 = path2 + '/demo-test.tar.gz'
+        variant3 = path2 + '/variant3.tar.gz'
+        variant4 = path2 + '/variant4.tar.gz'
 
         self.assertTrue(backend.exists(original1))
         self.assertFalse(backend.exists(variant1))
