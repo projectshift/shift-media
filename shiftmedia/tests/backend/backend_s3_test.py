@@ -4,6 +4,7 @@ from nose.tools import assert_raises
 
 import os, boto3
 from botocore import exceptions as bx
+from PIL import Image
 from config.local import LocalConfig
 from shiftmedia import BackendS3, utils, PathBuilder, exceptions as x
 from shiftmedia.testing.localstorage_testhelpers import LocalStorageTestHelpers
@@ -29,8 +30,8 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
 
     def tearDown(self):
         """ Clean up after yourself """
-        self.clean()
-        self.clean_s3()
+        # self.clean()
+        # self.clean_s3()
         super().tearDown()
 
     def clean_s3(self, path=None):
@@ -40,7 +41,6 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         """
         backend = BackendS3(**self.config)
         backend.recursive_delete()
-
 
     # ------------------------------------------------------------------------
     # Tests
@@ -176,6 +176,24 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
             str(res['ResponseMetadata']['HTTPHeaders']['content-length'])
         )
 
+    def test_guess_content_type(self):
+        """ Guess content type for objects when putting to S3 """
+        self.prepare_uploads()
+        backend = BackendS3(**self.config)
+
+        src = os.path.join(self.upload_path, 'test.jpg')
+        id = utils.generate_id('demo.jpg')
+        backend.put(src, id, True)
+
+        path = '/'.join(backend.id_to_path(id)) + '/demo.jpg'
+        client = boto3.client('s3', **backend.credentials)
+        res = client.head_object(
+            Bucket=backend.bucket_name,
+            Key=path
+        )
+        headers = res['ResponseMetadata']['HTTPHeaders']
+        self.assertEquals('image/jpeg', headers['content-type'])
+
     def test_delete_file(self):
         """ Deleting file from local storage """
         # put file
@@ -206,7 +224,6 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         path3 = '/'.join(backend.id_to_path(id2)) + '/test.tar.gz'
         self.assertTrue(backend.exists(path3))
 
-    @attr('xxx')
     def test_retrieve_original_to_temp(self):
         """ Retrieving from backend to local temp """
         # put file
@@ -221,6 +238,30 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         expected_dst = os.path.join(self.tmp_path, id, 'demo-test.tar.gz')
         self.assertEquals(expected_dst, result)
         self.assertTrue(os.path.exists(expected_dst))
+
+
+    @attr('xxx')
+    def test_clear_variants(self):
+        """ Clearing generated variants"""
+        self.prepare_uploads()
+        backend = BackendS3(**self.config)
+
+        # src1 = os.path.join(self.upload_path, 'demo-test.tar.gz')
+        # id1 = utils.generate_id('demo-test.tar.gz')
+        # backend.put(src1, id1)
+        # backend.put_variant(src1, id1, 'variant1.tar.gz')
+        # backend.put_variant(src1, id1, 'variant2.tar.gz')
+
+        # src2 = os.path.join(self.upload_path, 'demo-test.tar.gz')
+        # id2 = utils.generate_id('test.jpg')
+        # backend.put(src2, id2)
+        # backend.put_variant(src2, id2, 'variant1.jpg')
+        # backend.put_variant(src2, id2, 'variant2.jpg')
+
+        # self.clean()
+        # self.clean_s3()
+
+
 
 
 

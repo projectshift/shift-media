@@ -1,4 +1,4 @@
-import os, shutil, boto3
+import os, shutil, mimetypes, boto3
 from pprint import PrettyPrinter
 from abc import ABCMeta, abstractmethod
 from botocore import exceptions as bx
@@ -12,7 +12,6 @@ class Backend(metaclass=ABCMeta):
     work with media storage
     """
 
-    # TODO: implement s3 backend
     # TODO: implement clearing generated files in backend
 
     @abstractmethod
@@ -311,7 +310,7 @@ class BackendS3(Backend):
         if len(delete_us['Objects']):
             client.delete_objects(Bucket=bucket, Delete=delete_us)
 
-    def put(self, src, id, force=False):
+    def put(self, src, id, force=False, content_type=None, encoding=None):
         """
         Put file to storage
         Does not require a filename as it will be extracted from provided id.
@@ -321,17 +320,42 @@ class BackendS3(Backend):
         :param src: string - path to source file
         :param id: string - generated id
         :param force: bool - whether to overwrite existing
+        :param content_type: string - content/type, guessed if none
+        :param encoding: string - content encoding, guessed if none
         :return: string - generated id
         """
         filename = '-'.join(id.split('-')[5:])
-        return self.put_variant(src, id, filename, force)
+        return self.put_variant(
+            src,
+            id,
+            filename,
+            force,
+            content_type,
+            encoding
+        )
 
-    def put_variant(self, src, id, filename, force=False):
+    def put_variant(
+        self,
+        src,
+        id,
+        filename,
+        force=False,
+        content_type=None,
+        encoding=None):
         """
         Put file variant to storage
         Save local file in storage under given id and filename. Will raise an
         exception on an attempt to overwrite existing file which you can force
-        to ignore.
+        to ignore. By default will guess content-type and content-encoding based
+        on file extension that you can override to set your own.
+
+        :param src: string - path to local file
+        :param id: string - storage object id
+        :param filename: string - varian filename
+        :param force: bool - whether to overwrite if exists
+        :param content_type: string - content/type, guessed if none
+        :param encoding: string - content encoding, guessed if none
+        :return: string put object id
         """
         if not os.path.exists(src):
             msg = 'Unable to find local file [{}]'
@@ -343,14 +367,22 @@ class BackendS3(Backend):
             msg += 'Use force option to overwrite.'
             raise x.FileExists(msg)
 
+        if not content_type or not encoding:
+            guessed = mimetypes.guess_type(src)
+            content_type = content_type if content_type else guessed[0]
+            encoding = encoding if encoding else guessed[1]
+
         client = boto3.client('s3', **self.credentials)
         with open(src, 'rb') as src:
-            client.put_object(
+            params = dict(
                 ACL='public-read',
                 Bucket=self.bucket_name,
                 Key=path,
                 Body=src
             )
+            if content_type: params['ContentType'] = content_type
+            if encoding: params['ContentEncoding'] = encoding
+            client.put_object(**params)
 
         return id
 
@@ -362,7 +394,6 @@ class BackendS3(Backend):
         """
         path = '/'.join(self.id_to_path(id))
         self.recursive_delete(path)
-
 
     def retrieve_original(self, id, local_path):
         """
