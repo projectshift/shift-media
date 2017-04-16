@@ -176,7 +176,6 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
             str(res['ResponseMetadata']['HTTPHeaders']['content-length'])
         )
 
-    @attr('zzz')
     def test_delete_file(self):
         """ Deleting file from local storage """
         # put file
@@ -207,22 +206,21 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         path3 = '/'.join(backend.id_to_path(id2)) + '/test.tar.gz'
         self.assertTrue(backend.exists(path3))
 
+    @attr('xxx')
+    def test_retrieve_original_to_temp(self):
+        """ Retrieving from backend to local temp """
+        # put file
+        self.prepare_uploads()
+        backend = BackendS3(**self.config)
+        src = os.path.join(self.upload_path, 'demo-test.tar.gz')
+        id = utils.generate_id('demo-test.tar.gz')
+        backend.put(src, id)
 
-    #
-    # def test_retrieve_original_to_temp(self):
-    #     """ Retrieving from backend to local temp """
-    #     # put file
-    #     self.prepare_uploads()
-    #     backend = BackendLocal(self.path)
-    #     src = os.path.join(self.upload_path, 'demo-test.tar.gz')
-    #     id = utils.generate_id('demo-test.tar.gz')
-    #     backend.put(src, id)
-    #
-    #     # retrieve file
-    #     result = backend.retrieve_original(id, self.tmp_path)
-    #     expected_dst = os.path.join(self.tmp_path, id, 'demo-test.tar.gz')
-    #     self.assertEquals(expected_dst, result)
-    #     self.assertTrue(os.path.exists(expected_dst))
-    #
+        # retrieve file
+        result = backend.retrieve_original(id, self.tmp_path)
+        expected_dst = os.path.join(self.tmp_path, id, 'demo-test.tar.gz')
+        self.assertEquals(expected_dst, result)
+        self.assertTrue(os.path.exists(expected_dst))
+
 
 

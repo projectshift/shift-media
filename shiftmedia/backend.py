@@ -337,7 +337,6 @@ class BackendS3(Backend):
             msg = 'Unable to find local file [{}]'
             raise x.LocalFileNotFound(msg.format(src))
 
-
         path = '/'.join(self.id_to_path(id)) + '/' + filename
         if not force and self.exists(path):
             msg = 'File [' + filename + '] exists under [' + id + ']. '
@@ -358,7 +357,8 @@ class BackendS3(Backend):
     def delete(self, id):
         """
         Delete
-        Remove file from storage by id
+        Remove file from storage by id. Since it searches for the keys
+        staring (!) with id, can accept nonexistent ids.
         """
         path = '/'.join(self.id_to_path(id))
         self.recursive_delete(path)
@@ -369,4 +369,22 @@ class BackendS3(Backend):
         Retrieve original
         Download file from storage and put to local temp path
         """
-        pass
+        path = self.id_to_path(id)
+        filename = path[5]
+        dst_dir = os.path.join(local_path, id)
+        dst = os.path.join(dst_dir, filename)
+        if not os.path.exists(dst_dir):
+            os.makedirs(dst_dir, exist_ok=True)
+
+        filename = '-'.join(id.split('-')[5:])
+        src = '/'.join(self.id_to_path(id)) + '/' + filename
+
+        client = boto3.client('s3', **self.credentials)
+        with open(dst, 'wb') as data:
+            client.download_fileobj(
+                Bucket=self.bucket_name,
+                Key=src,
+                Fileobj=data
+            )
+
+        return dst
