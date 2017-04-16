@@ -399,6 +399,10 @@ class BackendS3(Backend):
         """
         Retrieve original
         Download file from storage and put to local temp path
+
+        :param id: string - storage object id
+        :param local_path: string - local path to download to
+        :return: path to local download
         """
         path = self.id_to_path(id)
         filename = path[5]
@@ -419,3 +423,49 @@ class BackendS3(Backend):
             )
 
         return dst
+
+    def clear_variants(self):
+        """
+        Clear variants
+        Iterates through storage and removes all files that are not originals.
+        This is a good way to clear residual files not being used and
+        regenerate the once in use.
+
+        Please, also consider configure bucket lifecycle expiration policy
+        in order to removed older images.
+        :return: Bool
+        """
+        client = boto3.client('s3', **self.credentials)
+        paginator = client.get_paginator('list_objects_v2')
+        pages = paginator.paginate(Bucket=self.bucket_name)
+
+        per_query = 999  # aws limit
+        index = 1
+        delete_us = dict(Objects=[])
+        bucket = self.bucket_name
+        for item in pages.search('Contents'):
+            key = str(item['Key'])
+
+            # skip dirs
+            if key.endswith('/'):
+                continue
+
+            # skip originals
+            parts = key.split('/')
+            length = len(parts)
+            if parts[length-1] == parts[length-2]: continue
+
+            delete_us['Objects'].append(dict(Key=item['Key']))
+            index += 1
+
+            # flush full page
+            if index >= per_query:
+                client.delete_objects(Bucket=bucket, Delete=delete_us)
+                index = 0
+                delete_us = dict(Objects=[])
+
+        # flush last page
+        if len(delete_us['Objects']):
+            client.delete_objects(Bucket=bucket, Delete=delete_us)
+
+        return True
