@@ -315,19 +315,15 @@ class BackendS3(Backend):
         if path: params['Prefix'] = path
         pages = paginator.paginate(**params)
 
-        per_query = 999  # aws limit
-        index = 1
         delete_us = dict(Objects=[])
         bucket = self.bucket_name
         for item in pages.search('Contents'):
             if not item: continue
             delete_us['Objects'].append(dict(Key=item['Key']))
-            index += 1
 
             # flush full page
-            if index >= per_query:
+            if len(delete_us['Objects']) >= 999:
                 client.delete_objects(Bucket=bucket, Delete=delete_us)
-                index = 0
                 delete_us = dict(Objects=[])
 
         # flush last page
@@ -463,11 +459,10 @@ class BackendS3(Backend):
         paginator = client.get_paginator('list_objects_v2')
         pages = paginator.paginate(Bucket=self.bucket_name)
 
-        per_query = 999  # aws limit
-        index = 1
         delete_us = dict(Objects=[])
         bucket = self.bucket_name
         for item in pages.search('Contents'):
+            if not item: continue
             key = str(item['Key'])
 
             # skip dirs
@@ -480,12 +475,10 @@ class BackendS3(Backend):
             if parts[length-1] == parts[length-2]: continue
 
             delete_us['Objects'].append(dict(Key=item['Key']))
-            index += 1
 
             # flush full page
-            if index >= per_query:
+            if len(delete_us['Objects']) >= 999:
                 client.delete_objects(Bucket=bucket, Delete=delete_us)
-                index = 0
                 delete_us = dict(Objects=[])
 
         # flush last page
