@@ -9,7 +9,6 @@ rm -rf shiftmedia.egg-info
 
 ./setup.py clean
 ./setup.py sdist
-./setup.py bdist
 ./setup.py bdist_wheel --python-tag=py3
 
 echo '-------------------------------------------------------------------------'
