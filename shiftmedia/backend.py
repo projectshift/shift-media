@@ -11,9 +11,6 @@ class Backend(metaclass=ABCMeta):
     This defines methods your backend must implement in order to
     work with media storage
     """
-
-    # TODO: implement clearing generated files in backend
-
     @abstractmethod
     def __init__(self, url='http://localhost'):
         """

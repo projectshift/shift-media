@@ -13,7 +13,7 @@ class Resizer:
     # TODO: WRITE DOWN HOW MANUAL CROPS WORK IN GENERAL
 
     # Manual crops allow to choose target size, sample size
-    # and specify position and where this sample will taken from
+    # and specify position and where this sample will be taken from
 
     # Do we need to specify both target size and sample, or is target enough?
     # Yes, we need both. That will allow arbitrary crops.
@@ -23,6 +23,17 @@ class Resizer:
     # position goes outside of src?
 
     # Sample size must be proportional to target size.
+
+    # SUMMARY: DEFINE sample PORTION OF src THAT WILL BECOME dst
+
+    # Do we forbid to define sample outside of src?
+    # Alternatively we can fallback to resizing intersection of src & sample:
+    #    * Get intersection of sample and src
+    #    * Find intersection center and its corresponding position in sample
+    #    * Resize intersection to fill sample (exception if no upscale)
+    #    * Resize result to become dst
+
+
 
 
 
