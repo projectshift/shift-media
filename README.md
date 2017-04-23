@@ -1,5 +1,7 @@
 # shift-media
 
+**Please note: this is in very early alpha. Not ready for any use.**
+
 A library for handling user-generated media files. It uses AWS S3 as storage backend for files. It is assumed that you are not going to server your media from your application but instead let S3 handle the heavy lifting.
 
 ## Installation
