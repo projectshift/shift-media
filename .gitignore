@@ -12,6 +12,11 @@ __pycache__
 nbproject
 www.esproj
 
+# Build ignores
+/build
+/dist
+/shiftmedia.egg-info
+
 # Virtualenv ignores
 /env
 
