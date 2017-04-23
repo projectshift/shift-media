@@ -22,7 +22,7 @@ from setuptools import setup, find_packages
 # ----------------------------------------------------------------------------
 
 # project version
-version='0.0.1'
+version='0.0.2'
 
 # development status
 # dev_status = '1 - Planning'
@@ -91,7 +91,7 @@ setup(**dict(
     ],
 
     # project packages
-    packages=find_packages(exclude=['tests*']),
+    packages=find_packages(exclude=['shiftmedia.tests*']),
 
     # include none-code data files from manifest.in (http://goo.gl/Uf0Yxc)
     include_package_data=True,
