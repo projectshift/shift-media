@@ -10,7 +10,7 @@ class Storage:
     def __init__(self, config, backend):
         self.config = config
         self.backend = backend
-        self.paths = PathBuilder(config.SECRET_KEY)
+        self.paths = PathBuilder(config['SECRET_KEY'])
         self._tmp_path = config.LOCAL_TEMP
 
     @property
