@@ -11,7 +11,7 @@ class Storage:
         self.config = config
         self.backend = backend
         self.paths = PathBuilder(config['SECRET_KEY'])
-        self._tmp_path = config.LOCAL_TEMP
+        self._tmp_path = config['LOCAL_TEMP']
 
     @property
     def tmp(self):
