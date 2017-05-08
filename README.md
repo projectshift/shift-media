@@ -53,6 +53,7 @@ Go to AWS S3 console and create a new bucket that we'll use to store our media f
 
 ```
 {
+    "Version": "2012-10-17",
     "Statement": [
         {
             "Effect": "Allow",
