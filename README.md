@@ -25,6 +25,7 @@ Now go to the user or group you created and attach an inline policy:
 
 ```
 {
+    "Version": "2012-10-17",
     "Statement": [
         {
             "Effect": "Allow",
