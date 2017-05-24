@@ -184,7 +184,16 @@ def example(path):
     storage.create_resize(url)
     return redirect(url)
 ```
-  
+
+## On the fly resizes with HTTPS
+
+If you need to use on-the fly resize functionality in HTTPS environment, there is some extra setup to be done. At the moment static web hosting (that redirects back to app on 404s) only works with HTTP, so no HTTPS support there. However we can put our 'static website' behind a CloudFront distribution:
+
+  * Come up with a subdomain name for your media storage, e.g. media.yourdomain.com
+  * For that subdomain create a certificate with CertificateManager in North Virginia region (us-east-1)
+  * Set up CloudFront distribution and set the origin to be the url of your static website endpoint (not your s3 bucket url)
+  * Set all the caches to zero (we only gonna use CloudFront for SSL termination)
+ 
 
 
 
@@ -204,6 +213,17 @@ pip install pillow
 ```
 
 
+### Troubleshooting: Too many redirects for resizes after setting up CloudFront
+
+As outlined above the workflow for creating a resize is this: 
+
+  * hit media storage (cloudfront)
+  * get forwarder back to app
+  * get forwarded back to media storage
+
+The problem here is that the first time we hit cloudfront and the resize is missing, we get redirected to the app (via routing rules) and ClodFront actually caches that redirect.
+
+The workaround at the moment is to disable Cloudfront caching altogether - go and set your cache lifetimes in AWS console to zero. Then invalidate your cahes.
 
 
 
