@@ -70,7 +70,7 @@ You will need to create a pipeline in ElasticTranscoder that will write into you
         }
 ```
 
-Here is the full policy listing updated wit htranscoder access:
+Here is the full policy listing updated with transcoder access:
 
 ```yml
 {
