@@ -7,8 +7,8 @@ from shiftmedia.resizer import Resizer
 from shiftmedia.testing.localstorage_testhelpers import LocalStorageTestHelpers
 
 
-@attr('resizer', 'integration')
-class StorageTests(TestCase, LocalStorageTestHelpers):
+@attr('resizer', 'autocrop','integration')
+class AutocropIntegrationTests(TestCase, LocalStorageTestHelpers):
     """
     Image resizer integration tests
     These will resize actual images
@@ -41,7 +41,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(img['size'][0], result.size[0])
         self.assertEquals(img['size'][1], result.size[1])
         # result.show()
@@ -55,7 +55,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(161, result.size[0])
         self.assertEquals(500, result.size[1])
         # result.show()
@@ -69,7 +69,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(96, result.size[0])
         self.assertEquals(300, result.size[1])
         # result.show()
@@ -83,7 +83,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(290, result.size[0])
         self.assertEquals(900, result.size[1])
         # result.show()
@@ -97,7 +97,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(161, result.size[0])
         self.assertEquals(500, result.size[1])
         # result.show()
@@ -111,7 +111,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(96, result.size[0])
         self.assertEquals(300, result.size[1])
         # result.show()
@@ -129,7 +129,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(248, result.size[0])
         self.assertEquals(768, result.size[1])
         # result.show()
@@ -143,7 +143,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(150, result.size[0])
         self.assertEquals(768, result.size[1])
         # result.show()
@@ -157,7 +157,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(200, result.size[0])
         self.assertEquals(100, result.size[1])
         # result.show()
@@ -171,7 +171,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(300, result.size[0])
         self.assertEquals(1000, result.size[1])
         # result.show()
@@ -185,7 +185,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(200, result.size[0])
         self.assertEquals(1500, result.size[1])
         # result.show()
@@ -199,7 +199,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         upscale = True
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.resize_img(src, target_size, mode, upscale)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
         self.assertEquals(200, result.size[0])
         self.assertEquals(300, result.size[1])
         # result.show()
@@ -215,7 +215,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
         dst = os.path.join(self.tmp_path, filename)
-        result = Resizer.resize(src, dst, target_size)
+        result = Resizer.auto_crop(src, dst, target_size)
         self.assertTrue(os.path.isfile(result))
         out = Image.open(result)
         self.assertEquals(200, out.size[0])
@@ -229,7 +229,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
         dst = os.path.join(self.tmp_path, filename)
-        result = Resizer.resize(src, dst, target_size)
+        result = Resizer.auto_crop(src, dst, target_size)
         self.assertTrue(os.path.isfile(result))
         out = Image.open(result)
         self.assertEquals(50, out.size[0])
@@ -243,7 +243,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
         dst = os.path.join(self.tmp_path, filename)
-        result = Resizer.resize(src, dst, target_size)
+        result = Resizer.auto_crop(src, dst, target_size)
         self.assertTrue(os.path.isfile(result))
         out = Image.open(result)
         self.assertEquals(100, out.size[0])
@@ -258,7 +258,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
         dst = os.path.join(self.tmp_path, filename)
-        result = Resizer.resize(src, dst, target_size, format='JPEG')
+        result = Resizer.auto_crop(src, dst, target_size, format='JPEG')
         self.assertTrue(os.path.isfile(result))
         out = Image.open(result)
         self.assertEquals(50, out.size[0])

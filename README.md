@@ -1,5 +1,7 @@
 # shift-media
 
+**Please note: this is in very early alpha. Not ready for any use.**
+
 A library for handling user-generated media files. It uses AWS S3 as storage backend for files. It is assumed that you are not going to server your media from your application but instead let S3 handle the heavy lifting.
 
 ## Installation
@@ -23,6 +25,7 @@ Now go to the user or group you created and attach an inline policy:
 
 ```
 {
+    "Version": "2012-10-17",
     "Statement": [
         {
             "Effect": "Allow",
@@ -114,6 +117,7 @@ Go to AWS S3 console and create a new bucket that we'll use to store our media f
 
 ```
 {
+    "Version": "2012-10-17",
     "Statement": [
         {
             "Effect": "Allow",

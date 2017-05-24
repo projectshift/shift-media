@@ -1,17 +1,17 @@
 import os
 from pathlib import Path
-import uuid
-from shiftmedia import exceptions as x
+
+from shiftmedia import utils, exceptions as x
+from shiftmedia.paths import PathBuilder
 from shiftmedia.resizer import Resizer
-from shiftmedia import utils
 
 
 class Storage:
-
     def __init__(self, config, backend):
         self.config = config
         self.backend = backend
-        self._tmp_path = config.LOCAL_TEMP
+        self.paths = PathBuilder(config['SECRET_KEY'])
+        self._tmp_path = config['LOCAL_TEMP']
 
     @property
     def tmp(self):
@@ -23,20 +23,6 @@ class Storage:
             os.makedirs(self._tmp_path)
         return self._tmp_path
 
-    def generate_id(self, original_format):
-        """
-        Generate id
-        Accepts an original file type and generates id string.
-        Id will look like this:
-            3c72aedc-ba25-11e6-a569-406c8f413974-jpg
-
-        :param original_format: original file type
-        :return: storage id
-        """
-        extension = utils.normalize_extension(original_format)
-        id = str(uuid.uuid1()) + '-' + extension
-        return id
-
     def put(self, src, delete_local=True):
         """
         Put local file to storage
@@ -44,19 +30,20 @@ class Storage:
         it by that id and removes original on success.
         """
 
-        # todo: validate file before put
-        # todo: get real file extension to generate id with
+        # TODO: Implement file validation
 
         if not os.path.exists(src):
             msg = 'Unable to find local file [{}]'
             raise x.LocalFileNotFound(msg.format(src))
 
-        extension = ''.join(Path(src).suffixes)[1:]
-        filename = 'original.' + extension
-        id = self.generate_id(extension)
-        self.backend.put(src, id, filename)
-        if delete_local:
-            os.remove(src)
+        path = Path(src)
+        extension = ''.join(path.suffixes)[1:]
+        name = path.name.replace('.' + extension, '')
+        extension = utils.normalize_extension(extension)
+        filename = name + '.' + extension
+        id = utils.generate_id(filename)
+        self.backend.put_variant(src, id, filename)
+        if delete_local: os.remove(src)
         return id
 
     def delete(self, id):
@@ -66,73 +53,103 @@ class Storage:
         """
         return self.backend.delete(id)
 
-    def filename_to_resize_params(self, filename):
+    def get_original_url(self, id):
         """
-        Filename to parameters
-        Parses resize filename to a set of usable parameters. Will perform
-        filename signature checking and throw an exception if requested
-        resize filename is malformed.
-
-        :param filename: resize filename
-        :return: dict of parameters
+        Get original URL
+        Combines backend base url, path to object id and original filename.
+        :return: string - full object url
         """
+        base = self.backend.get_url().strip('/')
+        parts = self.backend.id_to_path(id)
+        filename = parts[5]
+        path = '/'.join(parts)
+        return base + '/' + path + '/' + filename
 
+    def get_auto_crop_url(self, *args, **kwargs):
         """
-        (1) AUTOCROP FORMAT:
-            * schema id (1)
-            * id (3c72aedc-ba25-11e6-a569-406c8f413974-jpg)
-            * size (200x300)
-            * fit/fill (fill)
-            * format (jpg)
-            * quality (100)
-            * upscale (scale)<-- move to settings?
-            * signature (12345)
-
-        (2) MANUAL CROP FORMAT:
-            * schema id (2)
-            * id (3c72aedc-ba25-11e6-a569-406c8f413974-jpg)
-            * size
-            * box selection (must be proportional to size)
-            * format
-            * quality
-            * upscale <-- move to settings?
-            * signature
-
+        Get auto crop URL
+        Combines backend base url, path to object id and generated filename.
+        :param args: positional args to be passed to filename generator
+        :param kwargs: keyword args to be passed to filename generator
+        :return: string - full object url
         """
+        id = kwargs['id'] if 'id' in kwargs else args[0]
+        base = self.backend.get_url().strip('/')
+        parts = self.backend.id_to_path(id)
+        path = '/'.join(parts)
+        filename = self.paths.get_auto_crop_filename(*args, **kwargs)
+        return base + '/' + path + '/' + filename
 
+    def get_manual_crop_url(self, *args, **kwargs):
+        """
+        Get manual crop URL
+        Combines backend base url, path to object id and generated filename.
+        :param args: positional args to be passed to filename generator
+        :param kwargs: keyword args to be passed to filename generator
+        :return: string - full object url
+        """
+        id = kwargs['id'] if 'id' in kwargs else args[0]
+        base = self.backend.get_url().strip('/')
+        parts = self.backend.id_to_path(id)
+        path = '/'.join(parts)
+        filename = self.paths.get_manual_crop_filename(*args, **kwargs)
+        return base + '/' + path + '/' + filename
 
-        original_schema1 = 'jpg-3c72aedc-ba25-11e6-a569-406c8f413974'
-        original_schema2 = '3c72aedc-ba25-11e6-a569-406c8f413974-jpg'
-
-        resize_schema1 = '3c72aedc/ba25/11e6-a569/406c8f413974/200x300-fit-100-upscale-SIGNME.jpg'
-        resize_schema2 = '3c72aedc-ba25-11e6-a569-406c8f413974-200x300-0x0-20x30-jpg-100-upscale'
-
-
-        # USE CASE:
-        #       1. UPLOAD ORIGINAL
-        #          Original gets assigned an id and put to storage
-
-        #       2. GET SOMETHING BACK
-        #          What is this something? An id?
-
-        #       3. USE THAT TO GET ORIGINAL
-        #          No extra storage queries to get extension
-        #          It must contain extension in the id
-
-        #       3. USE THAT TO CREATE RESIZE 
-
-
-
-
-
-        print('FILENAME:', filename)
-
-
-    def create_resize(self):
+    def create_resize(self, url):
         """
         Create resize
-        Retrieve resize from storage to local temp.
-        Perform resize and put back to storage.
-        Return url of resized image.
+        Accepts storage URL of a resize, parses and validates it and then
+        creates the resize to be put back to storage.
+        :param url: string - url of resize to be created
+        :return: string - same url on success
         """
-        id_format = ''
+        id, filename = self.backend.parse_url(url)
+        params = self.paths.filename_to_resize_params(id, filename)
+        mode = params['resize_mode']
+        modes = ['auto', 'manual']
+        if mode not in modes:
+            err = 'Resize mode [' + mode + '] is not yet implemented.'
+            raise x.NotImplementedError(err)
+
+        local_original = self.backend.retrieve_original(id, self._tmp_path)
+        local_resize = os.path.join(self._tmp_path, id, params['filename'])
+        factor = Resizer.RESIZE_TO_FIT
+        if params['factor'] == 'fill':
+            factor = Resizer.RESIZE_TO_FILL
+
+        resize = Resizer.auto_crop(
+            src=local_original,
+            dst=local_resize,
+            size=params['target_size'],
+            mode= factor,
+            upscale=params['upscale'],
+            format=params['output_format'],
+            quality=params['quality']
+        )
+        self.backend.put_variant(resize, id, filename)
+        os.remove(local_original)
+        os.remove(resize)
+        tmp_dir = os.path.join(self._tmp_path, id)
+        if not os.listdir(tmp_dir):
+            os.rmdir(tmp_dir)
+        return url
+
+    def transcode_video(self, url):
+        """
+        Transcode video
+        Accepts a url to nonexistent transcoded clip, parses and validates it
+        and then puts it back to storage.
+
+        :param url: string - url of clip to be created
+        :return: string - same url on success
+        """
+
+        # TODO: how can we make it work with local storage?
+        # TODO: shall we limit it to AWS backend only?
+        # TODO: shall we delegate this to backend (how will that work)?
+
+        pass
+
+
+
+
