@@ -43,6 +43,70 @@ Now go to the user or group you created and attach an inline policy:
 
 This will allow to list all buckets the user has access to as well as full access to `your-bucket-name-here` bucket.
 
+### Allow access to ElasticTranscoder
+
+If you will transcode your videos with Elastic transcoder, you might want to reuse the same IAM user in your application.
+You will need to create a pipeline in ElasticTranscoder that will write into your bucket and allow the user to use this pipeline, use transcoding preset and create transcoding. Here is an example of such policy:
+
+```yml
+        {
+            "Effect": "Allow",
+            "Action": [
+                "elastictranscoder:Read*",
+                "elastictranscoder:List*",
+                "elastictranscoder:*Job",
+                "sns:List*"
+            ],
+            "Resource": [
+                "arn:aws:elastictranscoder:<aws_region>:<aws_account_id>:job/*",
+                "arn:aws:elastictranscoder:<aws_region>:<aws_account_id>:preset/*",
+                "arn:aws:elastictranscoder:<aws_region>:<aws_account_id>:pipeline/<pipeline_id>",
+                "arn:aws:elastictranscoder:<aws_region>:<aws_account_id>:pipeline/<pipeline_id>",
+                "arn:aws:elastictranscoder:<aws_region>:<aws_account_id>:pipeline/<pipeline_id>"
+            ]
+        }
+```
+
+Here is the full policy listing updated wit htranscoder access:
+
+```yml
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "s3:ListAllMyBuckets",
+            "Resource": "arn:aws:s3:::*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "s3:*",
+            "Resource": [
+                "arn:aws:s3:::your-bucket-name-here",
+                "arn:aws:s3:::your-bucket-name-here/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "elastictranscoder:Read*",
+                "elastictranscoder:List*",
+                "elastictranscoder:*Job",
+                "sns:List*"
+            ],
+            "Resource": [
+                "arn:aws:elastictranscoder:<aws_region>:<aws_account_id>:job/*",
+                "arn:aws:elastictranscoder:<aws_region>:<aws_account_id>:preset/*",
+                "arn:aws:elastictranscoder:<aws_region>:<aws_account_id>:pipeline/<pipeline_id>",
+                "arn:aws:elastictranscoder:<aws_region>:<aws_account_id>:pipeline/<pipeline_id>",
+                "arn:aws:elastictranscoder:<aws_region>:<aws_account_id>:pipeline/<pipeline_id>"
+            ]
+        }
+    ]
+}
+
+```
+
 
 ### Create a public bucket
 
@@ -64,6 +128,61 @@ Go to AWS S3 console and create a new bucket that we'll use to store our media f
     ]
 }
 ```
+
+
+### On-the-fly resizing with S3
+
+The workflow for on-the-fly resizing is this:
+
+  * User requests an image resize from the bucket
+  * The bucket returns a 404
+  * A special bucket policy is applied to redirect 404s back to the app
+  * The app parses the resize url and validates signature
+  * If valid, app creates downloads the original from the bucket and creates resize
+  * The app puts resize back to the bucket and redirects back to original url requested
+  * On subsequent requests the resize is already in the bucket and will be served from there
+
+To configure this workflow you must enable static website hosting in bucket properties editor and apply the following routing rules:
+
+```xml
+<RoutingRules>
+    <RoutingRule>
+        <Condition>
+            <KeyPrefixEquals/>
+            <HttpErrorCodeReturnedEquals>404</HttpErrorCodeReturnedEquals>
+        </Condition>
+        <Redirect>
+            <Protocol>http</Protocol>
+            <HostName>your-host-name.com</HostName>
+        </Redirect>
+    </RoutingRule>
+</RoutingRules>
+```  
+
+On the other side, you must configure your app have an endpoint that recognizes the request. Here is an example for flask:
+
+```python
+from flask import Flask
+from werkzeug.routing import BaseConverter
+
+class RegexConverter(BaseConverter):
+    def __init__(self, url_map, *items):
+        super(RegexConverter, self).__init__(url_map)
+        self.regex = items[0]
+
+app = Flask(__name__)
+app.url_map.converters['regex'] = RegexConverter
+
+@app.route('/<regex("[\w/]{36}/[^/]*/\d*x\d*-[a-z]*-\d{1,2}-[a-z]*-[a-z0-9]{32}.[a-z]*"):path>')
+def example(path):
+    url = 'http://bucket-name.s3-website-eu-west-1.amazonaws.com/'
+    url+= path
+    storage.create_resize(url)
+    return redirect(url)
+```
+  
+
+
 
 ### Troubleshooting: Pillow fails to install on MacOS
 
