@@ -131,7 +131,12 @@ class Storage:
             format=params['output_format'],
             quality=params['quality']
         )
-        self.backend.put_variant(resize, id, filename, force=True)
+
+        try:
+            self.backend.put_variant(resize, id, filename, force=True)
+        except x.FileExists:
+            pass
+
         os.remove(local_original)
         os.remove(resize)
         tmp_dir = os.path.join(self._tmp_path, id)
