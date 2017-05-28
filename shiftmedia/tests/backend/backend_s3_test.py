@@ -71,7 +71,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         path = '/'.join(parts)
         object_url = base_url + '/' + path + '/'
         original = object_url + filename
-        crop_filename = pb.get_auto_crop_filename(id, '100x100', 'fit')
+        crop_filename = pb.get_auto_crop_filename(id, '100x100', 'fit', 'jpg')
         resize = object_url + crop_filename
         result1 = backend.parse_url(original)
         result2 = backend.parse_url(resize)

@@ -88,6 +88,19 @@ class PathBuilderTests(TestCase):
         start = '100x200-fill-80-upscale'
         self.assertTrue(filename.startswith(start))
 
+    def test_missing_autocrop_format_defaults_to_original_format(self):
+        """ Autocrop defaults to original format when format not specified"""
+        params = dict(
+            id=utils.generate_id('zz.gif'),
+            size='100x200',
+            factor='fill',
+            upscale=True,
+            quality=80
+        )
+        pb = PathBuilder('12345')
+        filename = pb.get_auto_crop_filename(**params)
+        self.assertTrue(filename.endswith('.gif'))
+
     def test_manual_crop_filename_generator_raises_on_bad_sample_size(self):
         """ Manual crop filename generator raises on bad sample size"""
         params = dict(
@@ -158,6 +171,21 @@ class PathBuilderTests(TestCase):
         filename = pb.get_manual_crop_filename(**params)
         start = '100x200-200x400-80-upscale'
         self.assertTrue(filename.startswith(start))
+
+    def test_missing_manual_crop_format_defaults_to_original_format(self):
+        """ Manual crop defaults to original format when format not specified"""
+        params = dict(
+            id=utils.generate_id('zz.gif'),
+            sample_size='200x400',
+            target_size='100x200',
+            upscale=True,
+            quality=80
+        )
+        pb = PathBuilder('12345')
+        filename = pb.get_manual_crop_filename(**params)
+        self.assertTrue(filename.endswith('gif'))
+
+
 
     def test_validate_signature(self):
         """ Validating signature contained within filename  """
