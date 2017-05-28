@@ -7,11 +7,16 @@ from shiftmedia.resizer import Resizer
 
 
 class Storage:
-    def __init__(self, config, backend):
-        self.config = config
+    def __init__(self, backend, secret_key, local_temp):
+        """
+        Init
+        :param backend:, shiftmedia.backend.Backend instance
+        :param secret_key: string, random salt
+        :param local_temp: string, path to local temp directory
+        """
         self.backend = backend
-        self.paths = PathBuilder(config.SECRET_KEY)
-        self._tmp_path = config.LOCAL_TEMP
+        self.paths = PathBuilder(secret_key)
+        self._tmp_path = local_temp
 
     @property
     def tmp(self):
@@ -126,7 +131,12 @@ class Storage:
             format=params['output_format'],
             quality=params['quality']
         )
-        self.backend.put_variant(resize, id, filename)
+
+        try:
+            self.backend.put_variant(resize, id, filename, force=True)
+        except x.FileExists:
+            pass
+
         os.remove(local_original)
         os.remove(resize)
         tmp_dir = os.path.join(self._tmp_path, id)
