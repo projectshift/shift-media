@@ -3,8 +3,6 @@ from nose.plugins.attrib import attr
 from nose.tools import assert_raises
 
 import os, boto3
-from botocore import exceptions as bx
-from PIL import Image
 from config.local import LocalConfig
 from shiftmedia import BackendS3, utils, PathBuilder, exceptions as x
 from shiftmedia.testing.localstorage_testhelpers import LocalStorageTestHelpers

@@ -1,9 +1,8 @@
 import os, shutil
 from config.local import LocalConfig
-from shiftmedia import DefaultConfig
 
 
-class TestConfig(DefaultConfig):
+class TestConfig(LocalConfig):
     """
     Test config
     This is a config file used for testing

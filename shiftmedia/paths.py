@@ -1,5 +1,4 @@
 import hashlib
-from shiftmedia.config.default import DefaultConfig
 from shiftmedia import exceptions as x
 from shiftmedia import utils
 
@@ -11,23 +10,7 @@ class PathBuilder:
         Initializes path builder service.
         :param secret_key: string - secret key from config
         """
-        self.validate_secret_key(secret_key)
         self.secret_key = secret_key
-
-    def validate_secret_key(self, secret_key):
-        """
-        Validate secret key
-        Makes sure secret key is not equal to default. Prevents security
-        vulnerability when using default one.
-
-        :param secret_key: string, secret key to validate
-        :return: bool
-        """
-        if secret_key == DefaultConfig.SECRET_KEY:
-            msg = 'Security warning: using default secret key '
-            raise x.ConfigurationException(msg)
-
-        return True
 
     def generate_signature(self, id, filename):
         """

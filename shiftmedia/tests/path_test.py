@@ -4,7 +4,6 @@ from nose.tools import assert_raises
 
 from shiftmedia import utils
 from shiftmedia.paths import PathBuilder
-from shiftmedia.config.default import DefaultConfig
 from shiftmedia import exceptions as x
 
 
@@ -16,11 +15,6 @@ class PathBuilderTests(TestCase):
         """ Instantiating path builder """
         pb = PathBuilder(secret_key='12345')
         self.assertIsInstance(pb, PathBuilder)
-
-    def test_path_builder_requires_configured_secret_key(self):
-        """ Path builder forbids default secret key """
-        with assert_raises(x.ConfigurationException):
-            PathBuilder(DefaultConfig.SECRET_KEY)
 
     def test_generate_signature(self):
         """ Generating hash signature"""
