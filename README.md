@@ -185,9 +185,7 @@ def example(path):
     return redirect(url)
 ```
 
-## On the fly resizes with HTTPS and custom domains
-
-Please note: you can still use the https aws bucket url if you don't need custom domain for your bucket.
+## On the fly resizes with HTTPS
 
 If you need to use on-the fly resize functionality in HTTPS environment with a custom domain however, there is some extra setup to be done. At the moment static web hosting (that redirects back to app on 404s) only works with HTTP, so no HTTPS support there. However we can put our 'static website' behind a CloudFront distribution:
 
