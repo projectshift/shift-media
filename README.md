@@ -187,7 +187,7 @@ def example(path):
 
 ## On the fly resizes with HTTPS
 
-If you need to use on-the fly resize functionality in HTTPS environment, there is some extra setup to be done. At the moment static web hosting (that redirects back to app on 404s) only works with HTTP, so no HTTPS support there. However we can put our 'static website' behind a CloudFront distribution:
+If you need to use on-the fly resize functionality in HTTPS environment with a custom domain however, there is some extra setup to be done. At the moment static web hosting (that redirects back to app on 404s) only works with HTTP, so no HTTPS support there. However we can put our 'static website' behind a CloudFront distribution:
 
   * Come up with a subdomain name for your media storage, e.g. media.yourdomain.com
   * For that subdomain create a certificate with CertificateManager in North Virginia region (us-east-1)

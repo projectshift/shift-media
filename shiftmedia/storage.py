@@ -35,7 +35,7 @@ class Storage:
         it by that id and removes original on success.
         """
 
-        # TODO: Implement file validation
+        # TODO: Implement file validation (libmagic)
 
         if not os.path.exists(src):
             msg = 'Unable to find local file [{}]'
@@ -143,22 +143,6 @@ class Storage:
         if not os.listdir(tmp_dir):
             os.rmdir(tmp_dir)
         return url
-
-    def transcode_video(self, url):
-        """
-        Transcode video
-        Accepts a url to nonexistent transcoded clip, parses and validates it
-        and then puts it back to storage.
-
-        :param url: string - url of clip to be created
-        :return: string - same url on success
-        """
-
-        # TODO: how can we make it work with local storage?
-        # TODO: shall we limit it to AWS backend only?
-        # TODO: shall we delegate this to backend (how will that work)?
-
-        pass
 
 
 

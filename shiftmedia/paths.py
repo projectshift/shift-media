@@ -1,45 +1,16 @@
 import hashlib
-from shiftmedia.config.default import DefaultConfig
 from shiftmedia import exceptions as x
 from shiftmedia import utils
 
 
 class PathBuilder:
-
-    # TODO: come up with video transcoding schema
-    # TODO: it should allow for several outputs based on single input
-    # TODO: it should support creating static screenshots
-    # TODO: that will require a testcase with boto3 and elastic transcoder
-    # TODO: will allow us to know what are the url parameters
-    # TODO: and whether we should use config-based templating
-
-
-    # TODO: evaluate itsdangerous
-
-
     def __init__(self, secret_key):
         """
         Path builder constructor
         Initializes path builder service.
         :param secret_key: string - secret key from config
         """
-        self.validate_secret_key(secret_key)
         self.secret_key = secret_key
-
-    def validate_secret_key(self, secret_key):
-        """
-        Validate secret key
-        Makes sure secret key is not equal to default. Prevents security
-        vulnerability when using default one.
-
-        :param secret_key: string, secret key to validate
-        :return: bool
-        """
-        if secret_key == DefaultConfig.SECRET_KEY:
-            msg = 'Security warning: using default secret key '
-            raise x.ConfigurationException(msg)
-
-        return True
 
     def generate_signature(self, id, filename):
         """
@@ -79,7 +50,7 @@ class PathBuilder:
             id,
             size,
             factor,
-            output_format='jpg',
+            output_format=None,
             upscale=True,
             quality=65
     ):
@@ -119,6 +90,11 @@ class PathBuilder:
             err = 'Quality must be numeric'
             raise x.InvalidArgumentException(err)
 
+        # guess format from original if not specified
+        if not output_format:
+            parts = id.split('-')
+            output_format= parts[5][parts[5].index('.') + 1:]
+
         # prepare upscale
         upscale = 'upscale' if bool(upscale) else 'noupscale'
 
@@ -140,13 +116,13 @@ class PathBuilder:
         return signed_filename
 
     def get_manual_crop_filename(
-            self,
-            id,
-            sample_size,
-            target_size,
-            output_format='jpg',
-            upscale=True,
-            quality=65
+        self,
+        id,
+        sample_size,
+        target_size,
+        output_format=None,
+        upscale=True,
+        quality=65
     ):
         """
         Get manual crop filename
@@ -199,6 +175,11 @@ class PathBuilder:
         if not str(quality).isdigit():
             err = 'Quality must be numeric'
             raise x.InvalidArgumentException(err)
+
+        # guess format from original if not specified
+        if not output_format:
+            parts = id.split('-')
+            output_format= parts[5][parts[5].index('.') + 1:]
 
         # prepare upscale
         upscale = 'upscale' if bool(upscale) else 'noupscale'

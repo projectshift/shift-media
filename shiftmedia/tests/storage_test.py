@@ -6,7 +6,6 @@ import os, shutil
 from shiftmedia import Storage, BackendLocal, utils
 from shiftmedia import exceptions as x
 from shiftmedia.testing.localstorage_testhelpers import LocalStorageTestHelpers
-from shiftmedia.testing.localstorage_testhelpers import TestConfig
 
 
 @attr('storage')
@@ -28,20 +27,33 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
     def test_instantiate_storage(self):
         """ Instantiating storage """
         backend = mock.MagicMock()
-        storage = Storage(backend=backend, secret_key=TestConfig.SECRET_KEY, local_temp=self.config.LOCAL_TEMP)
+        storage = Storage(
+            backend=backend,
+            secret_key=self.config.SECRET_KEY,
+            local_temp=self.config.LOCAL_TEMP
+        )
         self.assertIsInstance(storage, Storage)
 
     def test_getting_tmp_creates_directory(self):
         """ Can create local temp upon getting """
         shutil.rmtree(self.tmp_path)
-        storage = Storage(mock.MagicMock(), secret_key=TestConfig.SECRET_KEY, local_temp=self.config.LOCAL_TEMP)
+        storage = Storage(
+            mock.MagicMock(),
+            secret_key=self.config.SECRET_KEY,
+            local_temp=self.config.LOCAL_TEMP
+        )
         tmp = storage.tmp
         self.assertTrue(os.path.exists(self.tmp_path))
 
     def test_put_file(self):
         """ Put uploaded file to storage """
         backend = mock.MagicMock()
-        storage = Storage(backend, secret_key=TestConfig.SECRET_KEY, local_temp=self.config.LOCAL_TEMP)
+        storage = Storage(
+            backend,
+            secret_key=self.config.SECRET_KEY,
+            local_temp=self.config.LOCAL_TEMP
+        )
+
         self.prepare_uploads()
         filepath = os.path.join(self.upload_path, 'test.tar.gz')
         id = storage.put(filepath)
@@ -51,7 +63,11 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
     def test_put_raises_on_nonexistent_src(self):
         """ Storage raises exception on nonexistent file put"""
         backend = mock.MagicMock()
-        storage = Storage(backend, secret_key=TestConfig.SECRET_KEY, local_temp=self.config.LOCAL_TEMP)
+        storage = Storage(
+            backend,
+            secret_key=self.config.SECRET_KEY,
+            local_temp=self.config.LOCAL_TEMP
+        )
         with assert_raises(x.LocalFileNotFound) as exception:
             storage.put('CRAP')
 
@@ -59,7 +75,11 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         """ Deleting file from storage by id """
         id = '123'
         backend = mock.MagicMock()
-        storage = Storage(backend, secret_key=TestConfig.SECRET_KEY, local_temp=self.config.LOCAL_TEMP)
+        storage = Storage(
+            backend,
+            secret_key=self.config.SECRET_KEY,
+            local_temp=self.config.LOCAL_TEMP
+        )
         storage.delete(id)
         backend.delete.assert_called_with(id)
 
@@ -72,7 +92,11 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         path = self.path
         base_url = 'http://test.url'
         backend = BackendLocal(path, base_url)
-        storage = Storage(backend, secret_key=TestConfig.SECRET_KEY, local_temp=self.config.LOCAL_TEMP)
+        storage = Storage(
+            backend,
+            secret_key=self.config.SECRET_KEY,
+            local_temp=self.config.LOCAL_TEMP
+        )
         filename = 'example-object.tar.gz'
         id = utils.generate_id(filename)
         url = storage.get_original_url(id)
@@ -84,7 +108,11 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         path = self.path
         base_url = 'http://test.url'
         backend = BackendLocal(path, base_url)
-        storage = Storage(backend, secret_key=TestConfig.SECRET_KEY, local_temp=self.config.LOCAL_TEMP)
+        storage = Storage(
+            backend,
+            secret_key=self.config.SECRET_KEY,
+            local_temp=self.config.LOCAL_TEMP
+        )
         filename = 'example-object.tar.gz'
         id = utils.generate_id(filename)
         url = storage.get_auto_crop_url(
@@ -106,7 +134,10 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         path = self.path
         base_url = 'http://test.url'
         backend = BackendLocal(path, base_url)
-        storage = Storage(backend, secret_key=TestConfig.SECRET_KEY, local_temp=self.config.LOCAL_TEMP)
+        storage = Storage(
+            backend, secret_key=self.config.SECRET_KEY,
+            local_temp=self.config.LOCAL_TEMP
+        )
         filename = 'example-object.tar.gz'
         id = utils.generate_id(filename)
         url = storage.get_manual_crop_url(
@@ -131,7 +162,12 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         filename = 'original_vertical.jpg'
         src = os.path.join(uploads, filename)
         backend = BackendLocal(path)
-        storage = Storage(backend, secret_key=TestConfig.SECRET_KEY, local_temp=self.config.LOCAL_TEMP)
+        storage = Storage(
+            backend,
+            secret_key=self.config.SECRET_KEY,
+            local_temp=self.config.LOCAL_TEMP
+        )
+
         id = storage.put(src)
         resize_url = storage.get_auto_crop_url(id, '100x200', 'fill')
         storage.create_resize(resize_url)
