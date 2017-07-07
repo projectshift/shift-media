@@ -25,7 +25,8 @@ class AutocropIntegrationTests(TestCase, LocalStorageTestHelpers):
     files = dict(
         vertical=dict(file='original_vertical.jpg', size=(248, 768)),
         horizontal=dict(file='original_horizontal.jpg', size=(768, 248)),
-        square=dict(file='original_square.jpg', size=(700, 700))
+        square=dict(file='original_square.jpg', size=(700, 700)),
+        orientation=dict(file='bad_orientation.jpg', size=(2448, 3264))
     )
 
     # ------------------------------------------------------------------------
@@ -266,5 +267,20 @@ class AutocropIntegrationTests(TestCase, LocalStorageTestHelpers):
         self.assertTrue(isinstance(out, JpegImagePlugin.JpegImageFile))
         # out.show()
 
+    # ------------------------------------------------------------------------
+    # Image manipulation tests: Rotation metadata
+    # ------------------------------------------------------------------------
 
-
+    def test_integration_fit_no_upscale_smaller_original2(self):
+        """ INTEGRATION: Fit, no upscale, src smaller """
+        img = self.files['orientation'] #248x768
+        filename = img['file']
+        target_size = '300x100'
+        mode = Resizer.RESIZE_TO_FIT
+        upscale = False
+        self.prepare_uploads()
+        src = os.path.join(self.upload_path, filename)
+        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
+        self.assertEquals(75, result.size[0])
+        self.assertEquals(100, result.size[1])
+        result.show()

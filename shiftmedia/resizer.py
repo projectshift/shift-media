@@ -1,4 +1,4 @@
-from PIL import Image, ImageSequence
+from PIL import Image, ImageSequence, ExifTags
 from math import floor
 from shiftmedia import utils
 
@@ -32,12 +32,6 @@ class Resizer:
     #    * Find intersection center and its corresponding position in sample
     #    * Resize intersection to fill sample (exception if no upscale)
     #    * Resize result to become dst
-
-
-
-
-
-
 
 
     # TODO: IMPLEMENT MANUAL RESIZE
@@ -165,6 +159,17 @@ class Resizer:
 
         # create image and get size
         img = img if isinstance(img, Image.Image) else Image.open(img)
+
+        # use orientation to rotate
+        if getattr(img, '_getexif', None):
+            tags = {v: k for k, v in ExifTags.TAGS.items()}
+            orientation = tags['Orientation']
+            exif = dict(img._getexif().items())
+            if orientation in exif.keys():
+                if exif[orientation] == 3 : img=img.rotate(180, expand=True)
+                elif exif[orientation] == 6 : img=img.rotate(270, expand=True)
+                elif exif[orientation] == 8 : img=img.rotate(90, expand=True)
+
         src = img.size
         dst = [int(x) for x in size.split('x')]
 
