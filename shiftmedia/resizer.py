@@ -120,7 +120,7 @@ class Resizer:
         if format:
             format = utils.extension_to_format(format) # normalize for pil
 
-        if not animated_gif or (animated_gif and format != 'GIF'):
+        if not animated_gif or (animated_gif and format and format != 'GIF'):
             # resize regular image
             img = img.convert(mode='RGBA')
             img = Resizer.auto_crop_img(img, size, mode, upscale)
