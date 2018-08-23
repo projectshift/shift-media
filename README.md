@@ -2,7 +2,7 @@
 
 **Please note: this is in very early alpha. Not ready for any use.**
 
-A library for handling user-generated media files. It uses AWS S3 as storage backend for files. It is assumed that you are not going to server your media from your application but instead let S3 handle the heavy lifting.
+A library for handling user-generated media files. It uses AWS S3 as storage backend for files. It is assumed that you are not going to serve your media from your application but instead let S3 handle the heavy lifting.
 
 ## Installation
 
@@ -19,7 +19,7 @@ Setting up S3 involves creating an IAM user and granting it proper permissions a
 
 Go to your AWS Management Console and Select "Identity & Access Management" and create a user. This will generate security credentials that you can download. Make note of this as it will be required to configure media storage.
 
-We are now gonna configure S3 access permissions for the user, but before we do, you might want to consider creating a group and assigning permissions to the group, rather than specific user. The benefit of this is permissions reuse - you can later on add and remove users to/from group and not worry about configuring each one user individually. If you decided to use a group - go ahead and create one and then add user to it.
+We are now gonna configure S3 access permissions for the user, but before we do, you might want to consider creating a group and assigning permissions to the group, rather than specific user. The benefit of this is permissions reuse - you can later add and remove users to/from this group and not worry about configuring each one user individually. If you decided to use a group - go ahead and create one and then add the user to it.
 
 Now go to the user or group you created and attach an inline policy:
 
@@ -113,7 +113,7 @@ Here is the full policy listing updated with transcoder access:
 
 ### Create a public bucket
 
-Go to AWS S3 console and create a new bucket that we'll use to store our media files. The bucket will need to be made public since we are to serve static files from S3 directly, so go bucket properties, select permissions section and apply following policy:
+Go to AWS S3 console and create a new bucket that we'll use to store our media files. The bucket will need to be made public since we are to serve static files from S3 directly, so go to bucket properties, select permissions section and apply following policy:
 
 ```
 {
@@ -142,9 +142,9 @@ The workflow for on-the-fly resizing is this:
   * The bucket returns a 404
   * A special bucket policy is applied to redirect 404s back to the app
   * The app parses the resize url and validates signature
-  * If valid, app creates downloads the original from the bucket and creates resize
+  * If valid, app downloads the original from the bucket and creates resize
   * The app puts resize back to the bucket and redirects back to original url requested
-  * On subsequent requests the resize is already in the bucket and will be served from there
+  * On subsequent requests the resize will already be in the bucket and will be served from there
 
 To configure this workflow you must enable static website hosting in bucket properties editor and apply the following routing rules:
 
@@ -163,7 +163,7 @@ To configure this workflow you must enable static website hosting in bucket prop
 </RoutingRules>
 ```  
 
-On the other side, you must configure your app have an endpoint that recognizes the request. Here is an example for flask:
+On the other side, you must configure your app to have an endpoint that recognizes the request. Here is an example for flask:
 
 ```python
 from flask import Flask
@@ -187,15 +187,13 @@ def example(path):
 
 ## On the fly resizes with HTTPS
 
-If you need to use on-the fly resize functionality in HTTPS environment with a custom domain however, there is some extra setup to be done. At the moment static web hosting (that redirects back to app on 404s) only works with HTTP, so no HTTPS support there. However we can put our 'static website' behind a CloudFront distribution:
+If you need to use on-the fly resize functionality in HTTPS environment with a custom domain, there is some extra setup to be done. At the moment static web hosting (that redirects back to app on 404s) only works with HTTP (for custom domains), so no HTTPS support there. However we can put our 'static website' behind a CloudFront distribution:
 
   * Come up with a subdomain name for your media storage, e.g. media.yourdomain.com
   * For that subdomain create a certificate with CertificateManager in North Virginia region (us-east-1)
   * Set up CloudFront distribution and set the origin to be the url of your static website endpoint (not your s3 bucket url)
   * Set all the caches to zero (we only gonna use CloudFront for SSL termination)
  
-
-
 
 ### Troubleshooting: Pillow fails to install on MacOS
 
