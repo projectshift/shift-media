@@ -23,7 +23,7 @@ We are now gonna configure S3 access permissions for the user, but before we do,
 
 Now go to the user or group you created and attach an inline policy:
 
-```
+```json
 {
     "Version": "2012-10-17",
     "Statement": [
