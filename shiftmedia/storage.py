@@ -64,7 +64,7 @@ class Storage:
         Combines backend base url, path to object id and original filename.
         :return: string - full object url
         """
-        base = self.backend.get_url().strip('/')
+        base = self.backend.get_url().rstrip('/')
         parts = self.backend.id_to_path(id)
         filename = parts[5]
         path = '/'.join(parts)
@@ -79,7 +79,7 @@ class Storage:
         :return: string - full object url
         """
         id = kwargs['id'] if 'id' in kwargs else args[0]
-        base = self.backend.get_url().strip('/')
+        base = self.backend.get_url().rstrip('/')
         parts = self.backend.id_to_path(id)
         path = '/'.join(parts)
         filename = self.paths.get_auto_crop_filename(*args, **kwargs)
@@ -94,7 +94,7 @@ class Storage:
         :return: string - full object url
         """
         id = kwargs['id'] if 'id' in kwargs else args[0]
-        base = self.backend.get_url().strip('/')
+        base = self.backend.get_url().rstrip('/')
         parts = self.backend.id_to_path(id)
         path = '/'.join(parts)
         filename = self.paths.get_manual_crop_filename(*args, **kwargs)
