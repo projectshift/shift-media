@@ -2,11 +2,13 @@ from unittest import mock, TestCase
 from nose.plugins.attrib import attr
 from nose.tools import assert_raises
 
-import os, shutil
+import os
+import shutil
+from PIL import Image
 from shiftmedia import Storage, BackendLocal, utils
 from shiftmedia import exceptions as x
 from shiftmedia.testing.localstorage_testhelpers import LocalStorageTestHelpers
-
+from pprint import pprint as pp
 
 @attr('storage')
 class StorageTests(TestCase, LocalStorageTestHelpers):
@@ -17,7 +19,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
 
     def tearDown(self):
         """ Clean up after yourself """
-        self.clean()
+        # self.clean()
         super().tearDown()
 
     # ------------------------------------------------------------------------
@@ -59,6 +61,22 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
         id = storage.put(filepath)
         self.assertFalse(os.path.exists(filepath))
         self.assertTrue(id.endswith('-test.tar.gz'))
+
+    def test_put_fixes_orientation_for_images(self):
+        """ Fix orientation when putting to storage """
+        backend = mock.MagicMock()
+        storage = Storage(
+            backend,
+            secret_key=self.config.SECRET_KEY,
+            local_temp=self.config.LOCAL_TEMP
+        )
+
+        self.prepare_uploads()
+        filepath = os.path.join(self.upload_path, 'bad_orientation2.jpg')
+        storage.put(filepath, delete_local=False, fix_orientation=True)
+        img = Image.open(filepath)
+        orientation = img._getexif()[274]
+        self.assertEqual(1, orientation)
 
     def test_put_raises_on_nonexistent_src(self):
         """ Storage raises exception on nonexistent file put"""

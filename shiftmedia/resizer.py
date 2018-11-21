@@ -1,7 +1,12 @@
-from PIL import Image, ImageSequence, ExifTags
+import magic
+from PIL import Image
+from PIL import ImageSequence
+from PIL import ExifTags
+import piexif
 from math import floor
 from shiftmedia import utils
 from pprint import pprint as pp
+
 
 class Resizer:
     """
@@ -44,6 +49,76 @@ class Resizer:
     RESIZE_TO_FIT = 'mode_resize_to_fit'
 
     @staticmethod
+    def fix_orientation_and_save(src):
+        """
+        Fix orientation and save
+        Check if file is an image and the checks it exif data for orientation.
+        If the image is flipped, will attempt to fix its orientation while
+        preserving original exif metadata.
+
+        Note that this method uses quality parameter when saving rotated image.
+        Thus if your image was modified by this function its size can increase.
+
+        :param src: str, path to original.
+        :return:str
+        """
+        if 'image' not in str(magic.from_file(src)).lower():
+            return
+
+        try:
+            img = Image.open(src)
+            if not getattr(img, '_getexif', None):
+                return
+        except OSError:
+            return
+
+        img, exif = Resizer.fix_orientation(img)
+        if not exif:
+            return
+
+        # save params (some formats require quality)
+        params = dict(exif=exif)
+        if img.format == 'JPEG':
+            params['quality'] = '95'
+
+        # and save
+        img.save(src, **params)
+
+    @staticmethod
+    def fix_orientation(img):
+        """
+        Fix orientation
+        Accepts a PIL image and checks if orientation needs fixing. Upon
+        success returns a tuple of the image object and patched exif data
+        :param img: PIL.Image
+        :return: (PIL.Image, exif bytes)
+        """
+        exif = piexif.load(img.info["exif"]) if 'exif' in img.info else None
+        if not exif:
+            return img, None
+
+        fixable = [3, 6, 8]
+        orientation_code = 274
+        orientation = exif['0th'].get(orientation_code)
+        if not orientation or orientation not in fixable:
+            return img, None
+
+        # fix now
+        if orientation == 3:
+            img = img.rotate(180, expand=True)
+        elif orientation == 6:
+            img = img.rotate(270, expand=True)
+        elif orientation == 8:
+            img = img.rotate(90, expand=True)
+
+        # fix exif
+        exif['0th'][orientation_code] = 1
+        exif = piexif.dump(exif)
+
+        # and return
+        return img, exif
+
+    @staticmethod
     def manual_crop(
         src,
         dst,
@@ -67,7 +142,6 @@ class Resizer:
         """
         pass
 
-
     def manual_crop_img(self, img, size, upscale=False):
         """
         Manual crop and return img
@@ -84,7 +158,6 @@ class Resizer:
         """
 
         pass
-
 
     @staticmethod
     def auto_crop(
@@ -117,16 +190,7 @@ class Resizer:
         :return: destination image path
         """
         img = Image.open(src)
-
-        # fix orientation if possible
-        if getattr(img, '_getexif', None):
-            tags = {v: k for k, v in ExifTags.TAGS.items()}
-            orientation = tags['Orientation']
-            exif = dict(img._getexif().items())
-            if orientation in exif.keys():
-                if exif[orientation] == 3 : img=img.rotate(180, expand=True)
-                elif exif[orientation] == 6 : img=img.rotate(270, expand=True)
-                elif exif[orientation] == 8 : img=img.rotate(90, expand=True)
+        img, exif = Resizer.fix_orientation(img)
 
         animated_gif = 'duration' in img.info and img.info['duration'] > 0
         if format:

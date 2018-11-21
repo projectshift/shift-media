@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-
 from shiftmedia import utils, exceptions as x
 from shiftmedia.paths import PathBuilder
 from shiftmedia.resizer import Resizer
@@ -28,15 +27,12 @@ class Storage:
             os.makedirs(self._tmp_path)
         return self._tmp_path
 
-    def put(self, src, delete_local=True):
+    def put(self, src, delete_local=True, fix_orientation=False):
         """
         Put local file to storage
         Generates a uuid for the file, tells backend to accept
         it by that id and removes original on success.
         """
-
-        # TODO: Implement file validation (libmagic)
-
         if not os.path.exists(src):
             msg = 'Unable to find local file [{}]'
             raise x.LocalFileNotFound(msg.format(src))
@@ -47,6 +43,11 @@ class Storage:
         extension = utils.normalize_extension(extension)
         filename = name + '.' + extension
         id = utils.generate_id(filename)
+
+        # fix image orientation before accepting
+        if fix_orientation:
+            Resizer.fix_orientation_and_save(src)
+
         self.backend.put_variant(src, id, filename)
         if delete_local: os.remove(src)
         return id
