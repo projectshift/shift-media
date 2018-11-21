@@ -22,7 +22,7 @@ from setuptools import setup, find_packages
 # ----------------------------------------------------------------------------
 
 # project version
-version = '0.0.11'
+version = '0.0.12'
 
 # development status
 # dev_status = '1 - Planning'
@@ -103,6 +103,7 @@ setup(**dict(
         'click>=6.0,<7.0',
         'python-termstyle',
         'python-magic>=0.4,<0.5',
+        'piexif>=1.1.0,<1.2.0'
     ],
 
 
