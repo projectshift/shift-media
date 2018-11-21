@@ -1,6 +1,7 @@
 from PIL import Image, ImageSequence, ExifTags
 from math import floor
 from shiftmedia import utils
+from pprint import pprint as pp
 
 class Resizer:
     """
@@ -116,6 +117,17 @@ class Resizer:
         :return: destination image path
         """
         img = Image.open(src)
+
+        # fix orientation if possible
+        if getattr(img, '_getexif', None):
+            tags = {v: k for k, v in ExifTags.TAGS.items()}
+            orientation = tags['Orientation']
+            exif = dict(img._getexif().items())
+            if orientation in exif.keys():
+                if exif[orientation] == 3 : img=img.rotate(180, expand=True)
+                elif exif[orientation] == 6 : img=img.rotate(270, expand=True)
+                elif exif[orientation] == 8 : img=img.rotate(90, expand=True)
+
         animated_gif = 'duration' in img.info and img.info['duration'] > 0
         if format:
             format = utils.extension_to_format(format) # normalize for pil
@@ -160,17 +172,6 @@ class Resizer:
 
         # create image and get size
         img = img if isinstance(img, Image.Image) else Image.open(img)
-
-        # use orientation to rotate
-        if getattr(img, '_getexif', None):
-            tags = {v: k for k, v in ExifTags.TAGS.items()}
-            orientation = tags['Orientation']
-            exif = dict(img._getexif().items())
-            if orientation in exif.keys():
-                if exif[orientation] == 3 : img=img.rotate(180, expand=True)
-                elif exif[orientation] == 6 : img=img.rotate(270, expand=True)
-                elif exif[orientation] == 8 : img=img.rotate(90, expand=True)
-
         src = img.size
         dst = [int(x) for x in size.split('x')]
 

@@ -277,11 +277,11 @@ class AutocropIntegrationTests(TestCase, LocalStorageTestHelpers):
         img = self.files['orientation']
         filename = img['file']
         target_size = '300x100'
-        mode = Resizer.RESIZE_TO_FIT
-        upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
+        dst = os.path.join(self.tmp_path, filename)
+        Resizer.auto_crop(src, dst, target_size)
+        result = Image.open(dst)
         # result.show()
 
     def test_correct_bad_orientation2(self):
@@ -289,9 +289,9 @@ class AutocropIntegrationTests(TestCase, LocalStorageTestHelpers):
         img = self.files['orientation2']
         filename = img['file']
         target_size = '160x96'
-        mode = Resizer.RESIZE_TO_FILL
-        upscale = False
         self.prepare_uploads()
         src = os.path.join(self.upload_path, filename)
-        result = Resizer.auto_crop_img(src, target_size, mode, upscale)
+        dst = os.path.join(self.tmp_path, filename)
+        Resizer.auto_crop(src, dst, target_size)
+        result = Image.open(dst)
         # result.show()
