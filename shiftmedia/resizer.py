@@ -134,7 +134,11 @@ class Resizer:
 
         if not animated_gif or (animated_gif and format and format != 'GIF'):
             # resize regular image
-            img = img.convert(mode='RGBA')
+            if format == 'PNG' or dst.lower().endswith('.png'):
+                img = img.convert(mode='RGBA')
+            else:
+                img = img.convert(mode='RGB')
+
             img = Resizer.auto_crop_img(img, size, mode, upscale)
             img.save(dst, format=format, quality=quality)
         else:
