@@ -170,7 +170,7 @@ class BackendLocal(Backend):
         parts = self.id_to_path(id)
         dir = os.path.join(self.path, *parts)
         os.makedirs(dir, exist_ok=True)
-        dst = os.path.join(self.path, *parts, filename.lower())
+        dst = os.path.join(self.path, *parts, filename)
         if not force and os.path.exists(dst):
             msg = 'File [' + filename + '] exists under [' + id + ']. '
             msg += 'Use force option to overwrite.'
