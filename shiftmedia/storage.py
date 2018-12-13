@@ -49,7 +49,8 @@ class Storage:
             Resizer.fix_orientation_and_save(src)
 
         self.backend.put_variant(src, id, filename)
-        if delete_local: os.remove(src)
+        if delete_local:
+            os.remove(src)
         return id
 
     def delete(self, id):

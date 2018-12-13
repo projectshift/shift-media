@@ -114,6 +114,17 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         path = '/'.join(backend.id_to_path(id)) + '/demo-test.tar.gz'
         self.assertTrue(backend.exists(path))
 
+    def test_lowercase_filename_when_putting(self):
+        """REGRESSEION (#9):  Convert file names to lowercase """
+        self.prepare_uploads()
+        backend = BackendS3(**self.config)
+        uploads = self.upload_path
+        src = os.path.join(uploads, 'MiXeDcAsE.jpg')
+        id = utils.generate_id('MiXeDcAsE.jpg')
+        backend.put(src, id)
+        path = '/'.join(backend.id_to_path(id)) + '/MiXeDcAsE.jpg'
+        self.assertTrue(backend.exists(path.lower()))
+
     def test_put_file_variant(self):
         """ Put file to storage by filename"""
         self.prepare_uploads()

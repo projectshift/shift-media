@@ -176,6 +176,8 @@ class BackendLocal(Backend):
             msg += 'Use force option to overwrite.'
             raise x.FileExists(msg)
         shutil.copyfile(src, dst)
+
+
         return id
 
     def delete(self, id):
