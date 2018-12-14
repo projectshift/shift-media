@@ -146,7 +146,7 @@ The workflow for on-the-fly resizing is this:
   * The app puts resize back to the bucket and redirects back to original url requested
   * On subsequent requests the resize will already be in the bucket and will be served from there
 
-To configure this workflow you must enable static website hosting in bucket properties editor and apply the following routing rules:
+To configure this workflow you must enable static website hosting in bucket properties editor and apply the routing below. It is important to set redirect code to 302 so the browsers don't cache that redirect which can cause an infinite loop:
 
 ```xml
 <RoutingRules>
@@ -158,12 +158,14 @@ To configure this workflow you must enable static website hosting in bucket prop
         <Redirect>
             <Protocol>http</Protocol>
             <HostName>your-host-name.com</HostName>
+            <ReplaceKeyPrefixWith>media/</ReplaceKeyPrefixWith>
+            <HttpRedirectCode>302</HttpRedirectCode>		
         </Redirect>
     </RoutingRule>
 </RoutingRules>
 ```  
 
-On the other side, you must configure your app to have an endpoint that recognizes the request. Here is an example for flask:
+On the other side, you must configure your app to have an endpoint that recognizes the request. Here is an example for flask that will work with both local media storage and s3 media storage including when served by flask dev server.
 
 ```python
 from flask import Flask
@@ -179,10 +181,41 @@ app.url_map.converters['regex'] = RegexConverter
 
 @app.route('/<regex("[\w/]{36}/[^/]*/\d*x\d*-[a-z]*-\d{1,2}-[a-z]*-[a-z0-9]{32}.[a-z]*"):path>')
 def example(path):
-    url = 'http://bucket-name.s3-website-eu-west-1.amazonaws.com/'
-    url+= path
-    storage.create_resize(url)
-    return redirect(url)
+    # local media storage
+    if isinstance(storage.backend, BackendLocal):
+        local_media_path = '{}/{}'.format('media', path)
+        existing = os.path.join(os.getcwd(), 'web', local_media_path)
+
+        # if file exists, serve it (dev server)
+        if os.path.isfile(existing):
+            cache_timeout = current_app.get_send_file_max_age(path)
+            return send_from_directory(
+                directory=current_app.static_folder,
+                filename=local_media_path,
+                cache_timeout=cache_timeout
+            )
+
+    # otherwise create resize for any type of storage
+    try:
+        url = '{url}/{path}'
+        url = url.format(url=storage.backend.get_url(), path=path)
+
+        # already there (browser cache)?
+        backend = storage.backend
+        if isinstance(backend, BackendS3):
+            path = url.replace(backend.get_url(), '').lstrip('/')
+            exists = backend.exists(path)
+            if exists:
+                return redirect(url, code=301)
+
+        # create otherwise
+        media_storage.create_resize(url)
+        return redirect(url, code=301)
+
+    except mx.MediaException:
+        pass
+
+    abort(404)
 ```
 
 ## On the fly resizes with HTTPS
