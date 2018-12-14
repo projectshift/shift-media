@@ -146,7 +146,7 @@ The workflow for on-the-fly resizing is this:
   * The app puts resize back to the bucket and redirects back to original url requested
   * On subsequent requests the resize will already be in the bucket and will be served from there
 
-To configure this workflow you must enable static website hosting in bucket properties editor and apply the routing below. It is important to set redirect code to 302 so the browsers don't cache that redirect which can cause an infinite loop:
+To configure this workflow you must enable static website hosting in bucket properties editor and apply the routing below. It is important to set redirect code to 302 so the browsers don't cache that redirect which can cause an infinite loop. 
 
 ```xml
 <RoutingRules>
@@ -165,7 +165,7 @@ To configure this workflow you must enable static website hosting in bucket prop
 </RoutingRules>
 ```  
 
-On the other side, you must configure your app to have an endpoint that recognizes the request. Here is an example for flask that will work with both local media storage and s3 media storage including when served by flask dev server.
+On the other side, you must configure your app to have an endpoint that recognizes the request. Here is an example for flask that will work with both local media storage and s3 media storage including when served by flask dev server. Notice that this time, after the resize has been created we issue a 301 redirect.
 
 ```python
 from flask import Flask
