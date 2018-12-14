@@ -19,7 +19,7 @@ class StorageTests(TestCase, LocalStorageTestHelpers):
 
     def tearDown(self):
         """ Clean up after yourself """
-        # self.clean()
+        self.clean()
         super().tearDown()
 
     # ------------------------------------------------------------------------
