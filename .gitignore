@@ -21,7 +21,8 @@ www.esproj
 /env
 
 # Project ignores
-/config
+/config/*
+!/config/local.dist.py
 /var
 
 
