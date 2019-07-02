@@ -95,8 +95,8 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
         current = self.path
         for dir in id.split('-')[0:5]:
             current = os.path.join(current, dir)
-        full_file_path = os.path.join(current, 'MiXeDcAsE.jpg'.lower())
-        self.assertTrue(os.path.exists(full_file_path))
+        full_file_path = os.path.join(current, 'MiXeDcAsE.jpg')
+        self.assertTrue(os.path.exists(full_file_path.lower()))
 
     def test_put_variant(self):
         """ Put file variant to storage by filename"""

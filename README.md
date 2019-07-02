@@ -252,7 +252,7 @@ As outlined above the workflow for creating a resize is this:
   * get forwarder back to app
   * get forwarded back to media storage
 
-The problem here is that the first time we hit cloudfront and the resize is missing, we get redirected to the app (via routing rules) and ClodFront actually caches that redirect.
+The problem here is that the first time we hit cloudfront and the resize is missing, we get redirected to the app (via routing rules) and CloudFront actually caches that redirect.
 
 The workaround at the moment is to disable Cloudfront caching altogether - go and set your cache lifetimes in AWS console to zero. Then invalidate your cahes.
 
