@@ -227,7 +227,14 @@ class BackendS3(Backend):
     Amazon S3 backend
     Stores files in an amazon s3 bucket
     """
-    def __init__(self, key_id, access_secret, bucket, url='http://localhost'):
+    def __init__(
+        self,
+        key_id,
+        access_secret,
+        bucket,
+        region,
+        url='http://localhost'
+    ):
         """
         S3 Backend constructor
         Creates an instance of s3 backend, requires credentials to access
@@ -236,12 +243,15 @@ class BackendS3(Backend):
         :param key_id: string - AWS IAM Key id
         :param access_secret: string - AWS IAM Access secret
         :param bucket: string - AWS S3 bucket name, e.g. 'test-bucket'
+        :param region: string - AWS S3 bucket region, e.g. 'eu-west-1'
         :param url: string - base storage url
         """
         self.bucket_name = bucket
+        self.bucket_region = region
         self.credentials = dict(
             aws_access_key_id=key_id,
             aws_secret_access_key=access_secret,
+            region_name=region,  # a bit weird that region goes here
         )
         super().__init__(url)
 

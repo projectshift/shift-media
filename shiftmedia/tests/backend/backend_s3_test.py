@@ -19,7 +19,7 @@ class BackendLocalTests(TestCase, LocalStorageTestHelpers):
             key_id=LocalConfig.AWS_IAM_KEY_ID,
             access_secret=LocalConfig.AWS_IAM_ACCESS_SECRET,
             bucket=LocalConfig.AWS_S3_BUCKET,
-
+            region=LocalConfig.AWS_S3_REGION
         )
         return credentials
 
