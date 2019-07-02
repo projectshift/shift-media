@@ -91,7 +91,12 @@ setup(**dict(
     ],
 
     # project packages
-    packages=find_packages(exclude=['shiftmedia.tests*']),
+    packages=find_packages(
+        exclude=[
+            'shiftmedia.tests*',
+            'shiftmedia.testing*'
+        ]
+    ),
 
     # include none-code data files from manifest.in (http://goo.gl/Uf0Yxc)
     include_package_data=True,
