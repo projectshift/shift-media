@@ -97,6 +97,13 @@ class Resizer:
         if not exif:
             return img, None
 
+        # workaround exif issues with pieexif
+        # see: https://github.com/hMatoba/Piexif/issues/95
+        scene_type_code = 41729
+        if 'Exif' in exif and scene_type_code in exif['Exif']:
+            value = bytes([exif['Exif'][41729]])
+            exif['Exif'][scene_type_code] = value
+
         fixable = [3, 6, 8]
         orientation_code = 274
         orientation = exif['0th'].get(orientation_code)
