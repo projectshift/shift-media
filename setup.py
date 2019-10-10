@@ -103,7 +103,7 @@ setup(**dict(
 
     # project dependencies
     install_requires=[
-        'Pillow>=6.0.0,<6.1.0',
+        'Pillow>=6.2.0,<6.3.0',
         'boto3>=1.9.0,<=1.10.0',
         'click>=7.0,<8.0',
         'python-termstyle==0.1.10',
