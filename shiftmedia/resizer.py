@@ -101,10 +101,7 @@ class Resizer:
         # see: https://github.com/hMatoba/Piexif/issues/95
         scene_type_code = 41729
         if 'Exif' in exif and scene_type_code in exif['Exif']:
-            value = exif['Exif'][41729]
-            if type(value) is int:
-                value = bytes([value])
-                exif['Exif'][scene_type_code] = value
+            del exif['Exif'][scene_type_code]
 
         fixable = [3, 6, 8]
         orientation_code = 274
