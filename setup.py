@@ -22,7 +22,7 @@ from setuptools import setup, find_packages
 # ----------------------------------------------------------------------------
 
 # project version
-version = '0.0.16'
+version = '0.0.17'
 
 # development status
 # dev_status = '1 - Planning'
@@ -103,12 +103,12 @@ setup(**dict(
 
     # project dependencies
     install_requires=[
-        'Pillow>=6.2.0,<6.3.0',
-        'boto3>=1.9.0,<=1.10.0',
-        'click>=7.0,<8.0',
-        'python-termstyle==0.1.10',
-        'python-magic>=0.4,<0.5',
-        'piexif>=1.1.0,<1.2.0'
+        'Pillow>=7.2.0,<8.3.0',
+        'boto3>=1.14.16,<=1.15.0',
+        'click>=7.1.2,<8.0',
+        'python-termstyle>=0.1.10,<1.0.0',
+        'python-magic>=0.4.18,<1.0.0',
+        'piexif>=1.1.3,<1.2.0'
     ],
 
 
