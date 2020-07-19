@@ -40,6 +40,9 @@ class PathBuilder:
         :return:
         """
         parts = filename.split('-')
+        if len(parts) != 5:
+            return False
+        
         extension = parts[4][parts[4].index('.'):]
         non_signed_filename = '-'.join(parts[:4]) + extension
         signature = parts[4].replace(extension, '')
