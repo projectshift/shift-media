@@ -168,53 +168,63 @@ To configure this workflow you must enable static website hosting in bucket prop
 On the other side, you must configure your app to have an endpoint that recognizes the request. Here is an example for flask that will work with both local media storage and s3 media storage including when served by flask dev server. Notice that this time, after the resize has been created we issue a 301 redirect.
 
 ```python
-from flask import Flask
-from werkzeug.routing import BaseConverter
 
-class RegexConverter(BaseConverter):
-    def __init__(self, url_map, *items):
-        super(RegexConverter, self).__init__(url_map)
-        self.regex = items[0]
+@app.route('/media/<path:path>/')
+def media_endpoint(path=None):
+    """
+    Static media endpoint
+    Used as a flask view to perform several actions: in dev environment
+    serves static files if they exist. otherwise (for any environment)
+    attempts to create a dynamic o-the-fly resize
+    :param path: str, path to an original or resize
+    :return:
+    """
+    p = r'[\w/]{36}/[^/]*/\d*x\d*-[a-z]*-\d{1,2}-[a-z]*-[a-z0-9]{32}.[a-z]*'
+    if not re.match('/media/{}'.format(p), request.path):
+        abort(404)
 
-app = Flask(__name__)
-app.url_map.converters['regex'] = RegexConverter
+    # local media storage: serve if exists
+    if isinstance(media.backend, BackendLocal):
+        local_media_path = os.path.join(os.getcwd(), 'media')
+        exists = os.path.isfile(os.path.join(local_media_path, path))
 
-@app.route('/<regex("[\w/]{36}/[^/]*/\d*x\d*-[a-z]*-\d{1,2}-[a-z]*-[a-z0-9]{32}.[a-z]*"):path>')
-def example(path):
-    # local media storage
-    if isinstance(storage.backend, BackendLocal):
-        local_media_path = '{}/{}'.format('media', path)
-        existing = os.path.join(os.getcwd(), 'web', local_media_path)
+        # ensure app only serves static in dev mode
+        if exists and current_app.config.get('ENV') != 'development':
+            err = 'This endpoint only works in development. Use a web ' \
+                  'server to serve static assets in production.'
+            abort(400, err)
 
-        # if file exists, serve it (dev server)
-        if os.path.isfile(existing):
+        # serve is exists (dev server only)
+        if exists:
             cache_timeout = current_app.get_send_file_max_age(path)
             return send_from_directory(
-                directory=current_app.static_folder,
-                filename=local_media_path,
+                directory=local_media_path,
+                filename=path,
                 cache_timeout=cache_timeout
             )
 
-    # otherwise create resize for any type of storage
+    # otherwise create resize
     try:
-        url = '{url}/{path}'
-        url = url.format(url=storage.backend.get_url(), path=path)
+        backend_url = media.backend.get_url().rstrip('/')
+        url = '{}/{}'.format(backend_url, path)
 
-        # already there (browser cache)?
-        backend = storage.backend
-        if isinstance(backend, BackendS3):
-            path = url.replace(backend.get_url(), '').lstrip('/')
-            exists = backend.exists(path)
+        # S3: check if exists (important)
+        if isinstance(media.backend, BackendS3):
+            path = url.replace(media.backend.get_url(), '').lstrip('/')
+            exists = media.backend.exists(path)
             if exists:
                 return redirect(url, code=301)
 
-        # create otherwise
-        media_storage.create_resize(url)
+        # create new resize and redirect
+        media.create_resize(url)
+
+        # redirect to resized version
         return redirect(url, code=301)
 
     except mx.MediaException:
         pass
 
+    # otherwise not found
     abort(404)
 ```
 
