@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+from shiftmedia.version import version
 from setuptools import setup, find_packages
 
 # ----------------------------------------------------------------------------
@@ -22,7 +23,7 @@ from setuptools import setup, find_packages
 # ----------------------------------------------------------------------------
 
 # project version
-version = '0.0.17'
+version = version
 
 # development status
 # dev_status = '1 - Planning'
@@ -103,12 +104,11 @@ setup(**dict(
 
     # project dependencies
     install_requires=[
-        'Pillow>=7.2.0,<8.3.0',
-        'boto3>=1.14.16,<=1.15.0',
+        'Pillow>=8.0.0,<9.0.0',
+        'boto3>=1.16,<2.0',
         'click>=7.1.2,<8.0',
-        'python-termstyle>=0.1.10,<1.0.0',
         'python-magic>=0.4.18,<1.0.0',
-        'piexif>=1.1.3,<1.2.0'
+        'piexif>=1.1.3,<2'
     ],
 
 

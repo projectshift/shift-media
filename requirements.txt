@@ -1,11 +1,13 @@
-Pillow>=7.2.0,<8.3.0
-python-magic>=0.4.18,<1.0.0
-boto3>=1.14.16,<=1.15.0
+Pillow>=8.0.0,<9.0.0
+boto3>=1.16,<2.0
 click>=7.1.2,<8.0
-colorama>=0.4.3,<0.5.0
+python-magic>=0.4.18,<1.0.0
+piexif>=1.1.3,<2
+
+# testing
 nose>=1.3.7,<2.0.0
-python-termstyle>=0.1.10,<1.0.0
 rednose>=1.3.0,<2.0.0
 
 # dev dependencies
-twine>=3.2.0,<4.0.0
+wheel
+twine
