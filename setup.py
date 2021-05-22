@@ -104,10 +104,10 @@ setup(**dict(
 
     # project dependencies
     install_requires=[
-        'Pillow>=8.0.0,<9.0.0',
-        'boto3>=1.16,<2.0',
-        'click>=7.1.2,<8.0',
-        'python-magic>=0.4.18,<1.0.0',
+        'Pillow>=8.2.0,<9.0.0',
+        'boto3>=1.17.78,<2.0',
+        'click>=8.0.0,<9.0.0',
+        'python-magic>=0.4.22,<1.0.0',
         'piexif>=1.1.3,<2'
     ],
 
